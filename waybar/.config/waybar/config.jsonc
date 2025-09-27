@@ -4,7 +4,7 @@
   "height": 20,
   "output": ["HDMI-A-1"],
   "margin-top": 10,
-  "margin-bottom": 5,
+ "margin-bottom": 5,
   "margin-left": 10,
   "margin-right": 10,
 
@@ -74,10 +74,10 @@
   },
 
   "custom/screenshot": {
-    "format": "Sshot",
+    "format": "ss",
     "tooltip": "Screenshot",
-    "on-click": "grim ~/pix/ss/screenshot-$(date +%Y%m%d-%H%M%S).png && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga",
-    "on-click-right": "grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'",
+    "on-click-right": "grim ~/pix/ss/screenshot-$(date +%Y%m%d-%H%M%S).png && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga",
+    "on-click": "grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'",
   },
 
   "clock": {
