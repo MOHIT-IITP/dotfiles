@@ -1,0 +1,133 @@
+@import url("/home/mohiitp/.config/waybar/colors.css");
+
+* {
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: transparent;
+    color: @on_surface;
+    transition: background-color 0.2s;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+.modules-left, .modules-center {
+    margin: 0 4px;
+}
+
+.modules-right {
+    margin-right: 8px;
+}
+
+/* Main module styling */
+#custom-cava-music,
+#custom-cputemp,
+#custom-playerctl,
+#cpu,
+#memory,
+#custom-screenshot,
+#clock,
+#custom-weather,
+#pulseaudio,
+#pulseaudio.microphone,
+#custom-powermenu,
+#custom-media,
+#temperature,
+#backlight,
+#network,
+#custom-notifications,
+#bluetooth,
+#tray {
+    background-color: @primary_fixed;
+    border-radius: 100px;
+    padding: 0 10px;
+    margin: 0 5px;
+    color: @background;
+    transition: all 0.3s cubic-bezier(0.55, -0.68, 0.48, 1.68);
+}
+
+#network.disconnected {
+    background-color: @error;
+    color: @on_error;
+}
+
+#pulseaudio.muted {
+    background-color: @surface_container_high;
+    color: @error;
+}
+
+#pulseaudio.microphone.source-muted {
+    background-color: @error_container;
+    color: @tertiary_fixed_dim;
+}
+
+/* Workspaces */
+#workspaces {
+    background-color: transparent;
+    font-weight: 800;
+    font-size:2rem;
+    min-height:0;
+}
+
+#workspaces button {
+    background-color: @on_primary_container;
+    color: @primary_container;
+    border-radius: 8px;
+    padding: 0 10px;
+    margin: 0 2px;
+    transition: all 0.3s ease;
+}
+
+#workspaces button.active {
+    background-color: @inverse_primary;
+    color: @primary_fixed_dim;
+    border-radius: 100px;
+    font-weight: 800;
+    padding: 1px 20px;
+}
+
+
+
+#workspaces button.urgent {
+    background-color: @error;
+    color: @crust;
+    animation: blink 1s infinite alternate;
+}
+
+/* Power menu */
+#custom-powermenu {
+    color: @on_surface;
+    font-size: 12px;
+}
+
+#custom-powermenu:hover {
+    background: linear-gradient(90deg, @error 0%, @error_container 100%);
+    color: @on_error;
+}
+
+/* Media controls hover */
+#custom-cava-music:hover,
+#custom-playerctl:hover {
+    background: linear-gradient(90deg, @primary_container 0%, @secondary_container 100%);
+    color: @on_primary_container;
+}
+
+/* Animations */
+@keyframes blink {
+    from {
+        background-color: @error_container;
+        color: @on_error_container;
+    }
+    to {
+        background-color: @error;
+        color: @on_error;
+    }
+}

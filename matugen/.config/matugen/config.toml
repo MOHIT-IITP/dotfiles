@@ -1,0 +1,36 @@
+[config]
+generator = "dark"  # Or "auto", or "light"
+
+# Extraction settings
+[extraction]
+mode = "wallpaper"  # Extract colors from wallpaper
+wallpaper = "auto"  # Auto-detect wallpaper or specify path
+
+[templates.waybar]
+input_path = "templates/colors.css"  # Template file
+output_path = "~/.config/waybar/colors.css"  # Output file
+post_hook = 'pkill waybar; waybar &'
+
+[templates.hyprland]
+input_path = "~/.config/matugen/templates/hypr.conf"  # Template file
+output_path = '~/.config/hypr/colors.conf'
+post_hook = 'hyprctl reload'
+
+
+[templates.alacritty]
+input_path = 'templates/alacritty.toml'
+output_path = '~/.config/alacritty/colors.toml'
+
+[templates.rofi]
+input_path = '~/.config/matugen/templates/rofi-colors.rasi'
+output_path = '~/.config/rofi/colors/colors.rasi'
+
+
+[templates.starship]
+input_path = '~/.config/matugen/templates/starship-colors.toml'
+output_path = '~/.config/starship.toml'
+
+
+[templates.kitty]
+input_path = '~/.config/matugen/templates/kitty-colors.conf'
+output_path = '~/.config/kitty/colors.conf'

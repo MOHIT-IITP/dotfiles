@@ -1,0 +1,204 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 20,
+  "output": ["HDMI-A-1"],
+  "margin-top": 10,
+  "margin-bottom": 5,
+  "margin-left": 10,
+  "margin-right": 10,
+
+  "modules-left": ["clock"],
+  "modules-center": ["hyprland/workspaces"],
+  "modules-right": ["pulseaudio", "pulseaudio#microphone", "custom/screenshot"],
+
+  "hyprland/workspaces": {
+    "format": "{name}",
+    "format-window-separator": " ",
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
+    "window-rewrite-default": "",
+    "persistent-workspaces":{
+      "1":[],
+      "2":[],
+      "3":[],
+      "4":[],
+      "5":[]
+    },
+    "window-rewrite": {
+      "firefox": "󰈹",
+      "foot": "󰽒",
+      "kitty": "",
+      "zen":"",
+      "alacritty": "",
+      "ghostty": "",
+      "code": "󰨞",
+      "cursor": "󰨞",
+      "discord": "",
+      "vesktop": "",
+      "github": "",
+      "postman": "",
+      "telegram": "",
+      "google-chrome": "",
+      "thunar": "",
+      "org.gnome.Nautilus": "",
+      "spotify": "󰓇",
+      "steam": "󰓓",
+      "org.pwmt.zathura": "󰈙"
+    },
+    "format-icons": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      "10": "10",
+      "urgent": "",
+      "focused": "",
+      "default": ""
+    },
+    "on-click": "activate",
+    "all-outputs": true,
+    "sort-by-number": true
+  },
+
+  "custom/colorpicker": {
+    "format": "",
+    "tooltip": "Pick a color",
+    "on-click": "hyprpicker",
+    "interval": "once"
+  },
+
+  "custom/screenshot": {
+    "format": "Sshot",
+    "tooltip": "Screenshot",
+    "on-click": "grim ~/pix/ss/screenshot-$(date +%Y%m%d-%H%M%S).png && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga",
+    "on-click-right": "grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'",
+  },
+
+  "clock": {
+    "format": "{:%I:%M}",
+    "format-alt": "{:%A, %B %d, %Y}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "interval": 60
+  },
+
+  "cpu": {
+    "format": "󰘚 {usage}% ",
+    "tooltip": true,
+    "interval": 2
+  },
+
+  "memory": {
+    "format": "󰍛 {}% ",
+    "interval": 2
+  },
+
+  "network": {
+    "format-wifi": "{essid} ({signalStrength}%) 󰖩",
+    "format-ethernet": "Net",
+    "tooltip-format": "{ifname} via {gwaddr}",
+    "format-linked": "{ifname} (No IP) 󰈀",
+    "format-disconnected": "Disconnected ⚠",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "on-click-right": "nm-connection-editor"
+  },
+  "custom/powermenu": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "~/.config/waybar/scripts/powermenu.sh",
+    "interval": 0
+  },
+  "custom/cava-music": {
+    "exec": "$HOME/.config/hypr/scripts/WaybarCava.sh",
+    "format": "{}"
+  },
+
+  "custom/playerctl": {
+    "format": "{}",
+    "escape": true,
+    "return-type": "json", 
+    "max-length": 10,
+    "exec": "$HOME/.config/waybar/scripts/mediaplayer.py 2> /dev/null",
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl stop",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "smooth-scrolling-threshold": 1,
+    "tooltip": false
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}% ",
+    "format-bluetooth": "{volume}% {icon} 󰂯",
+    "format-bluetooth-muted": "󰂲 󰖁 {icon}",
+    "format-muted": "󰖁 ",
+    "format-icons": {
+      "headphone": "󰋋 ",
+      "hands-free": "󰋎 ",
+      "headset": "󰋎 ",
+      "phone": "󰏲 ",
+      "portable": "󰄝 ",
+      "car": "󰄋 ",
+      "default": ["󰕿 ", "󰖀 ", "󰕾 "]
+    },
+    "on-click": "pavucontrol",
+    "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+  },
+
+  "pulseaudio#microphone": {
+    "format": "{format_source}",
+    "format-source": "󰍬 {volume}%",
+    "format-source-muted": "󰍭 {volume}%",
+    "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+    "on-click-right": "pavucontrol",
+    "tooltip": true,
+    "tooltip-format": "{format_source}",
+    "scroll-step": 5
+  },
+  "custom/cputemp": {
+    "format": "🌡️ {}°C",
+    "exec": "sensors | awk '/Tctl:/ {gsub(/\\+|°C/, \"\", $2); print $2}'",
+    "interval": 5,
+    "return-type": "plain"
+  },
+
+
+
+  "bluetooth": {
+    "format": " {status}",
+    "format-disabled": "", // an empty format will hide the module
+    "format-connected": " {num_connections}",
+    "tooltip-format": "{device_alias}",
+    "tooltip-format-connected": " {device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}"
+  },
+  "custom/notifications": {
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "󰂚",
+      "none": "󰂛",
+      "dnd-notification": "󰂛",
+      "dnd-none": "󰂛",
+      "inhibited-notification": "󰂚",
+      "inhibited-none": "󰂛",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+
+  "tray": {
+    "icon-size": 18,
+    "spacing": 8
+  }
+}

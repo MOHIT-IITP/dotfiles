@@ -1,0 +1,309 @@
+@import url("/home/mohiitp/.config/waybar/colors.css");
+
+/* * { */
+/*     font-family: "SF Pro Display", "Font Awesome 5 Brands ", sans-serif; */
+/*     font-size: 1rem;            */
+/*     font-weight: 500; */
+/*     min-height: 0; */
+/*     margin: 0px; */
+/*     padding: 0px; */
+/* } */
+/**/
+/* window#waybar { */
+/*     background-color: transparent; */
+/*     color: @on_surface; */
+/*     transition-duration: 0.2s; */
+/*     transition-property: background-color; */
+/* } */
+/**/
+/* window#waybar.hidden { */
+/*     opacity: 0.2; */
+/* } */
+/**/
+/**/
+/* .modules-left, .modules-center { margin: 0 4px; } /* Slightly reduced margin */ */
+/* .modules-right { margin-right: 8px; } */
+/**/
+/* #custom-cava-music, */
+/* #custom-cputemp, */
+/* #custom-playerctl, */
+/* #cpu, */
+/* #memory, */
+/* #custom-screenshot, */
+/* #clock, */
+/* #custom-weather, */
+/* #pulseaudio, */
+/* #pulseaudio.microphone, */
+/* #custom-powermenu, */
+/* #custom-media, */
+/* #temperature, */
+/* #backlight, */
+/* #network, */
+/* #custom-notifications, */
+/* #bluetooth, */
+/* #tray { */
+/*     background-color: @primary_fixed; */
+/*     border-radius: 100px;      */
+/*     padding: 0px 10px;           */
+/*     margin: 0 1px;             */
+/*     color: @background; */
+/*     transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.68); */
+/* } */
+/**/
+/**/
+/* #network.disconnected { */
+/*     background-color: @error; */
+/*     color: @on_error; */
+/* } */
+/**/
+/* #pulseaudio { */
+/*     margin-right: 0; */
+/*     border-top-right-radius: 0; */
+/*     border-bottom-right-radius: 0; */
+/*     padding-right: 4px;         */
+/* } */
+/**/
+/* #pulseaudio.microphone { */
+/*     margin-left: 0; */
+/*     border-top-left-radius: 0; */
+/*     border-bottom-left-radius: 0; */
+/*     padding-left: 4px;         /* Decreased padding */ */
+/* } */
+/**/
+/* #pulseaudio.muted { */
+/*     background-color: @surface_container_high; */
+/*     color: @error; */
+/* } */
+/**/
+/* #pulseaudio.microphone.source-muted { */
+/*     background-color: @error_container; */
+/*     color: @tertiary_fixed_dim; */
+/* } */
+/**/
+/* #workspaces { */
+/*     background-color: transparent; */
+/*     font-weight: 800; */
+/* } */
+/**/
+/* #workspaces button { */
+/*     background-color: @background; */
+/*     color: @primary_fixed_dim; */
+/*     border-radius: 8px; */
+/*     padding: 0px 10px; */
+/*     margin: 0px 2px; */
+/*     transition: background-color 0.3s ease, color 0.3s ease, padding 0.2s ease; */
+/* } */
+/**/
+/* #workspaces button.active { */
+/*     background-color: @primary_fixed_dim; */
+/*     border-radius: 100px; */
+/*     color: @on_primary_fixed; */
+/*     font-size: 12px; */
+/*     padding: 1px 20px; */
+/* } */
+/**/
+/* #workspaces button.empty {  */
+/* 	color: @background_dim; */
+/* } */
+/**/
+/* #workspaces button.empty.active {  */
+/* 	color: @background; */
+/*     background-color: @tertiary_fixed_dim; */
+/* } */
+/**/
+/* #workspaces button.urgent { */
+/*     background-color: @error; */
+/*     color: @crust; */
+/*     animation: blink 1s infinite alternate; */
+/* } */
+/**/
+/* #custom-playerctl span:hover { */
+/*     animation: scroll 15s linear infinite; */
+/* } */
+/**/
+/* #custom-powermenu { */
+/*     color: @on_surface; */
+/*     font-size: 12px;           /* Decreased font size */ */
+/* } */
+/**/
+/* #custom-powermenu:hover { */
+/*     background: linear-gradient(90deg, @error 0%, @error_container 100%); */
+/*     color: @on_error; */
+/* } */
+/**/
+/* #custom-cava-music:hover, */
+/* #custom-playerctl:hover { */
+/*     background: linear-gradient(90deg, @primary_container 0%, @secondary_container 100%); */
+/*     color: @on_primary_container; */
+/* } */
+/**/
+/* @keyframes blink { */
+/*     to { */
+/*         background-color: @error; */
+/*         color: @on_error; */
+/*     } */
+/*     from { */
+/*         background-color: @error_container; */
+/*         color: @on_error_container; */
+/*     } */
+/* } */
+/**/
+/* @keyframes scroll { */
+/*     from { margin-left: 0px; } */
+/*     to { margin-left: -400px; } */
+/* } */
+
+
+
+
+* {
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: transparent;
+    color: @on_surface;
+    transition: background-color 0.2s;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+.modules-left, .modules-center {
+    margin: 0 4px;
+}
+
+.modules-right {
+    margin-right: 8px;
+}
+
+/* Main module styling */
+#custom-cava-music,
+#custom-cputemp,
+#custom-playerctl,
+#cpu,
+#memory,
+#custom-screenshot,
+#clock,
+#custom-weather,
+#pulseaudio,
+#pulseaudio.microphone,
+#custom-powermenu,
+#custom-media,
+#temperature,
+#backlight,
+#network,
+#custom-notifications,
+#bluetooth,
+#tray {
+    background-color: @primary_fixed;
+    border-radius: 100px;
+    padding: 0 10px;
+    margin: 0 1px;
+    color: @background;
+    transition: all 0.3s cubic-bezier(0.55, -0.68, 0.48, 1.68);
+}
+
+#network.disconnected {
+    background-color: @error;
+    color: @on_error;
+}
+
+/* Audio controls */
+#pulseaudio {
+    margin-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-right: 4px;
+}
+
+#pulseaudio.microphone {
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-left: 4px;
+}
+
+#pulseaudio.muted {
+    background-color: @surface_container_high;
+    color: @error;
+}
+
+#pulseaudio.microphone.source-muted {
+    background-color: @error_container;
+    color: @tertiary_fixed_dim;
+}
+
+/* Workspaces */
+#workspaces {
+    background-color: transparent;
+    font-weight: 800;
+}
+
+#workspaces button {
+    background-color: @background;
+    color: @primary_fixed_dim;
+    border-radius: 8px;
+    padding: 0 10px;
+    margin: 0 2px;
+    transition: all 0.3s ease;
+}
+
+#workspaces button.active {
+    background-color: @primary_fixed_dim;
+    border-radius: 100px;
+    color: @on_primary_fixed;
+    font-size: 12px;
+    padding: 1px 20px;
+}
+
+#workspaces button.empty {
+    color: @background_dim;
+}
+
+#workspaces button.empty.active {
+    color: @background;
+    background-color: @tertiary_fixed_dim;
+}
+
+#workspaces button.urgent {
+    background-color: @error;
+    color: @crust;
+    animation: blink 1s infinite alternate;
+}
+
+/* Power menu */
+#custom-powermenu {
+    color: @on_surface;
+    font-size: 12px;
+}
+
+#custom-powermenu:hover {
+    background: linear-gradient(90deg, @error 0%, @error_container 100%);
+    color: @on_error;
+}
+
+/* Media controls hover */
+#custom-cava-music:hover,
+#custom-playerctl:hover {
+    background: linear-gradient(90deg, @primary_container 0%, @secondary_container 100%);
+    color: @on_primary_container;
+}
+
+/* Animations */
+@keyframes blink {
+    from {
+        background-color: @error_container;
+        color: @on_error_container;
+    }
+    to {
+        background-color: @error;
+        color: @on_error;
+    }
+}
