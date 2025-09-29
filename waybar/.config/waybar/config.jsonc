@@ -10,7 +10,7 @@
 
   "modules-left": ["clock"],
   "modules-center": ["hyprland/workspaces"],
-  "modules-right": ["pulseaudio", "pulseaudio#microphone", "custom/screenshot"],
+  "modules-right": ["pulseaudio", "pulseaudio#microphone", "custom/screenshot", "custom/notify"],
 
   "hyprland/workspaces": {
     "format": "{name}",
@@ -74,10 +74,15 @@
   },
 
   "custom/screenshot": {
-    "format": "ss",
+    "format": "󰹑",
     "tooltip": "Screenshot",
     "on-click-right": "grim ~/pix/ss/screenshot-$(date +%Y%m%d-%H%M%S).png && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga",
     "on-click": "grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'",
+  },
+
+  "custom/notify": {
+    "format": "",
+    "on-click": "swaync-client -t",
   },
 
   "clock": {
