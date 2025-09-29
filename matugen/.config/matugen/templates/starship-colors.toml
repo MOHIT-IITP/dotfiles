@@ -9,7 +9,7 @@ command_timeout = 3600
 add_newline = false 
 
 format = """
- ➜\
+ 󰳟\
 $directory\
 ${custom.giturl}\
 $git_branch\
