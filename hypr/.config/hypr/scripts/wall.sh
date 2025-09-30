@@ -23,6 +23,7 @@ change_wallpaper() {
         # Generate colors with matugen
         sleep 3  # Wait for wallpaper to set
         matugen image "$wallpaper" --mode dark
+        killall -9 swaync && setsid swaync &
         
         log_message "Wallpaper and colors updated successfully"
     else

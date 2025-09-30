@@ -23,15 +23,15 @@ right_format = """$all"""
 
 [palettes.colors]
 mustard = '#af8700'
-color1 = '#82d3e1'
-color2 = '#00363d'
-color3 = '#bfc8ca'
-color4 = '#1b2122'
-color5 = '#00363d'
-color6 = '#0e1415'
-color7 = '#0e1415'
-color8 = '#82d3e1'
-color9 = '#bbc6ea'
+color1 = '#f2b3e5'
+color2 = '#4c1f48'
+color3 = '#d1c2cb'
+color4 = '#241e22'
+color5 = '#4c1f48'
+color6 = '#171216'
+color7 = '#171216'
+color8 = '#f2b3e5'
+color9 = '#f5b8a6'
 
 [os.symbols]
 Windows = "󰍲"

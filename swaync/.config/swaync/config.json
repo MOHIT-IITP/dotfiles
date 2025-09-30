@@ -90,8 +90,11 @@
         {
           "label": "󰏘",
           "command": "hyprpicker -a"
+        },
+        {
+          "label": "󰽥",
+          "command": "pgrep gammastep >/dev/null && pkill gammastep || gammastep -O 4000"
         }
-        
       ]
     }
   }
