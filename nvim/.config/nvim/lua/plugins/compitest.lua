@@ -129,8 +129,8 @@ return {
       open_received_contests = true,
       replace_received_testcases = false,
     })
-    vim.api.nvim_set_keymap('n', '<leader>p', ":CompetiTest receive problem<CR>", {})
-    vim.api.nvim_set_keymap('n', '<leader>o', ":CompetiTest receive testcases<CR>", {})
+    vim.api.nvim_set_keymap('n', '<leader>cp', ":CompetiTest receive problem<CR>", {})
+    vim.api.nvim_set_keymap('n', '<leader>co', ":CompetiTest receive testcases<CR>", {})
     vim.api.nvim_set_keymap('n', '<leader>hh', ":CompetiTest run<CR>", {})
   end,
 }
