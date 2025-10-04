@@ -1,0 +1,9 @@
+power-profiles-daemon
+fd
+fzf
+ripgrep
+swaync
+waybar 
+swww
+matugen
+
