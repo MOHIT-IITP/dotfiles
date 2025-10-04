@@ -1,0 +1,19 @@
+#!/bin/bash
+
+WALL_DIR="$HOME/pix/wall"
+
+
+CWD="$(pwd)"
+
+cd "$WALL_DIR" || exit
+
+IFS=$'\n'
+
+SELECTED_WALL=$(for a in *.jpg *.png; do echo -en "$a\0icon\x1f$a\n" ; done | rofi -dmenu -p "  Select Wallpaper" -theme ~/.config/rofi/config.rasi)
+
+
+if [ -n "$SELECTED_WALL" ]; then
+    walset-backend "$SELECTED_WALL"
+fi
+
+cd "$CWD"

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <path_to_image>"
+    exit 1
+fi
+
+
+IMAGE="$1"
+
+notify-send "theme changing"
+
+swww img "$IMAGE" --transition-type center --transition-duration 3 --transition-fps 120 
+
+matugen image "$IMAGE"
+
+pkill waybar
+waybar > /dev/null 2>&1 &
+
+
+pkill swaync 
+swaync > /dev/null 2>&1 &
+
+notify-send "theme applied"

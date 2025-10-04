@@ -1,4 +1,6 @@
 export ZSH="$HOME/.oh-my-zsh"
+export PATH=/home/mohiitp/.local/bin:~/.npm-global/bin:$PATH
+
 
 ZSH_THEME="robbyrussell"
 
@@ -23,7 +25,7 @@ setopt hist_verify
 
 # Aliases
 alias python=/usr/bin/python3
-alias ff='cd "$(fd --type d . | fzf)"'
+alias ff='cd "$(fd --type d --hidden --exclude .git . | fzf --height 40% --reverse --border --prompt="📂 Select directory: ")"'
 alias vi="nvim"
 alias v="vim"
 alias cd="z"
