@@ -23,6 +23,7 @@ setopt hist_verify
 
 # Aliases
 alias python=/usr/bin/python3
+alias ff='cd "$(fd --type d . | fzf)"'
 alias vi="nvim"
 alias v="vim"
 alias cd="z"
@@ -33,7 +34,7 @@ alias lt="eza --tree"
 alias ys="yay -S"
 alias ysu="yay -Syu"
 alias yss="yay -Ss"
-alias ff="yazi"
+alias yy="yazi"
 alias ta="tmux a"
 alias editzsh="nvim ~/.zshrc"
 alias sourcezsh="source ~/.zshrc"
