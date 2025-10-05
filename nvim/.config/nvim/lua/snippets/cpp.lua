@@ -12,6 +12,7 @@ ls.add_snippets("cpp", {
             "using namespace std;",
             "",
             "#define ll long long",
+            "#define el endl",
             "#define pb push_back",
             "#define MOD 1000000007",
             "",
