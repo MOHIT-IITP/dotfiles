@@ -1,154 +1,134 @@
-@import                          "~/dotfiles/rofi/.config/rofi/launchers/type-1/shared/colors.rasi"
-@import                          "~/dotfiles/rofi/.config/rofi/launchers/type-1/shared/fonts.rasi"
+@theme "~/.config/rofi/colors/colors.rasi"
 
-/*****----- Main Window -----*****/
+configuration {
+    modi:                        "drun";
+    font:                        "JetBrains Mono Nerd Font 12";
+    show-icons:                  true;
+    drun-display-format:         "{name}";
+    hover-select:                true;
+    me-select-entry:             "MouseSecondary";
+    me-accept-entry:             "MousePrimary";
+    window-format:               "{w} · {c} · {t}";
+    dpi:                         1;
+}
+
+* {
+    background-alt:              @background-alt; 
+    selected:                    @selected; 
+    active:                      @active; // Window activated
+    urgent:                      @urgent; // When hovering the activated window (maybe more?)
+    text-selected:               @selected;
+    text-color:                  @foreground;
+    border-color:                @selected;
+}
+
+
 window {
+    enabled:                     true;
+    fullscreen:                  false;
     transparency:                "real";
+    cursor:                      "default";
+    spacing:                     0px;
+    border-radius:               10px;
     location:                    center;
     anchor:                      center;
-    fullscreen:                  false;
-    width:                       750px;
-    x-offset:                    0px;
-    y-offset:                    0px;
-
-    enabled:                     true;
-    margin:                      0px;
-    padding:                     0px;
-    border:                      0px solid;
-    border-radius:               12px;
-    border-color:                @selected;
-    background-color:            black / 10%;
-    cursor:                      "default";
+    width:                       75%;
+    background-color:            #0000001a;
+    border:                      2px;
+    border-color:                rgba(0, 0, 0, 0.3);
 }
 
-/*****----- Main Box -----*****/
 mainbox {
     enabled:                     true;
-    spacing:                     20px;
-    margin:                      0px;
-    padding:                     20px;
-    border:                      0px solid;
-    border-radius:               0px 0px 0px 0px;
-    border-color:                @selected;
+    children:                    [ "inputbar", "listview"  ];
     background-color:            transparent;
-    children:                    [ "inputbar", "listview" ];
 }
 
-/*****----- Inputbar -----*****/
 inputbar {
-    enabled:                     true;
-    spacing:                     10px;
-    margin:                      0px;
-    padding:                     15px;
-    border:                      0px solid;
-    border-radius:               10px;
-    border-color:                @selected;
-    background-color:            white / 5%;
-    text-color:                  @foreground;
-    children:                    [ "prompt", "entry" ];
+    enabled:                      true;
+    text-color:                   #ffffff4d;
+    background-color:             transparent;
+    padding:                      5px;
+    margin:                       10px;
+    children:                     [ "entry" ];
 }
 
-prompt {
-    enabled:                     true;
-    background-color:            transparent;
-    text-color:                  inherit;
-}
-textbox-prompt-colon {
-    enabled:                     true;
-    expand:                      false;
-    str:                         "::";
-    background-color:            transparent;
-    text-color:                  inherit;
-}
 entry {
-    enabled:                     true;
-    background-color:            transparent;
-    text-color:                  inherit;
-    cursor:                      text;
-    placeholder:                 "Search";
-    placeholder-color:           inherit;
+    enabled:                      true;
+    text-color:                   inherit;
+    background-color:             transparent;
 }
 
-/*****----- Listview -----*****/
 listview {
     enabled:                     true;
-    columns:                     5;
-    lines:                       3;
+    columns:                     5; /* Number of elements in a row */
+    lines:                       1; /* One row */
+    padding:                     26px 36px;
     cycle:                       true;
     dynamic:                     true;
     scrollbar:                   false;
-    layout:                      vertical;
+    layout:                      vertical; /* Vertical arrangement */
     reverse:                     false;
     fixed-height:                true;
     fixed-columns:               true;
-    
-    spacing:                     0px;
-    margin:                      0px;
-    padding:                     0px;
-    border:                      0px solid;
-    border-radius:               0px;
-    border-color:                @selected;
+
     background-color:            transparent;
-    text-color:                  @foreground;
-    cursor:                      "default";
-}
-scrollbar {
-    handle-width:                5px ;
-    handle-color:                @selected;
-    border-radius:               0px;
-    background-color:            @background-alt;
+    spacing:                     20px;
+    
+    border:                      0px;
 }
 
-/*****----- Elements -----*****/
 element {
     enabled:                     true;
-    spacing:                     15px;
-    margin:                      0px;
-    padding:                     20px 10px;
-    border:                      0px solid;
+    orientation:                 vertical; /* Vertical arrangement */
+    expand:                      false;
+    spacing:                     0px;
+    padding:                     5px 10px;
     border-radius:               10px;
-    border-color:                @selected;
-    background-color:            transparent;
-    text-color:                  @foreground;
-    orientation:                 vertical;
     cursor:                      pointer;
-}
-element normal.normal {
-    background-color:            transparent;
-    text-color:                  @foreground;
-}
-element selected.normal {
-    background-color:            white / 5%;
-    text-color:                  @foreground;
-}
-element-icon {
-    background-color:            transparent;
-    text-color:                  inherit;
-    size:                        64px;
-    cursor:                      inherit;
-}
-element-text {
-    background-color:            transparent;
-    text-color:                  inherit;
-    highlight:                   inherit;
-    cursor:                      inherit;
-    vertical-align:              0.5;
-    horizontal-align:            0.5;
+    background-color:            #00000000;
 }
 
-/*****----- Message -----*****/
-error-message {
-    padding:                     15px;
-    border:                      2px solid;
-    border-radius:               10px;
-    border-color:                @selected;
-    background-color:            black / 10%;
+element normal.normal {
+    background-color:            #00000033;
+    text-color:                  inherit;
+}
+element normal.urgent {
+    background-color:            #00000000;
     text-color:                  @foreground;
 }
-textbox {
-    background-color:            transparent;
+element normal.active {
+    background-color:            #00000000;
     text-color:                  @foreground;
-    vertical-align:              0.5;
-    horizontal-align:            0.0;
-    highlight:                   none;
+}
+
+element selected.normal {
+    background-color:            #00000080;
+    text-color:                  @text-selected;
+}
+element alternate.normal {
+    background-color:            #00000033;
+    text-color:                  inherit;
+}
+element alternate.urgent {
+    background-color:            #00000000;
+    text-color:                  inherit;
+}
+element alternate.active {
+    background-color:            #00000000;
+    text-color:                  inherit;
+}
+
+element-icon {
+    size:                        50%;
+    cursor:                      inherit;
+    expand:                      false;
+    padding:                     0px;
+    background-color:            #00000000;
+}
+
+element-text {
+    cursor:                      inherit;
+    background-color:            transparent;
+    padding-left:                10px; /* Add padding to the left of the text */
 }
