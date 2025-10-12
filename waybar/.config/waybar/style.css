@@ -31,6 +31,7 @@ window#waybar.hidden {
 #custom-cava-music,
 #custom-cputemp,
 #custom-playerctl,
+#custom-pacman,
 #cpu,
 #memory,
 #power-profiles-daemon,
@@ -54,6 +55,12 @@ window#waybar.hidden {
     margin: 0 5px;
     color: @background;
     transition: all 0.3s cubic-bezier(0.55, -0.68, 0.48, 1.68);
+}
+#custom-pacman{
+    margin-right: 20px;
+}
+#power-profiles-daemon{
+    margin-left: 20px;
 }
 
 #network.disconnected {

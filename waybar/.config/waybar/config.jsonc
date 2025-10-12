@@ -9,7 +9,7 @@
   "margin-right": 10,
 
   "modules-left": ["clock"],
-  "modules-center": ["hyprland/workspaces", "power-profiles-daemon"],
+  "modules-center": ["custom/pacman","hyprland/workspaces", "power-profiles-daemon"],
   "modules-right": ["pulseaudio", "pulseaudio#microphone", "custom/screenshot", "custom/notify"],
 
   "hyprland/workspaces": {
@@ -64,6 +64,15 @@
     "on-click": "activate",
     "all-outputs": true,
     "sort-by-number": true
+  },
+
+  "custom/pacman": {
+    "format": "󰅢 {}",
+    "interval": "once",
+    "exec": "checkupdates | wc -l",
+    "on-click": "update-system",
+    "signal": 8,
+    "tooltip-format": "{} update available",
   },
 
   "custom/colorpicker": {
