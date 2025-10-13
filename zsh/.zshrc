@@ -8,6 +8,13 @@ plugins=(git zsh-autosuggestions web-search)
 
 source $ZSH/oh-my-zsh.sh
 
+# Make autosuggestions white
+# ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=white'
+
+# Or make them light gray
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#525252'
+
+
 
 # Shell enhancements
 eval "$(starship init zsh)"
