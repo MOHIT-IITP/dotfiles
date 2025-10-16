@@ -2,7 +2,7 @@
   "layer": "top",
   "position": "top",
   "height": 20,
-  "output": ["HDMI-A-1"],
+  "output": ["DP-1"],
   "margin-top": 10,
  "margin-bottom": 5,
   "margin-left": 10,

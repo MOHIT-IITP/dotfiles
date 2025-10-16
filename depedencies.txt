@@ -6,4 +6,6 @@ swaync
 waybar 
 swww
 matugen
+nwg-look
+
 
