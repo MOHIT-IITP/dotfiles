@@ -1,3 +1,13 @@
+vim.g.mapleader = ","
+
+local map = vim.keymap.set
+
+map("n", "<leader>w", ":w<CR>", { desc = "Save file" })
+map("n", "<leader>q", ":q<CR>", { desc = "Quit" })
+map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear highlights" })
+
+
+
 vim.cmd("let g:netrw_liststyle = 3")
 
 -- changing the cursor to the block
@@ -10,11 +20,6 @@ local opt = vim.opt
 -- new line warping and folding config
 vim.o.linebreak = true
 vim.keymap.set('n', '<leader>ww', ':set wrap!<CR>');
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-vim.keymap.set('n', '<leader>fc', '<cmd>normal! zM<CR>', { desc = 'Close all folds' })
-vim.keymap.set('n', '<leader>lo', '<cmd>normal! zR<CR>', { desc = 'Open all folds' })
-vim.keymap.set('n', '<leader>nt', '<cmd>normal! za<CR>', { desc = 'Open all folds' })
 
 opt.relativenumber = true
 opt.number = true
