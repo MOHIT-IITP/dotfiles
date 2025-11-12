@@ -18,6 +18,8 @@ return {
                     "lua_ls",
                     "tailwindcss-language-server",
                     "ts_ls",
+                    "html",
+                    "pyright",
                     "gopls",
                     "graphql",
                     "goimports",

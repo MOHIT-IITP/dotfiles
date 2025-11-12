@@ -59,6 +59,8 @@ alias gs="git status"
 alias mg="cd ~/moLib/moGit"
 alias nrd="npm run dev"
 alias nrs="npm run start"
+alias jc="javac"
+alias j="java"
 alias nrb="npm run build"
 
 # Tmux: attach or create session named 'default'

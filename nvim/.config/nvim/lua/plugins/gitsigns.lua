@@ -50,15 +50,15 @@ return {
           end, "Previous Hunk")
 
           -- Actions
-          map("n", "<leader>hs", gs.stage_hunk, "Stage Hunk")
-          map("n", "<leader>hr", gs.reset_hunk, "Reset Hunk")
-          map("v", "<leader>hs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, "Stage Selection")
-          map("v", "<leader>hr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, "Reset Selection")
-          map("n", "<leader>hu", gs.undo_stage_hunk, "Undo Stage Hunk")
-          map("n", "<leader>hp", gs.preview_hunk, "Preview Hunk")
-          map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, "Blame Line")
-          map("n", "<leader>hd", gs.diffthis, "Diff This")
-          map("n", "<leader>hD", function() gs.diffthis("~") end, "Diff Against HEAD")
+          -- map("n", "<leader>hs", gs.stage_hunk, "Stage Hunk")
+          -- map("n", "<leader>hr", gs.reset_hunk, "Reset Hunk")
+          -- map("v", "<leader>hs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, "Stage Selection")
+          -- map("v", "<leader>hr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, "Reset Selection")
+          -- map("n", "<leader>hu", gs.undo_stage_hunk, "Undo Stage Hunk")
+          -- map("n", "<leader>hp", gs.preview_hunk, "Preview Hunk")
+          -- map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, "Blame Line")
+          -- map("n", "<leader>hd", gs.diffthis, "Diff This")
+          -- map("n", "<leader>hD", function() gs.diffthis("~") end, "Diff Against HEAD")
         end,
       })
     end,

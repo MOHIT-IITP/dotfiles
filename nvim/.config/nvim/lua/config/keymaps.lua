@@ -4,14 +4,11 @@ local map = vim.keymap.set
 
 map("n", "<leader>w", ":w<CR>", { desc = "Save file" })
 map("n", "<leader>q", ":q<CR>", { desc = "Quit" })
-map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear highlights" })
 
 
 
 vim.cmd("let g:netrw_liststyle = 3")
 
--- changing the cursor to the block
-vim.opt.guicursor = "a:block"
 
 vim.api.nvim_set_keymap("n", "<leader>yy", "ggVGy", { noremap = true, silent = true })
 
