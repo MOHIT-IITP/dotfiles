@@ -5,10 +5,36 @@ local map = vim.keymap.set
 map("n", "<leader>w", ":w<CR>", { desc = "Save file" })
 map("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 
+map("n", "te", ":tabedit")
+map("n", "<tab>", ":tabnext<Return>", opts)
+map("n", "<s-tab>", ":tabprev<Return>", opts)
+map("n", "tw", ":tabclose<Return>", opts)
 
+vim.scriptencoding = "utf-8"
+vim.opt.encoding = "utf-8"
+vim.opt.fileencoding = "utf-8"
+
+vim.opt.title = true
+vim.opt.smartindent = true
+vim.opt.hlsearch = true
+vim.opt.backup = false
+vim.opt.showcmd = true
+vim.opt.cmdheight = 0
+vim.opt.laststatus = 0
+vim.opt.scrolloff = 10
+vim.opt.inccommand = "split"
+vim.opt.ignorecase = true
+vim.opt.breakindent = true
+vim.opt.path:append({ "**" })
+vim.opt.wildignore:append({ "*/node_modules/*" })
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+vim.opt.splitkeep = "cursor"
+vim.opt.mouse = ""
+
+vim.opt.formatoptions:append({ "r" })
 
 vim.cmd("let g:netrw_liststyle = 3")
-
 
 vim.api.nvim_set_keymap("n", "<leader>yy", "ggVGy", { noremap = true, silent = true })
 
@@ -16,7 +42,7 @@ local opt = vim.opt
 
 -- new line warping and folding config
 vim.o.linebreak = true
-vim.keymap.set('n', '<leader>ww', ':set wrap!<CR>');
+vim.keymap.set("n", "<leader>ww", ":set wrap!<CR>")
 
 opt.relativenumber = true
 opt.number = true
@@ -55,11 +81,6 @@ opt.splitbelow = true -- split horizontal window to the bottom
 -- turn off swapfile
 opt.swapfile = false
 
-vim.cmd("set expandtab")
-vim.cmd("set tabstop=4")
-vim.cmd("set softtabstop=4")
-vim.cmd("set shiftwidth=4")
-vim.cmd("set relativenumber")
 vim.opt.listchars:append("space:·")
 
 vim.opt.linespace = 2
@@ -126,37 +147,32 @@ vim.api.nvim_set_keymap(
 	{ noremap = true, silent = true }
 )
 
-
-
--- input.txt => fill input  
+-- input.txt => fill input
 vim.api.nvim_set_keymap("n", "<Leader>r", "<cmd>lua CompileAndRunCpp()<CR>", { noremap = true, silent = true })
 
 -- Function to compile and run C++ file with input redirection
 function CompileAndRunCpp()
-  -- Get full path without extension
-  local filepath = vim.fn.expand("%:p:r")
-  local cpp_file = filepath .. ".cpp"
-  local output_file = filepath .. ".out"
-  local input_file = vim.fn.expand("%:p:h") .. "/input.txt"
+	-- Get full path without extension
+	local filepath = vim.fn.expand("%:p:r")
+	local cpp_file = filepath .. ".cpp"
+	local output_file = filepath .. ".out"
+	local input_file = vim.fn.expand("%:p:h") .. "/input.txt"
 
-  -- Compile the C++ file
-  local compile_cmd = string.format("g++ -std=c++17 -o '%s' '%s'", output_file, cpp_file)
-  vim.fn.system(compile_cmd)
+	-- Compile the C++ file
+	local compile_cmd = string.format("g++ -std=c++17 -o '%s' '%s'", output_file, cpp_file)
+	vim.fn.system(compile_cmd)
 
-  if vim.v.shell_error ~= 0 then
-    print("❌ Compilation failed!")
-    return
-  end
+	if vim.v.shell_error ~= 0 then
+		print("❌ Compilation failed!")
+		return
+	end
 
-  print("✅ Compilation succeeded!")
+	print("✅ Compilation succeeded!")
 
-  -- Escape spaces and run the output file with input redirection
-  local run_cmd = string.format("split | terminal bash -c '%s < %s; exec bash'", output_file, input_file)
-  vim.cmd(run_cmd)
+	-- Escape spaces and run the output file with input redirection
+	local run_cmd = string.format("split | terminal bash -c '%s < %s; exec bash'", output_file, input_file)
+	vim.cmd(run_cmd)
 end
-
-
-
 
 -- --  Compile and run C++ code with input from file
 -- vim.api.nvim_set_keymap(
@@ -179,7 +195,6 @@ function VerticalSplit()
 	vim.cmd("vsplit")
 end
 vim.api.nvim_set_keymap("n", "<leader>vs", "<cmd>lua VerticalSplit()<CR>", { noremap = true, silent = true })
-
 
 --horizontal split
 --keybinds
@@ -292,5 +307,3 @@ end
 -- Options for terminal split style and resizing
 vim.g.split_term_style = "horizontal" -- Choose between 'vertical' and 'horizontal'
 vim.g.split_term_resize_cmd = "resize 15" -- Command to resize the terminal window
-
---- adding the cpp template
