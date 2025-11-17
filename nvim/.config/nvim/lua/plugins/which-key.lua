@@ -2,14 +2,13 @@ return {
 	"folke/which-key.nvim",
 	event = "VeryLazy",
 	config = function()
-		require("which-key").setup({})
+		local wk = require("which-key")
 
-		-- Minimal registration to show the leader key is active
-		require("which-key").register({
-			t = { name = "Telescope" },
-			f = { name = "File" },
-		}, {
-			prefix = "<leader>",
+		wk.setup({})
+
+		wk.add({
+			{ "<leader>f", group = "File" },
+			{ "<leader>t", group = "Telescope" },
 		})
 	end,
 }
