@@ -31,6 +31,12 @@ return {
 	},
 	{
 		"vimpostor/vim-tpipeline",
+		event = "VeryLazy",
+		config = function()
+			-- Minimal recommended settings
+			vim.g.tpipeline_clearstl = 1
+			vim.g.tpipeline_autoembed = 1
+		end,
 	},
 	{
 		"Wansmer/treesj",
@@ -99,6 +105,37 @@ return {
 
 		config = function(_, opts)
 			require("todo-comments").setup(opts)
+		end,
+	},
+	{
+		"folke/noice.nvim",
+		event = "VeryLazy",
+		dependencies = {
+			"MunifTanjim/nui.nvim",
+			"rcarriga/nvim-notify",
+		},
+		config = function()
+			require("notify").setup({
+				stages = "fade_in_slide_out",
+				timeout = 2000,
+			})
+
+			require("noice").setup({
+				lsp = {
+					override = {
+						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+						["vim.lsp.util.stylize_markdown"] = true,
+						["cmp.entry.get_documentation"] = true,
+					},
+				},
+				presets = {
+					bottom_search = true, -- search bar at bottom
+					command_palette = true, -- position cmdline & popupmenu together
+					long_message_to_split = true, -- long messages in split
+					inc_rename = false,
+					lsp_doc_border = true,
+				},
+			})
 		end,
 	},
 }

@@ -19,6 +19,7 @@ vim.opt.smartindent = true
 vim.opt.hlsearch = true
 vim.opt.backup = false
 vim.opt.showcmd = true
+vim.opt.showmode = false
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 0
 vim.opt.scrolloff = 10
