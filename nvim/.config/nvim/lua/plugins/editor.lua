@@ -18,22 +18,27 @@ return {
 		},
 	},
 
-	-- Auto-close brackets, quotes, and Blink.cmp integration
+	-- Auto-close brackets, quotes
 	{
 		"windwp/nvim-autopairs",
 		event = "InsertEnter",
 		opts = {
-			check_ts = true, -- enable Treesitter support
+			check_ts = true,
 		},
 		config = function(_, opts)
 			local autopairs = require("nvim-autopairs")
 			autopairs.setup(opts)
-
-			-- Integration with Blink.cmp
-			local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-			local cmp = require("blink.cmp")
-
-			cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+		end,
+	},
+	{
+		"vimpostor/vim-tpipeline",
+	},
+	{
+		"Wansmer/treesj",
+		keys = { "<space>m", "<space>j", "<space>s" },
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		config = function()
+			require("treesj").setup({})
 		end,
 	},
 }

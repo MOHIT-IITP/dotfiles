@@ -1,0 +1,86 @@
+(defcfg
+    concurrent-tap-hold yes
+    log-layer-changes no
+    process-unmapped-keys yes
+    macos-dev-names-exclude (
+    "MX Master 2S"
+    )
+)
+
+
+(defsrc
+  esc   VolumeMute  VolumeUp   F3   F4   F5   F6   F7   F8   F9  F10  F11  F12 
+  grv    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps   a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft   z    x    c    v    b    n    m    ,    .    /    ▲   rsft
+  fn   lctl   lmet  lalt      spc        rmet ralt ◀    ▼    ▶
+)
+
+(defvar
+    tap-timeout 150
+    hold-timeout 250 
+)
+
+(defalias
+    escctrl (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
+    vimnav (tap-hold $tap-timeout $hold-timeout v (layer-toggle vimnav))
+    lalt-mod lctl 
+    lctl-mod lalt
+    cnav (tap-hold $tap-timeout $hold-timeout c (layer-toggle cnav))
+    a (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ lmet) break)
+    s (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ lsft) break)
+    d (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ lalt) break)
+    f (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ lctl) break)
+
+    j (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ rctl) break)
+    k (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ ralt) break)
+    l (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ rsft) break)
+    ; (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout _ rmet) break)
+    
+    tilde (tap-hold $tap-timeout $hold-timeout S-ˋ S-˜ )
+    funtoggle (tap-hold $tap-timeout $hold-timeout rctl (layer-toggle layerfun))
+
+  ms↑ (movemouse-accel-up 1 1000 1 5)
+  ms← (movemouse-accel-left 1 1000 1 5)
+  ms↓ (movemouse-accel-down 1 1000 1 5)
+  ms→ (movemouse-accel-right 1 1000 1 5)
+
+)
+(deflayer base
+  esc  F1    F2   F3   F4   F5   F6   F7   F8   F9  F10  F11  F12 
+  grv    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft   z    x   c   @vimnav  b    n    m    ,    .    /    ▲   rsft
+  fn   lctl  lalt lmet        spc       rmet @funtoggle ◀    ▼    ▶ 
+)
+
+(deflayer layerfun 
+  esc  F1    F2   F3   F4   F5   F6   F7   F8   F9  F10  F11  F12 
+  grv    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   @a    @s   @d   @f    g   h   @j   @k   @l   @;    '    ret
+  lsft   z    x   c   @vimnav  b    n    m    ,    .    /    ▲   rsft
+  fn   lctl  lalt lmet          spc         rmet ralt   ◀    ▼    ▶
+)
+
+(deflayer vimnav     
+  esc  F1    F2   F3   F4   F5   F6   F7   F8   F9  F10  F11  F12 
+  grv    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   a    s    d    f    g    left  down up  right  ;    '    ret
+  lsft   z    x  c  @vimnav  b    n    m    ,    .    /    ▲   rsft
+  fn   lctl  lalt lmet          spc         rmet ralt ◀    ▼    ▶
+
+)
+(deflayer cnav
+  @tilde  F1    F2   F3   F4   F5   F6   F7   F8   F9  F10  F11  F12 
+  grv    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   a    s    d    f    g     h    j    k    l   ;    '    ret
+  lsft   z    x   c  @vimnav  b    mltp   mrtp    ,    .    /    ▲   rsft
+  fn   lctl  lalt lmet          spc         rmet ralt ◀    ▼    ▶
+)
+
+
