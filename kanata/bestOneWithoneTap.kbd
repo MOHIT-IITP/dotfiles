@@ -9,7 +9,7 @@
   q w e r t      y u i o p
   a s d f g      h j k l ;
   z x c v b      n m , . /
-        lmet lalt bspc  spc ret
+   lmet lalt bspc  spc ret ralt
         caps
 )
 
@@ -29,13 +29,15 @@
 (defalias
   modlayer (one-shot 2000 (layer-while-held mods))
   caps-mod (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
+  lalt-mod (tap-dance 250 ( @modlayer (layer-switch symbol)))
+  ralt-mod (layer-switch base)
 )
 
 (deflayer base
   q w e r t        y u i o p
   a s d f g        h j k l ;
   z x c v b        n m , . /
-    lmet @modlayer bspc spc ret
+    lmet @lalt-mod bspc spc ret ralt
     @caps-mod
 )
 
@@ -43,7 +45,15 @@
   _ _ _ _ _   _ _ _ _ _
   @os-ctl @os-alt @os-sft @os-met _ _ @os-met @os-sft @os-alt @os-ctl
   _ _ _ _ _   _ _ _ _ _
-        _ _ _ _ _
+        _ _ _ _ _ _
         _
+)
+
+(deflayer symbol
+  1 2 3 4 5      6 7 8 9 0
+  a s S-4 S-5 g     left down up right ;
+  z x S-9 S-0 b      [ ] , . /
+     lmet lalt bspc  spc ret @ralt-mod
+        caps
 )
 
