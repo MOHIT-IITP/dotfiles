@@ -1,0 +1,89 @@
+(defcfg
+ concurrent-tap-hold yes
+ log-layer-changes no
+ process-unmapped-keys yes
+ macos-dev-names-exclude (
+     "MX Master 2S"
+     )
+ )
+
+
+(defsrc
+ esc    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+ tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+ caps   a    s    d    f    g    h    j    k    l    ;    '    ret
+ lsft   z    x    c    v    b    n    m    ,    .    /    ▲   rsft
+ lctl   lmet  lalt      spc        rmet  ralt    ◀    ▼    ▶
+ )
+
+
+(defvar
+ tap-timeout 200
+ hold-timeout 500 
+ )
+
+(defalias
+
+ escctrl (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
+ vimnav (tap-hold-press $tap-timeout $hold-timeout spc (layer-toggle vimnav))
+
+ lctl-mod lalt
+
+ cnav (tap-hold $tap-timeout $hold-timeout c (layer-toggle cnav))
+
+ a (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout a lctl a) break)
+ s (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout s lsft s) break)
+ d (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout d lalt d) break)
+ f (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout f lmet f) break)
+
+ j (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout j rmet j) break)
+ k (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout k ralt k) break)
+ l (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout l rsft l) break)
+ ; (switch ((key-timing 2 less-than $tap-timeout)) _ break () (tap-hold-release-timeout $tap-timeout $hold-timeout ; rctl ;) break)
+
+
+ tilde (tap-hold $tap-timeout $hold-timeout grv S-grv )
+ funtoggle (switch ((key-timing 1 less-than $tap-timeout)) _ break () (tap-hold $tap-timeout $hold-timeout lalt (layer-toggle layerfun)) break)
+ lalt-mod lmet
+
+ ms↑ (movemouse-accel-up 1 1000 1 5)
+ ms← (movemouse-accel-left 1 1000 1 5)
+ ms↓ (movemouse-accel-down 1 1000 1 5)
+ ms→ (movemouse-accel-right 1 1000 1 5)
+
+
+ )
+
+ (deflayer base
+  @tilde    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   @a    @s    @d    @f    g    h    @j    @k    @l    @;    '    ret
+  lsft   z    x   c   v   b    n    m    ,    .    /    ▲   rsft
+  lctl   @lalt-mod @funtoggle      @vimnav       rmet ralt ◀    ▼    ▶ 
+ )
+
+ (deflayer layerfun 
+  @tilde    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   @a    @s   @d   @f    [   ]   @j   @k   @l   @;    '    ret
+  lsft   z    x   c   v  b    n    S-9    S-0    .    /    ▲   rsft
+  lctl  lalt lmet          spc         rmet ralt   ◀    ▼    ▶
+ )
+
+ (deflayer vimnav     
+  @tilde    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    1    2    3    4    5    6    7    8    9    0    [    ]    \
+  @escctrl   a    s    d    [    ]    left  down up  right  ;    '    ret
+  lsft   z    x  c  @vimnav  b    S-9    S-0    ,    .    /    ▲   rsft
+  lctl  lalt lmet          spc         rmet ralt ◀    ▼    ▶
+
+ )
+ 
+ (deflayer cnav
+  @tilde    1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @escctrl   a    s    d    f    g     h    j    k    l   ;    '    ret
+  lsft   z    x   c  @vimnav  b    mltp   mrtp    ,    .    /    ▲   rsft
+  lctl  lalt lmet          spc         rmet ralt ◀    ▼    ▶
+ )
+
