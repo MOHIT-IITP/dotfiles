@@ -1,0 +1,56 @@
+(defcfg
+process-unmapped-keys yes 
+)
+;; Problems with home row mods (asuming QUERTY and shifting with index fingers)
+;; P1 unwanted mod activation (this is the big problem)
+;; P2 shifted rolls [ER instead of Er] (human not fast enought to release shift in time) 
+;; P3 shift finger overload [fof or fo instead of Of] (human releases shift to early to speed up the follow up f) 
+
+;; Solution (status)
+;; P1 solved by fast typing layer (and by higher hold-timeouts for non shift modifiers)
+;; P2 solved by using unmod in fast typing layer (has the side effect that ALL CAPS words must be typed without activating this rolls) 
+;; P3 only solved for FJ - other cases require learning the correct timeing
+
+;; timeings should work fine for 40 to 80 words per minute; if you are slower or new to home row mods increasing them might help in getting started   
+
+(defvirtualkeys
+to-base (layer-switch base)
+)
+
+(defvar
+  tot 220  ;; setting this to 0 could in theory improve delays 
+)
+
+
+(deftemplate homerowmod (timeouttap timeouthold keytap keyhold)
+	(tap-hold $timeouttap $timeouthold 
+		(multi $keytap  @.tp) 
+		$keyhold
+	)
+)
+
+(defalias
+  .base   (layer-while-held base)
+  .tp  (multi
+    ;; (layer-switch typing) ;; causes a P3 issue with Ffj instead of FJ         
+	(one-shot 95 (layer-while-held typing)) ;; solves P3 only in the FJ case
+    (on-idle  95 tap-vkey to-base )
+  )
+)
+
+(defsrc )
+
+(deflayermap (base)
+ f (t! homerowmod $tot 160 f lsft)
+ j (t! homerowmod $tot 160 j rsft)
+ d (t! homerowmod $tot 300 d lctl)
+ k (t! homerowmod $tot 300 k rctl)
+ s (t! homerowmod $tot 400 s lalt)
+ l (t! homerowmod $tot 400 l ralt)
+ a (t! homerowmod $tot 450 a lmet)
+ q (multi q @.tp) w (multi w @.tp) e (multi e @.tp) r (multi r @.tp) t (multi t @.tp) y (multi y @.tp) u (multi u @.tp) i (multi i @.tp) o (multi o @.tp) p (multi p @.tp) g (multi g @.tp) h (multi h @.tp) z (multi z @.tp) x (multi x @.tp) c (multi c @.tp) v (multi v @.tp) b (multi b @.tp) n (multi n @.tp) m (multi m @.tp) 
+)
+
+(deflayermap (typing)
+ a (unmod a) b (unmod b) c (unmod c) d (unmod d) e (unmod e) f (unmod f) g (unmod g) h (unmod h) i (unmod i) j (unmod j) k (unmod k) l (unmod l) m (unmod m) n (unmod n) o (unmod o) p (unmod p) q (unmod q) r (unmod r) s (unmod s) t (unmod t) u (unmod u) v (unmod v) w (unmod w) x (unmod x) y (unmod y) z (unmod z) 
+)
