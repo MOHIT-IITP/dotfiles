@@ -1,5 +1,3 @@
-Latest Best 
-
 (defcfg
   process-unmapped-keys yes
   danger-enable-cmd no

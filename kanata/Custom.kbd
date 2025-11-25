@@ -1,0 +1,49 @@
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc
+  q w e r t y u i o p
+  a s d f g h j k l ;
+  z x c v b n m , . /
+   lalt spc ralt
+)
+
+(defvar
+  streak-count 3
+  streak-time 325
+  tap-timeout 200
+  hold-timeout 300
+  chord-timeout 50
+)
+
+
+(deftemplate charmod (char mod)
+  (switch 
+    ((key-timing $streak-count less-than $streak-time)) $char break
+    () (tap-hold-release-timeout $tap-timeout $hold-timeout $char $mod $char reset-timeout-on-press) break
+  )
+)
+
+
+(deflayermap (main)
+  a (t! charmod a lmet)
+  s (t! charmod s lalt)
+  d (t! charmod d lsft)
+  f (t! charmod f lctl)
+  j (t! charmod j rctl)
+  k (t! charmod k rsft)
+  l (t! charmod l lalt)
+  ; (t! charmod ; rmet)
+  z (t! charmod z lctl) 
+  caps (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
+  ralt (layer-switch symbol)
+)
+
+
+(deflayermap (symbol)
+  a  S-9
+  s  S-0
+  caps (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
+  lalt (layer-switch main)
+)

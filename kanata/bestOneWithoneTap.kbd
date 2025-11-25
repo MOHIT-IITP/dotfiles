@@ -10,7 +10,7 @@
   a s d f g      h j k l ;
   z x c v b      n m , . /
         lmet lalt bspc  spc ret
-	caps
+        caps
 )
 
 (defvar
@@ -27,7 +27,7 @@
 )
 
 (defalias
-  modlayer (one-shot 2000 (layer-while-held mods))   
+  modlayer (one-shot 2000 (layer-while-held mods))
   caps-mod (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
 )
 
@@ -40,9 +40,10 @@
 )
 
 (deflayer mods
-  _ _ _ _ _   _ _ _ _ _ 
-  @os-ctl @os-alt @os-sft @os-met _ _ @os-met @os-sft @os-alt @os-ctl 
+  _ _ _ _ _   _ _ _ _ _
+  @os-ctl @os-alt @os-sft @os-met _ _ @os-met @os-sft @os-alt @os-ctl
   _ _ _ _ _   _ _ _ _ _
         _ _ _ _ _
-	_
+        _
 )
+

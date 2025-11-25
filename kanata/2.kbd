@@ -57,7 +57,7 @@
   (, .) ret
 )
 
-(deflayermap (main)
+(dflayermap (main)
   w (chord mtl w)
   e (chord mtl e)
   i (chord mtr i)
