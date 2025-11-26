@@ -16,7 +16,7 @@
 (defvar
   tap-timeout 150
   hold-timeout 180
-  oneshot-timeout 300
+  oneshot-timeout 400
   chord-timeout 50
 )
 
@@ -48,8 +48,8 @@
 (defalias
   modlayer (one-shot 2000 (layer-while-held mods))
   caps-mod (tap-hold $tap-timeout $hold-timeout esc (multi lmet lctl lalt lsft))
-  lalt-mod (tap-hold  $tap-timeout $hold-timeout @modlayer (layer-while-held symbol))
-  ralt-mod (tap-hold-release $tap-timeout $hold-timeout rctl (layer-while-held fumbol))
+  lalt-mod (tap-dance 250 ( @modlayer (layer-switch symbol)))
+  ralt-mod (layer-switch base)
   w (chord mtl w)
   e (chord mtl e)
   i (chord mtr i)
@@ -62,7 +62,7 @@
   q @w @e r t        y u @i @o p
   a s d f g        h j k l ;
   z x c v b        n m @, @. /
-    lmet @lalt-mod bspc spc ret @ralt-mod
+    lmet @lalt-mod bspc spc ret ralt
     @caps-mod
 )
 
@@ -76,18 +76,9 @@
 
 (deflayer symbol
   1 2 3 4 5      6 7 8 9 0
-  grv s S-4 S-5 /     left down up right =
-  z x S-9 S-0 b      [ ] - . /
-    lmet lalt bspc  spc ret @ralt-mod
-        @caps-mod
-)
-
-
-(deflayer fumbol
-  1 2 3 4 5      6 7 8 9 0
-  grv s S-4 S-5 g      = S-9 S-0 [ ]
-  z x S-9 S-0 b      [ ] - . /
-    lmet lalt bspc  spc ret @ralt-mod
-        @caps-mod
+  a s S-4 S-5 g     left down up right ;
+  z x S-9 S-0 b      [ ] , . /
+     lmet lalt bspc  spc ret @ralt-mod
+        caps
 )
 
