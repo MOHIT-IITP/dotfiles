@@ -30,15 +30,6 @@ return {
 		end,
 	},
 	{
-		"vimpostor/vim-tpipeline",
-		event = "VeryLazy",
-		config = function()
-			-- Minimal recommended settings
-			vim.g.tpipeline_clearstl = 1
-			vim.g.tpipeline_autoembed = 1
-		end,
-	},
-	{
 		"Wansmer/treesj",
 		keys = { "<space>m", "<space>j", "<space>s" },
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
