@@ -82,32 +82,6 @@ return {
 		end,
 	},
 	{
-		"folke/todo-comments.nvim",
-		event = "VeryLazy",
-		dependencies = { "nvim-lua/plenary.nvim" },
-
-		opts = {
-			signs = true, -- show icons in the gutter
-			keywords = {
-				TODO = { icon = " ", color = "info" },
-				FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT" } },
-				WARN = { icon = " ", color = "warning", alt = { "WARNING" } },
-				PERF = { icon = " ", color = "hint" },
-				NOTE = { icon = "󰎚 ", color = "hint", alt = { "INFO" } },
-				DONE = { icon = "󰄬 ", color = "success" },
-			},
-			highlight = {
-				before = "", -- "fg" or "bg" or empty
-				keyword = "bg",
-				after = "fg",
-			},
-		},
-
-		config = function(_, opts)
-			require("todo-comments").setup(opts)
-		end,
-	},
-	{
 		"folke/noice.nvim",
 		event = "VeryLazy",
 		dependencies = {
