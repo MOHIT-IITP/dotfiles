@@ -5,7 +5,7 @@ return {
 	opts = {},
 	keys = {
 		{
-			"<leader>ls", -- local search by mohiitp
+			"<leader>{", -- local search by mohiitp
 			mode = { "n", "x", "o" },
 			function()
 				require("flash").jump()
