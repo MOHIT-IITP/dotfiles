@@ -13,7 +13,7 @@ return {
 			desc = "Flash",
 		},
 		{
-			"<leader>vs", -- visual search  by mohiitp
+			"<leader>}", -- visual search  by mohiitp
 			mode = { "n", "x", "o" },
 			function()
 				require("flash").treesitter()
