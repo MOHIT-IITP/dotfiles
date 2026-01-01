@@ -13,6 +13,8 @@ map("n", "tw", ":tabclose<Return>", opts)
 vim.scriptencoding = "utf-8"
 vim.opt.encoding = "utf-8"
 vim.opt.fileencoding = "utf-8"
+vim.opt.wrap = true
+vim.opt.showbreak = "↪ "
 
 vim.opt.title = true
 vim.opt.smartindent = true

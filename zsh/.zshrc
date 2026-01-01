@@ -18,6 +18,11 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#525252'
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"  # replaces cd
 
+# Open buffer line in EDITOR
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^x^e' edit-command-line
+
 ### ─────────────────────────────────────────────
 ### History config
 ### ─────────────────────────────────────────────
