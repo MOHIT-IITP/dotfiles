@@ -107,6 +107,7 @@ alias gs="git status"
 
 # Project shortcuts
 alias mg="cd ~/moLib/moGit"
+alias todo="vi  ~/moLib/moGit/todo.md"
 alias nrd="npm run dev"
 alias nrs="npm run start"
 alias nrb="npm run build"
