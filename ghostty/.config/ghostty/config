@@ -1,6 +1,6 @@
 theme = "TokyoNight Moon"
 
-font-family = "CascadiaMono Nerd Font"
+font-family = "Iosevka Nerd Font Mono"
 font-size = 24 
 font-feature = liga
 
@@ -10,4 +10,4 @@ window-padding-y = 10
 background-opacity = 1
 background-blur = false
 
-font-thicken = true
+font-thicken = false 
