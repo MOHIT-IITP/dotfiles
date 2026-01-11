@@ -88,7 +88,6 @@ alias python="/usr/bin/python3"
 # navigation + tools
 alias vi="nvim"
 alias v="vim"
-alias cd="z"              # zoxide
 # alias ls="eza --icons"
 # alias ll="eza --long"
 # alias la="eza --long --all"
@@ -108,6 +107,8 @@ alias gs="git status"
 
 # Project shortcuts
 alias mg="cd ~/moLib/moGit"
+alias mc="cd ~/moLib/moCode"
+alias mn="cd ~/moLib/moNote"
 alias todo="vi  ~/moLib/moGit/todo.md"
 alias nrd="npm run dev"
 alias nrs="npm run start"
@@ -141,3 +142,4 @@ y() {
   rm -f -- "$tmp"
 }
 
+bindkey -v
