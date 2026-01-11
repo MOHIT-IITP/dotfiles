@@ -142,4 +142,3 @@ y() {
   rm -f -- "$tmp"
 }
 
-bindkey -v
