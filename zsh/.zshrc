@@ -119,7 +119,7 @@ alias j="java"
 ### ─────────────────────────────────────────────
 ### Tmux auto-attach
 ### ─────────────────────────────────────────────
-[ -z "$TMUX" ] && (tmux attach-session -t default || tmux new-session -s default)
+[ -z "$TMUX" ] && (tmux attach-session -t todo || tmux new-session -s default)
 
 ### ─────────────────────────────────────────────
 ### NVM
