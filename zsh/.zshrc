@@ -94,6 +94,8 @@ alias v="vim"
 # alias lt="eza --tree"
 alias yy="yazi"
 alias ta="tmux a"
+alias tnew="tmux new-session -s"
+alias td="tmux kill-session -t"
 alias delete_default="tmux kill-session -t default"
 alias editzsh="nvim ~/.zshrc"
 alias sourcezsh="source ~/.zshrc"
@@ -151,3 +153,10 @@ case ":$PATH:" in
 esac
 # pnpm end
 echo "Kaise ho Mohiitp"
+
+# bun completions
+[ -s "/Users/mohit_iitp/.bun/_bun" ] && source "/Users/mohit_iitp/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
