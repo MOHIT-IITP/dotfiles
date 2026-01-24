@@ -1,12 +1,8 @@
-# ~/.config/starship.toml
-
-palette = 'colors'
-
-command_timeout = 3600
-
 "$schema" = 'https://starship.rs/config-schema.json'
 
-add_newline = false 
+command_timeout = 3600
+add_newline = false
+palette = "aura"
 
 format = """
  󰳟\
@@ -21,63 +17,53 @@ $character
 
 right_format = """$all"""
 
-[palettes.colors]
-mustard = '#af8700'
-color1 = '#f3b2e3'
-color2 = '#4d1f46'
-color3 = '#d2c2cb'
-color4 = '#241e22'
-color5 = '#4d1f46'
-color6 = '#181216'
-color7 = '#181216'
-color8 = '#f3b2e3'
-color9 = '#f5b9a5'
+# -------------------------------------------------
+# 🎨 AURA DARK PALETTE
+# -------------------------------------------------
+[palettes.aura]
+bg        = "#15141b"
+fg        = "#edecee"
+black     = "#110f18"
+gray      = "#6d6d6d"
+red       = "#ff6767"
+green     = "#61ffca"
+yellow    = "#ffca85"
+blue      = "#82aaff"
+purple    = "#c099ff"
+cyan      = "#61ffca"
+pink      = "#ff9ac1"
+orange    = "#f7c67f"
 
-[os.symbols]
-Windows = "󰍲"
-Ubuntu = "󰕈"
-SUSE = ""
-Raspbian = "󰐿"
-Mint = "󰣭"
-Macos = " "
-Manjaro = ""
-Linux = "󰌽"
-Gentoo = "󰣨"
-Fedora = "󰣛"
-Alpine = ""
-Amazon = ""
-Android = ""
-Arch = "󰣇"
-Artix = "󰣇"
-CentOS = ""
-Debian = "󰣚"
-Redhat = "󱄛"
-RedHatEnterprise = "󱄛"
+color1 = "#ff6767"
+color2 = "#1c1b23"
+color3 = "#edecee"
+color4 = "#82aaff"
+color5 = "#c099ff"
+color6 = "#61ffca"
+color7 = "#edecee"
+color8 = "#ff9ac1"
+color9 = "#f7c67f"
+mustard = "#ffca85"
 
-[username]
-# show_always = true
-# style_user = "bg:transparent fg:color1"
-# style_root = "bg:transparent fg:color1"
-# format = '[ $user ]($style)'
-
+# -------------------------------------------------
+# 📂 DIRECTORY
+# -------------------------------------------------
 [directory]
-style = "sapphire"
-# style = "fg:color8"
-format = "[ $path ]($style)"
-#truncation_length = 4
-#truncation_symbol = "…/"
+style = "fg:blue bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 4
+truncation_symbol = "…/"
 
 [directory.substitutions]
 "Documents" = "󰈙 "
 "Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
+"Music"     = "󰝚 "
+"Pictures"  = " "
 "Developer" = "󰲋 "
 
-[os]
-disabled = true
-#style = "bg:surface0 fg:text"
-
+# -------------------------------------------------
+# 🌿 GIT
+# -------------------------------------------------
 [custom.giturl]
 description = "Display symbol for remote Git server"
 command = """
@@ -96,73 +82,83 @@ fi
 echo "$GIT_REMOTE_SYMBOL "
 """
 when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
-format = "at $output"
+format = "at [$output](fg:cyan)"
 
 [git_branch]
 symbol = "[](color2) "
-style = "fg:color1 bg:color2"
-format =  '  on [$symbol$branch]($style)[](color2)'
+style = "fg:purple bg:color2"
+format = " on [$symbol$branch]($style)[](color2)"
 
 [git_status]
-format = ' [($all_status$ahead_behind )]($style)'
+style = "fg:pink"
+format = " [($all_status$ahead_behind )]($style)"
 
+[git_state]
+style = "fg:yellow"
+
+# -------------------------------------------------
+# 🧠 LANGUAGES
+# -------------------------------------------------
 [nodejs]
 symbol = ""
-format = '[ $symbol( $version) ]($style)'
-
-[c]
-symbol = " "
-format = '[ $symbol( $version) ]($style)'
-
-[rust]
-symbol = ""
-format = '[ $symbol( $version) ]($style)'
-
-[golang]
-symbol = ""
-format = '[ $symbol( $version) ]($style)'
-detect_files = ["go.mod"]
-
-[php]
-symbol = ""
-format = '[ $symbol( $version) ]($style)'
-
-[java]
-symbol = " "
-format = '[ $symbol( $version) ]($style)'
-
-[kotlin]
-symbol = ""
-format = '[ $symbol( $version) ]($style)'
-
-[haskell]
-symbol = ""
-format = '[ $symbol( $version) ]($style)'
+style = "fg:green"
+format = "[ $symbol $version ]($style)"
 
 [python]
 symbol = ""
-format = '[ $symbol( $version) ]($style)'
+style = "fg:yellow"
+format = "[ $symbol $version ]($style)"
+
+[rust]
+symbol = ""
+style = "fg:orange"
+format = "[ $symbol $version ]($style)"
+
+[golang]
+symbol = ""
+style = "fg:cyan"
+format = "[ $symbol $version ]($style)"
+
+[c]
+symbol = " "
+style = "fg:blue"
+format = "[ $symbol $version ]($style)"
+
+[java]
+symbol = " "
+style = "fg:red"
+format = "[ $symbol $version ]($style)"
+
+[php]
+symbol = ""
+style = "fg:purple"
+format = "[ $symbol $version ]($style)"
 
 [docker_context]
 symbol = ""
-format = '[ $symbol( $context) ]($style)'
+style = "fg:blue"
+format = "[ $symbol $context ]($style)"
+
+# -------------------------------------------------
+# 🧭 SYSTEM
+# -------------------------------------------------
+[os]
+disabled = true
 
 [time]
 disabled = true
-time_format = "%R"
-style = "bg:peach"
-format = '[[  $time ](fg:mantle bg:foam)]($style)'
 
 [line_break]
-disabled = true 
-
-[character]
 disabled = false
-success_symbol = "[❯](color8 bold)"
-error_symbol = "[❯](@{error})"
-vicmd_symbol = "[❮](#f9e2af)"
-vimcmd_replace_one_symbol = '[](bold fg:purple)'
-vimcmd_replace_symbol = '[](bold fg:purple)'
-vimcmd_visual_symbol = '[](bold fg:lavender)'
 
+# -------------------------------------------------
+# ❯ PROMPT
+# -------------------------------------------------
+[character]
+success_symbol = "[ ❯](fg:purple bold)"
+error_symbol   = "[ ❯](fg:red bold)"
+vicmd_symbol   = "[ ❮](fg:yellow bold)"
 
+vimcmd_replace_one_symbol = "[](fg:pink bold)"
+vimcmd_replace_symbol     = "[](fg:pink bold)"
+vimcmd_visual_symbol      = "[](fg:cyan bold)"
