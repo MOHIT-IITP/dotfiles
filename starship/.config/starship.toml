@@ -1,18 +1,16 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 command_timeout = 3600
-add_newline = false
+add_newline = true
 palette = "aura"
 
 format = """
- 󰳟\
-$directory\
+$character$directory\
 ${custom.giturl}\
 $git_branch\
 $git_state\
 $git_status\
-$line_break\
-$character
+$line_break
 """
 
 right_format = """$all"""
@@ -55,11 +53,11 @@ truncation_length = 4
 truncation_symbol = "…/"
 
 [directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music"     = "󰝚 "
-"Pictures"  = " "
-"Developer" = "󰲋 "
+"Documents" = " 󰈙 "
+"Downloads" = "  "
+"Music"     = " 󰝚 "
+"Pictures"  = "  "
+"Developer" = " 󰲋 "
 
 # -------------------------------------------------
 # 🌿 GIT
@@ -149,16 +147,17 @@ disabled = true
 disabled = true
 
 [line_break]
-disabled = false
+disabled = true 
 
 # -------------------------------------------------
-# ❯ PROMPT
+# ❯ PROMPT CHARACTER
 # -------------------------------------------------
 [character]
-success_symbol = "[ ❯](fg:purple bold)"
-error_symbol   = "[ ❯](fg:red bold)"
-vicmd_symbol   = "[ ❮](fg:yellow bold)"
+success_symbol = "[󰳟](fg:green bold)"
+error_symbol   = "[󰳟](fg:red bold)"
+vicmd_symbol   = "[󰳟](fg:yellow bold)"
 
-vimcmd_replace_one_symbol = "[](fg:pink bold)"
-vimcmd_replace_symbol     = "[](fg:pink bold)"
-vimcmd_visual_symbol      = "[](fg:cyan bold)"
+vimcmd_replace_one_symbol = "[](fg:pink bold)"
+vimcmd_replace_symbol     = "[](fg:pink bold)"
+vimcmd_visual_symbol      = "[](fg:cyan bold)"
+
