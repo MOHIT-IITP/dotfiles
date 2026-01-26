@@ -5,6 +5,7 @@ return {
 	---@type snacks.Config
 	opts = {
 		bigfile = { enabled = true },
+
 		dashboard = { enabled = true },
 		explorer = { enabled = true },
 		indent = { enabled = true },
@@ -13,7 +14,7 @@ return {
 			enabled = true,
 			timeout = 3000,
 		},
-		picker = { enabled = true, layout = "ivy_split" },
+		picker = { enabled = true, layout = "telescope" },
 		quickfile = { enabled = true },
 		scope = { enabled = true },
 		scroll = { enabled = false },
@@ -58,7 +59,7 @@ return {
 			desc = "Find Config File",
 		},
 		{
-			"<leader>-",
+			";f",
 			function()
 				Snacks.picker.files()
 			end,

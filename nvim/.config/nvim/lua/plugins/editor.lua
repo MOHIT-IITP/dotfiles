@@ -103,83 +103,112 @@ return {
             })
         end,
     },
-    {
-        "nvim-lualine/lualine.nvim",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
+{
+  "nvim-lualine/lualine.nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons" },
 
-        config = function()
-            require("lualine").setup({
-                options = {
-                    theme = "auto",
-                    globalstatus = true,        -- single statusline for all windows
-                    icons_enabled = true,
-                    component_separators = { left = "", right = "" },
-                    section_separators = { left = "", right = "" },
-                    disabled_filetypes = { "neo-tree", "alpha" },
-                },
+  config = function()
 
-                sections = {
-                    lualine_a = { "mode" },
+    --------------------------------------------------
+    -- AURA DARK THEME
+    --------------------------------------------------
+    local aura_dark = {
+      normal = {
+        a = { bg = "#a277ff", fg = "#15141b", gui = "bold" },
+        b = { bg = "#1c1b22", fg = "#edecee" },
+        c = { bg = "#15141b", fg = "#edecee" },
+      },
+      insert = {
+        a = { bg = "#61ffca", fg = "#15141b", gui = "bold" },
+      },
+      visual = {
+        a = { bg = "#82aaff", fg = "#15141b", gui = "bold" },
+      },
+      replace = {
+        a = { bg = "#ff6767", fg = "#15141b", gui = "bold" },
+      },
+      command = {
+        a = { bg = "#ffd866", fg = "#15141b", gui = "bold" },
+      },
+      inactive = {
+        a = { bg = "#15141b", fg = "#6d6d6d" },
+        b = { bg = "#15141b", fg = "#6d6d6d" },
+        c = { bg = "#15141b", fg = "#6d6d6d" },
+      },
+    }
 
-                    lualine_b = {
-                        { "branch", icon = "" },
-                        { "diff" },
-                    },
+    --------------------------------------------------
+    -- LUALINE SETUP
+    --------------------------------------------------
+    require("lualine").setup({
+      options = {
+        theme = aura_dark,
+        globalstatus = true,
+        icons_enabled = true,
+        component_separators = { left = "", right = "" },
+        section_separators   = { left = "", right = "" },
+        disabled_filetypes = { "neo-tree", "alpha", "dashboard" },
+      },
 
-                    lualine_c = {
-                        {
-                            "diagnostics",
-                            sources = { "nvim_diagnostic" },
-                            symbols = {
-                                error = " ",
-                                warn  = " ",
-                                info  = " ",
-                                hint  = "󰌵 ",
-                            },
-                        },
-                        {
-                            "filename",
-                            path = 1,                -- 0 = filename, 1 = relative, 2 = absolute
-                            symbols = { modified = " ", readonly = " " },
-                        },
-                    },
+      sections = {
+        lualine_a = { "mode" },
 
-                    lualine_x = {
-                        {
-                            function()
-                                local buf_ft = vim.bo.filetype
-                                local clients = vim.lsp.get_clients({ bufnr = 0 })
-                                if next(clients) == nil then
-                                    return ""
-                                end
+        lualine_b = {
+          { "branch", icon = "" },
+          { "diff" },
+        },
 
-                                local names = {}
-                                for _, client in ipairs(clients) do
-                                    table.insert(names, client.name)
-                                end
+        lualine_c = {
+          {
+            "diagnostics",
+            sources = { "nvim_diagnostic" },
+            symbols = {
+              error = " ",
+              warn  = " ",
+              info  = " ",
+              hint  = "󰌵 ",
+            },
+          },
+          {
+            "filename",
+            path = 1,
+            symbols = { modified = " ", readonly = " " },
+          },
+        },
 
-                                return "  " .. table.concat(names, ", ")
-                            end,
-                            color = { fg = "#a6e3a1" },
-                        },
-                        "encoding",
-                        "filetype",
-                        "recording",
-                    },
+        lualine_x = {
+          {
+            function()
+              local clients = vim.lsp.get_clients({ bufnr = 0 })
+              if next(clients) == nil then return "" end
 
-                    lualine_y = { "progress" },
-                    lualine_z = { "location" },
-                },
+              local names = {}
+              for _, client in ipairs(clients) do
+                table.insert(names, client.name)
+              end
 
-                inactive_sections = {
-                    lualine_a = {},
-                    lualine_b = {},
-                    lualine_c = { "filename" },
-                    lualine_x = { "location" },
-                    lualine_y = {},
-                    lualine_z = {},
-                },
-            })
-        end,
-    },
+              return "  " .. table.concat(names, ", ")
+            end,
+            color = { fg = "#61ffca" },
+          },
+          "encoding",
+          "filetype",
+          "recording",
+        },
+
+        lualine_y = { "progress" },
+        lualine_z = { "location" },
+      },
+
+      inactive_sections = {
+        lualine_a = {},
+        lualine_b = {},
+        lualine_c = { "filename" },
+        lualine_x = { "location" },
+        lualine_y = {},
+        lualine_z = {},
+      },
+    })
+  end,
+},
 }

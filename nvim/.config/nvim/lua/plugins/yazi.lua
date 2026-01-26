@@ -8,7 +8,7 @@ return {
   },
 
   keys = {
-    { ";f", "<cmd>Yazi<cr>", desc = "Open Yazi here" },
+    { ";e", "<cmd>Yazi<cr>", desc = "Open Yazi here" },
     { "<leader>cw", "<cmd>Yazi cwd<cr>", desc = "Open Yazi (cwd)" },
     { "<C-Up>", "<cmd>Yazi toggle<cr>", desc = "Resume Yazi" },
   },
