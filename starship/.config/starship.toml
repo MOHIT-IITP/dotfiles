@@ -48,7 +48,7 @@ mustard = "#ffca85"
 # -------------------------------------------------
 [directory]
 style = "fg:blue bold"
-format = "[ 󰉋 $path ]($style)"
+format = "[$path ]($style)"
 truncation_length = 4
 truncation_symbol = "…/"
 
