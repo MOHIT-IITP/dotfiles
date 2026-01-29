@@ -152,7 +152,7 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
-echo "Kaise ho Mohiitp"
+echo "Kaise ho Mohiitp bhai"
 
 # bun completions
 [ -s "/Users/mohit_iitp/.bun/_bun" ] && source "/Users/mohit_iitp/.bun/_bun"
