@@ -1,2 +1,18 @@
-require("mohiitp.plugins.lsp")
-return {}
+return { 
+  require("mohiitp.plugins.theme") ,
+  require("mohiitp.plugins.editor") ,
+  require("mohiitp.plugins.flash") ,
+  require("mohiitp.plugins.vim-maximizer") ,
+  require("mohiitp.plugins.nvim-tmux-navigator") ,
+  require("mohiitp.plugins.nvim-treesitter") ,
+  require("mohiitp.plugins.lsp") ,
+  require("mohiitp.plugins.lualine") ,
+  require("mohiitp.plugins.dressing") ,
+  require("mohiitp.plugins.which-key") ,
+  require("mohiitp.plugins.telescope") ,
+  require("mohiitp.plugins.snack") ,
+  require("mohiitp.plugins.yazi") ,
+  require("mohiitp.plugins.markdown") ,
+  require("mohiitp.plugins.todo-comment"),
+  require("mohiitp.plugins.terminal")
+} 

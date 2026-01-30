@@ -61,7 +61,13 @@ return {
 		{
 			";f",
 			function()
-				Snacks.picker.files()
+				Snacks.picker.files({
+          hidden = true,
+          ignored = true,
+          exclude = {
+            "node_modules", ".git", "dist", "build"
+          },
+        })
 			end,
 			desc = "Find Files",
 		},

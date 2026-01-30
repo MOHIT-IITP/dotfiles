@@ -30,14 +30,6 @@ return {
         end,
     },
     {
-        "Wansmer/treesj",
-        keys = { "<space>m", "<space>j", "<space>s" },
-        dependencies = { "nvim-treesitter/nvim-treesitter" },
-        config = function()
-            require("treesj").setup({})
-        end,
-    },
-    {
         "echasnovski/mini.surround",
         version = false,
         event = "VeryLazy",
@@ -82,7 +74,7 @@ return {
         config = function()
             require("notify").setup({
                 stages = "fade_in_slide_out",
-                timeout = 2000,
+                timeout = 1500,
             })
 
             require("noice").setup({
@@ -109,9 +101,6 @@ return {
 
   config = function()
 
-    --------------------------------------------------
-    -- AURA DARK THEME
-    --------------------------------------------------
     local aura_dark = {
       normal = {
         a = { bg = "#a277ff", fg = "#15141b", gui = "bold" },
@@ -137,9 +126,6 @@ return {
       },
     }
 
-    --------------------------------------------------
-    -- LUALINE SETUP
-    --------------------------------------------------
     require("lualine").setup({
       options = {
         theme = aura_dark,

@@ -1,50 +1,37 @@
 return {
-  "nvim-treesitter/nvim-treesitter",
-  event = { "BufReadPre", "BufNewFile" },
-  build = ":TSUpdate",
-
-  dependencies = {
-    {
-      "windwp/nvim-ts-autotag",
-      config = function()
-        require("nvim-ts-autotag").setup()
-      end,
-    },
-  },
-
-  config = function()
-    local ok, configs = pcall(require, "nvim-treesitter.configs")
-    if not ok then
-      vim.notify("❌ Treesitter failed to load", vim.log.levels.ERROR)
-      return
-    end
-
-    configs.setup({
-      highlight = { enable = true },
-      indent = { enable = true },
-
-      ensure_installed = {
-        "lua",
-        "javascript",
-        "typescript",
-        "tsx",
-        "html",
-        "css",
-        "json",
-        "bash",
-        "markdown",
-        "c",
-        "cpp",
-      },
-
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<C-space>",
-          node_incremental = "<C-space>",
-          node_decremental = "<bs>",
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = {
+          "c",
+          "lua",
+          "vim",
+          "vimdoc",
+          "query",
+          "markdown",
+          "markdown_inline",
         },
-      },
-    })
-  end,
+
+        auto_install = false,
+
+        highlight = {
+          enable = true,
+          disable = function(_, buf)
+            local max_filesize = 100 * 1024 -- 100 KB
+            local ok, stats =
+              pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+            if ok and stats and stats.size > max_filesize then
+              return true
+            end
+          end,
+          additional_vim_regex_highlighting = false,
+        },
+
+        indent = { enable = true },
+      })
+    end,
+  },
 }
