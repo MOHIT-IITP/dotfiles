@@ -1,5 +1,6 @@
 return { 
   require("mohiitp.plugins.theme") ,
+  require("mohiitp.plugins.alpha") ,
   require("mohiitp.plugins.editor") ,
   require("mohiitp.plugins.flash") ,
   require("mohiitp.plugins.vim-maximizer") ,
