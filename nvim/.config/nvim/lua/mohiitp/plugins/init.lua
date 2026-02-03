@@ -1,8 +1,10 @@
 return { 
   require("mohiitp.plugins.theme") ,
+  require("mohiitp.plugins.fidget") ,
   require("mohiitp.plugins.alpha") ,
   require("mohiitp.plugins.editor") ,
   require("mohiitp.plugins.flash") ,
+  require("mohiitp.plugins.gitsign") ,
   require("mohiitp.plugins.vim-maximizer") ,
   require("mohiitp.plugins.nvim-tmux-navigator") ,
   require("mohiitp.plugins.nvim-treesitter") ,
