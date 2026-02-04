@@ -2,6 +2,7 @@ return {
   require("mohiitp.plugins.theme") ,
   require("mohiitp.plugins.fidget") ,
   require("mohiitp.plugins.alpha") ,
+  require("mohiitp.plugins.harpoon") ,
   require("mohiitp.plugins.editor") ,
   require("mohiitp.plugins.flash") ,
   require("mohiitp.plugins.gitsign") ,
