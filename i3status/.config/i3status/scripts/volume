@@ -1,0 +1,21 @@
+#!/bin/bash
+
+case "$BLOCK_BUTTON" in
+	1) amixer -q -D pulse sset Master toggle;;
+	4) amixer -q -D pulse sset Master on && amixer -q -D pulse sset Master 5%+;;
+	5) amixer -q -D pulse sset Master 5%-;;
+esac
+
+CURRENT_VOLUME=$(amixer sget Master | grep 'Left:' | awk -F'[][]' '{print $2}')
+CURRENT_STATE=$(amixer sget Master | grep 'Left:' | awk -F'[][]' '{print $4}')
+if [ "$CURRENT_STATE" == "off" ]
+then
+		COLOR="#D8512E"
+		ICON='<span size="large">婢</span>'
+else
+		COLOR="#c6c6c6"
+		ICON='<span size="large" color="grey">墳</span>'
+
+fi
+echo "<span color=\"$COLOR\">$ICON $CURRENT_VOLUME</span>"
+

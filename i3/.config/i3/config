@@ -1,5 +1,5 @@
 set $mod Mod4
-font pango:Iosevka Nerd Font 13
+font pango:Iosevka Nerd Font Mono 13
 
 exec --no-startup-id dex --autostart --environment i3
 
@@ -7,7 +7,7 @@ for_window [floating] floating enable, move position center, resize set 800 600
 
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
-exec_always --no-startup-id feh --bg-fill ~/Downloads/wallhaven-ex5x3o.png 
+exec_always --no-startup-id feh --bg-fill ~/Downloads/wallpaperm.jpg 
 
 
 exec --no-startup-id nm-applet
@@ -23,10 +23,12 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 bindsym $mod+Return exec kitty 
+bindsym $mod+Shift+Mod1+Ctrl+d exec discord 
+bindsym $mod+Shift+p exec --no-startup-id flameshot gui
 
 bindsym $mod+q kill
 
-bindsym $mod+d exec --no-startup-id dmenu_run
+bindsym $mod+d exec --no-startup-id rofi -show drun 
 
 # change focus
 bindsym $mod+h focus left
@@ -59,14 +61,14 @@ bindsym $mod+- split h
 bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
-bindsym $mod+f fullscreen toggle
+bindsym $mod+shift+mod1+ctrl+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
-bindsym $mod+Shift+space floating toggle
+bindsym $mod+Shift+Ctrl+Mod1+v floating toggle
 
 bindsym $mod+space focus mode_toggle
 
@@ -133,11 +135,6 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-# -----------------------
-# Colors
-# -----------------------
-
-# Backgrounds
 set $black     #000000
 set $darkgray  #111111
 set $gray      #d0d0d0
@@ -147,33 +144,47 @@ set $midgray   #9a9a9a
 set $textdark  #111111
 set $textlight #f5f5f5
 
-# -----------------------
-# Window borders
-# -----------------------
 gaps inner 10 
 
-# default_border pixel 5
-# default_floating_border pixel 5 
+default_border pixel 5
+default_floating_border pixel 5 
 
-client.focused          $textlight $textlight $darkgray
-client.unfocused        $darkgray $darkgray $midgray
-client.focused_inactive $darkgray $darkgray $midgray
-client.urgent           $darkgray $darkgray $textlight
-client.placeholder      $darkgray $darkgray $midgray
+client.focused #9b8d7f #9b8d7f #000000 #9b8d7f #9b8d7f
+client.focused_inactive #222222 #222222 #9b8d7f #222222 #222222
+client.unfocused #222222 #222222 #9b8d7f #222222 #222222
 
-# -----------------------
-# Bar
-# -----------------------
+# client.focused          $textlight $textlight $darkgray
+# client.unfocused        $darkgray $darkgray $midgray
+# client.focused_inactive $darkgray $darkgray $midgray
+# client.urgent           $darkgray $darkgray $textlight
+# client.placeholder      $darkgray $darkgray $midgray
+
+# bar {
+#     status_command i3status
+#     colors {
+#         background            #000000   
+#         statusline            #ffffff
+#         separator             #000000
+#
+#         focused_workspace     $textlight $textlight $textdark 
+#         active_workspace      $black $black #9a9a9a
+#         inactive_workspace    $black $black #9a9a9a
+#         urgent_workspace      #bbbbbb #bbbbbb #000000
+#     }
+# }
 bar {
-    status_command i3status
-    colors {
-        background            #000000   
-        statusline            #ffffff
-        separator             #000000
+  status_command i3status
+  position bottom
+  colors {
+    background #222222
+    statusline #9b8d7f
+    separator #9b8d7f
 
-        focused_workspace     $midgray $midgray $textlight 
-        active_workspace      $black $black #9a9a9a
-        inactive_workspace    $black $black #9a9a9a
-        urgent_workspace      #bbbbbb #bbbbbb #000000
-    }
+    focused_workspace #9b8d7f #9b8d7f #222222
+    inactive_workspace #222222 #222222 #9b8d7f
+    active_workspace #222222 #222222 #9b8d7f
+    urgent_workspace #222222 #222222 #9b8d7f
+    binding_mode #222222 #222222 #9b8d7f
+  }
 }
+
