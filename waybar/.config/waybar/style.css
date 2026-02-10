@@ -1,4 +1,4 @@
-@import url("/home/mohiitp/.config/waybar/colors.css");
+@import url("$HOME/.config/waybar/colors.css");
 
 * {
     font-family: "SF Pro Display, Bold","JetBrainsMono Nerd Font Propo", sans-serif;
