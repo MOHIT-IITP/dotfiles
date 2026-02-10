@@ -3,6 +3,7 @@
 ### ─────────────────────────────────────────────
 export ZSH="$HOME/.oh-my-zsh"
 export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
+export PATH="/home/mohiitp/.local/share/solana/install/active_release/bin:$PATH"
 
 ZSH_THEME="robbyrussell"
 plugins=(git zsh-autosuggestions web-search)
@@ -78,6 +79,35 @@ f() {
 fsearch() {
   rg --files | fzf --preview 'bat --style=numbers --color=always --line-range=:400 {}'
 }
+
+#tmux open throught fuzzy finding
+# Fuzzy-pick a directory and open it in a tmux session
+tmux-fzf() {
+  local dir session
+
+  # Pick a directory (customize search roots if you want)
+  dir=$(find ~/ -type d -maxdepth 3 2>/dev/null | fzf) || return
+
+  # Session name = directory name (sanitized)
+  session=$(basename "$dir" | tr . _)
+
+  # If tmux not running, start it
+  if ! tmux info &>/dev/null; then
+    tmux new-session -s "$session" -c "$dir"
+    return
+  fi
+
+  # Create session if it doesn't exist
+  if ! tmux has-session -t "$session" 2>/dev/null; then
+    tmux new-session -ds "$session" -c "$dir"
+  fi
+
+  # Switch to it
+  tmux switch-client -t "$session"
+}
+
+zle -N tmux-fzf
+bindkey '^F' tmux-fzf
 
 ### ─────────────────────────────────────────────
 ### Aliases
