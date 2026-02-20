@@ -1,8 +1,8 @@
 ### ─────────────────────────────────────────────
 ###  Oh-My-Zsh
 ### ─────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
 export ZSH="$HOME/.oh-my-zsh"
-export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
 export PATH="/home/mohiitp/.local/share/solana/install/active_release/bin:$PATH"
 
 ZSH_THEME="robbyrussell"
@@ -129,6 +129,8 @@ alias td="tmux kill-session -t"
 alias delete_default="tmux kill-session -t default"
 alias editzsh="nvim ~/.zshrc"
 alias sourcezsh="source ~/.zshrc"
+alias install="yay -S"
+alias open="xdg-open"
 
 # Git shortcuts
 alias ga="git pull origin main && git add ."
@@ -182,6 +184,7 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
 echo "Kaise ho Mohiitp bhai"
 
 # bun completions
@@ -190,3 +193,4 @@ echo "Kaise ho Mohiitp bhai"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$HOME/.config/emacs/bin:$PATH"
