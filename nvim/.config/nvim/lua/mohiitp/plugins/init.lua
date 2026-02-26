@@ -18,5 +18,6 @@ return {
   require("mohiitp.plugins.yazi") ,
   require("mohiitp.plugins.markdown") ,
   require("mohiitp.plugins.todo-comment"),
-  require("mohiitp.plugins.terminal")
+  require("mohiitp.plugins.terminal"),
+  require("mohiitp.plugins.zkOrg")
 } 

@@ -1,7 +1,6 @@
 ### ─────────────────────────────────────────────
 ###  Oh-My-Zsh
 ### ─────────────────────────────────────────────
-export PATH="$HOME/.local/bin:$PATH"
 export ZSH="$HOME/.oh-my-zsh"
 export PATH="/home/mohiitp/.local/share/solana/install/active_release/bin:$PATH"
 
@@ -144,6 +143,7 @@ alias mg="cd ~/moLib/moGit"
 alias mc="cd ~/moLib/moCode"
 alias mn="cd ~/moLib/moNote"
 alias todo="vi  ~/moLib/moGit/todo.md"
+alias ml="vi  ~/moLib/moNote/100x_ai/ml_notes1.md"
 alias nrd="npm run dev"
 alias nrs="npm run start"
 alias nrb="npm run build"
@@ -186,6 +186,7 @@ esac
 # pnpm end
 
 echo "Kaise ho Mohiitp bhai"
+uwufetch
 
 # bun completions
 [ -s "/Users/mohit_iitp/.bun/_bun" ] && source "/Users/mohit_iitp/.bun/_bun"
@@ -194,3 +195,5 @@ echo "Kaise ho Mohiitp bhai"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
