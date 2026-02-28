@@ -128,7 +128,7 @@ alias td="tmux kill-session -t"
 alias delete_default="tmux kill-session -t default"
 alias editzsh="nvim ~/.zshrc"
 alias sourcezsh="source ~/.zshrc"
-alias install="yay -S"
+alias install="yay -S" 
 alias open="xdg-open"
 
 # Git shortcuts
