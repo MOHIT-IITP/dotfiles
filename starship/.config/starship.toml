@@ -1,71 +1,48 @@
-"$schema" = 'https://starship.rs/config-schema.json'
+"$schema" = "https://starship.rs/config-schema.json"
 
 add_newline = false
 command_timeout = 2000
 
-format = """
-$character\
-$directory\
-$git_branch\
-$git_status \
-"""
+# PROMPT
+format = '[\[$username@$hostname $directory\]](bold white)$character'
 
-# ----------------
-# PALETTE
-# ----------------
-palette = "bw"
+[username]
+show_always = true
+format = "$user"
 
-[palettes.bw]
-black = "#000000"
-white = "#ffffff"
-gray = "#8a8a8a"
-light_gray = "#cfcfcf"
+[hostname]
+ssh_only = false
+format = "$hostname"
 
-# ----------------
-# DIRECTORY
-# ----------------
 [directory]
-format = "[ $path ]($style)"
-style = "bold fg:white"
+format = "$path"
+truncation_length = 1
+truncate_to_repo = false
+home_symbol = "~"
 
-# ----------------
-# GIT
-# ----------------
+[character]
+success_symbol = "[\\$](bold white)"
+error_symbol =  "[\\$](bold red)"
+vicmd_symbol =  "[\\$](bold green)"
+
 [git_branch]
-symbol = " "
-format = " on [$symbol$branch]($style)"
-style = "bold fg:white"
+disabled = true
 
 [git_status]
-format = " [($all_status$ahead_behind)]($style)"
-style = "fg:gray"
+disabled = true
 
-# ----------------
-# PROMPT SYMBOL
-# ----------------
-[character]
-success_symbol = "[󰳟](bold fg:white)"
-error_symbol   = "[󰳟](bold fg:gray)"
-vicmd_symbol   = "[](bold fg:white)"
-
-# ----------------
-# LANGUAGE RUNTIME (OPTIONAL)
-# ----------------
 [nodejs]
-format = "[  $version ](fg:gray)"
+disabled = true
 
 [python]
-format = "[  $version ](fg:gray)"
+disabled = true
 
 [rust]
-format = "[  $version ](fg:gray)"
+disabled = true
 
 [golang]
-format = "[  $version ](fg:gray)"
+disabled = true
 
-# ----------------
-# DISABLE COLOR NOISE
-# ----------------
 [cmd_duration]
 disabled = true
 
