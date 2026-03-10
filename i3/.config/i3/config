@@ -23,7 +23,8 @@ font pango:Iosevka Nerd Font Mono 12
 
 # Start XDG autostart applications
 exec --no-startup-id dex --autostart --environment i3
-
+# start polybar 
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 # Lock screen when system goes to sleep
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
@@ -72,7 +73,15 @@ floating_modifier $mod
 # Allow dragging tiled windows by titlebar
 tiling_drag modifier titlebar
 
+#############################################
+# SCRATCHPAD WINDOW MOVEMENT SETTINGS
+#############################################
 
+# Send focused window to scratchpad
+bindsym $mod+Shift+minus move scratchpad
+
+# Show / hide scratchpad window
+bindsym $mod+minus scratchpad show
 #############################################
 # APPLICATION SHORTCUTS
 #############################################
@@ -302,21 +311,22 @@ client.unfocused #222222 #222222 #9b8d7f #222222 #222222
 # I3 STATUS BAR
 #############################################
 
-bar {
-    status_command i3status
-    position bottom
-
-    separator_symbol "::"
-
-    colors {
-        background #222222
-        statusline #9b8d7f
-        separator #9b8d7f
-
-        focused_workspace #9b8d7f #9b8d7f #222222
-        inactive_workspace #222222 #222222 #9b8d7f
-        active_workspace #222222 #222222 #9b8d7f
-        urgent_workspace #222222 #222222 #9b8d7f
-        binding_mode #222222 #222222 #9b8d7f
-    }
-}
+# bar {
+#     mode hide
+#     status_command i3status
+#     position top 
+#
+#     separator_symbol "::"
+#
+#     colors {
+#         background #222222
+#         statusline #9b8d7f
+#         separator #9b8d7f
+#
+#         focused_workspace #9b8d7f #9b8d7f #222222
+#         inactive_workspace #222222 #222222 #9b8d7f
+#         active_workspace #222222 #222222 #9b8d7f
+#         urgent_workspace #222222 #222222 #9b8d7f
+#         binding_mode #222222 #222222 #9b8d7f
+#     }
+# }
