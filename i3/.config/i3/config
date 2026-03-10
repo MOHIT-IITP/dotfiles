@@ -16,6 +16,7 @@ set $mod Mod4
 # Font used by i3 bar and titles
 font pango:Iosevka Nerd Font Mono 12
 
+exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
 
 #############################################
 # AUTOSTART PROGRAMS
@@ -29,7 +30,7 @@ exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
 # Set wallpaper
-exec_always --no-startup-id feh --bg-fill ~/Downloads/first.png
+exec_always --no-startup-id feh --bg-fill ~/Downloads/dragon.jpg
 
 # Network manager tray applet
 exec --no-startup-id nm-applet
@@ -281,6 +282,7 @@ set $textdark  #111111
 set $textlight #f5f5f5
 
 
+
 #############################################
 # GAPS AND BORDERS
 #############################################
@@ -302,9 +304,24 @@ default_floating_border pixel 5
 # WINDOW COLORS
 #############################################
 
-client.focused #9b8d7f #9b8d7f #000000 #9b8d7f #9b8d7f
-client.focused_inactive #222222 #222222 #9b8d7f #222222 #222222
-client.unfocused #222222 #222222 #9b8d7f #222222 #222222
+# Load Pywal colors
+set_from_resource $background background
+set_from_resource $foreground foreground
+set_from_resource $color0 color0
+set_from_resource $color1 color1
+set_from_resource $color2 color2
+set_from_resource $color3 color3
+set_from_resource $color4 color4
+set_from_resource $color5 color5
+set_from_resource $color6 color6
+set_from_resource $color7 color7
+
+# Window borders
+client.focused $color1 $background $foreground $color2 $color3
+client.focused_inactive $color8 $background $foreground $color8 $color8
+client.unfocused $color0 $background $foreground $color0 $color0
+client.urgent $color1 $color1 $background $color1 $color1
+client.placeholder $background $background $foreground $background $background
 
 
 #############################################

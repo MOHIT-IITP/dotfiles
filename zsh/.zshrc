@@ -3,6 +3,7 @@
 ### ─────────────────────────────────────────────
 export ZSH="$HOME/.oh-my-zsh"
 export PATH="/home/mohiitp/.local/share/solana/install/active_release/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 ZSH_THEME="robbyrussell"
 plugins=(git zsh-autosuggestions web-search)
