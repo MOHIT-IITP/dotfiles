@@ -1,0 +1,61 @@
+@import "~/.cache/wal/colors-rofi-light.rasi"
+
+configuration {
+font: "DankMono Nerd Font 16";
+show-icons: true;
+drun-display-format: " {name} ";
+}
+
+* {
+  background: @normal-background;
+  foreground: @normal-foreground;
+  border-color: @border-color;
+  }
+
+window {
+width: 20%;
+border: 5px;
+border-color: @selected-urgent-background;
+padding: 15px;
+background-color: @normal-background;
+}
+
+mainbox {
+children: [ inputbar, listview ];
+}
+
+inputbar {
+children: [ prompt, entry ];
+padding: 5px;
+}
+
+prompt {
+text-color: @active-background;
+}
+
+entry {
+text-color: @normal-foreground;
+}
+
+listview {
+lines: 5;
+spacing: 4px;
+}
+
+element {
+padding: 6px;
+}
+
+element normal.normal {
+background-color: @normal-background;
+text-color: @normal-foreground;
+}
+
+element selected.normal {
+background-color: @normal-background;
+background-opacity: 0.1;
+text-color: @foreground;
+border: 3px;
+border-color: @selected-active-background;
+}
+
