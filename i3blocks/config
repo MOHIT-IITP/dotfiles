@@ -1,38 +1,44 @@
-
-# Battery Block
-[battery]
-command=acpi -b | grep -o '[0-9]*%' | tr -d '%'
-interval=30
-label=battery 
-color=#9b8d7f
-
-# Volume Block
+# --------------------
+# Volume
+# --------------------
 [volume]
 command=pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}'
 interval=1
-label=vol 
-color=#9b8d7f
+label=VOL 
+color=$(xrdb -query | grep color7 | awk '{print $2}')
 
-# Date/Time Block
-[time]
-command=date "+%Y-%m-%d %H:%M:%S "
-interval=1
-label=time 
-color=#9b8d7f
-
-# i3blocks config example
-
-
-# CPU usage Block
+# --------------------
+# CPU
+# --------------------
 [cpu]
 command=top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}'
 interval=5
-label=cpu 
-color=#9b8d7f
+label=CPU 
+color=$(xrdb -query | grep color7 | awk '{print $2}')
 
-# Memory Usage Block
+# --------------------
+# Memory
+# --------------------
 [memory]
 command=free -h | awk '/^Mem/ {print $3 "/" $2}'
 interval=10
-label=mem 
-color=#9b8d7f
+label=MEM 
+color=$(xrdb -query | grep color7 | awk '{print $2}')
+
+# --------------------
+# Battery
+# --------------------
+[battery]
+command=acpi -b | grep -o '[0-9]*%'
+interval=30
+label=BAT 
+color=$(xrdb -query | grep color7 | awk '{print $2}')
+
+# --------------------
+# Date / Time
+# --------------------
+[time]
+command=date "+%a %d-%m-%Y %I:%M %p"
+interval=1
+# label=TIME 
+color=$(xrdb -query | grep color7 | awk '{print $2}')

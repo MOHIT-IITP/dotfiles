@@ -17,6 +17,7 @@ set $mod Mod4
 font pango:Iosevka Nerd Font Mono 12
 
 exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
+exec_always --no-startup-id ~/.local/bin/fehwal ~/pix/haha.png
 
 #############################################
 # AUTOSTART PROGRAMS
@@ -25,7 +26,7 @@ exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
 # Start XDG autostart applications
 exec --no-startup-id dex --autostart --environment i3
 # start polybar 
-exec_always --no-startup-id ~/.config/polybar/launch.sh
+# exec_always --no-startup-id ~/.config/polybar/launch.sh
 # Lock screen when system goes to sleep
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
@@ -304,7 +305,7 @@ default_floating_border pixel 5
 # WINDOW COLORS
 #############################################
 
-# Load Pywal colors
+# Load pywal colors
 set_from_resource $background background
 set_from_resource $foreground foreground
 set_from_resource $color0 color0
@@ -316,34 +317,27 @@ set_from_resource $color5 color5
 set_from_resource $color6 color6
 set_from_resource $color7 color7
 
+bar {
+    status_command i3blocks
+    position top
+    separator_symbol "::"
+
+    colors {
+        background $background
+        statusline $foreground
+        separator  $color2
+
+        focused_workspace  $color1 $color1 $background
+        inactive_workspace $background $background $foreground
+        active_workspace   $background $background $foreground
+        urgent_workspace   $color1 $color1 $background
+        binding_mode       $color2 $color2 $background
+    }
+}
+
 # Window borders
 client.focused $color1 $background $foreground $color2 $color3
 client.focused_inactive $color8 $background $foreground $color8 $color8
 client.unfocused $color0 $background $foreground $color0 $color0
 client.urgent $color1 $color1 $background $color1 $color1
 client.placeholder $background $background $foreground $background $background
-
-
-#############################################
-# I3 STATUS BAR
-#############################################
-
-# bar {
-#     mode hide
-#     status_command i3status
-#     position top 
-#
-#     separator_symbol "::"
-#
-#     colors {
-#         background #222222
-#         statusline #9b8d7f
-#         separator #9b8d7f
-#
-#         focused_workspace #9b8d7f #9b8d7f #222222
-#         inactive_workspace #222222 #222222 #9b8d7f
-#         active_workspace #222222 #222222 #9b8d7f
-#         urgent_workspace #222222 #222222 #9b8d7f
-#         binding_mode #222222 #222222 #9b8d7f
-#     }
-# }
