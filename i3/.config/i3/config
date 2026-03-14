@@ -14,10 +14,11 @@
 set $mod Mod4
 
 # Font used by i3 bar and titles
-font pango:Iosevka Nerd Font Mono 12
+font pango:JetBrainsMono Nerd Font 12
 
 exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
-exec_always --no-startup-id ~/.local/bin/fehwal ~/pix/haha.png
+exec_always --no-startup-id wal -i ~/pix/dragon.jpg 
+exec_always --no-startup-id dunst
 
 #############################################
 # AUTOSTART PROGRAMS
@@ -30,8 +31,6 @@ exec --no-startup-id dex --autostart --environment i3
 # Lock screen when system goes to sleep
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
-# Set wallpaper
-exec_always --no-startup-id feh --bg-fill ~/Downloads/dragon.jpg
 
 # Network manager tray applet
 exec --no-startup-id nm-applet
@@ -295,6 +294,10 @@ gaps inner 10
 workspace 5 gaps horizontal 150
 workspace 5 gaps vertical 50
 workspace 5 gaps inner 10
+
+workspace 6 gaps horizontal 150
+workspace 6 gaps vertical 50
+workspace 6 gaps inner 10
 
 # Window borders
 default_border pixel 5

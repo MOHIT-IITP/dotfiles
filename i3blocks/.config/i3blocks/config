@@ -4,8 +4,8 @@
 [volume]
 command=pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}'
 interval=1
-label=VOL 
-color=$(xrdb -query | grep color7 | awk '{print $2}')
+label= 
+color=$(xrdb -query | grep color5 | awk '{print $2}')
 
 # --------------------
 # CPU
@@ -13,7 +13,7 @@ color=$(xrdb -query | grep color7 | awk '{print $2}')
 [cpu]
 command=top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}'
 interval=5
-label=CPU 
+label= 
 color=$(xrdb -query | grep color7 | awk '{print $2}')
 
 # --------------------
@@ -22,7 +22,7 @@ color=$(xrdb -query | grep color7 | awk '{print $2}')
 [memory]
 command=free -h | awk '/^Mem/ {print $3 "/" $2}'
 interval=10
-label=MEM 
+label= 
 color=$(xrdb -query | grep color7 | awk '{print $2}')
 
 # --------------------
@@ -31,7 +31,16 @@ color=$(xrdb -query | grep color7 | awk '{print $2}')
 [battery]
 command=acpi -b | grep -o '[0-9]*%'
 interval=30
-label=BAT 
+label= 
+color=$(xrdb -query | grep color7 | awk '{print $2}')
+
+# --------------------
+# Ethernet
+# --------------------
+[ethernet]
+command=cat /sys/class/net/enp*/operstate 2>/dev/null | grep -q up && echo "Connected" || echo "Disconnected"
+interval=5
+label=󰈀 
 color=$(xrdb -query | grep color7 | awk '{print $2}')
 
 # --------------------
@@ -40,5 +49,4 @@ color=$(xrdb -query | grep color7 | awk '{print $2}')
 [time]
 command=date "+%a %d-%m-%Y %I:%M %p"
 interval=1
-# label=TIME 
 color=$(xrdb -query | grep color7 | awk '{print $2}')

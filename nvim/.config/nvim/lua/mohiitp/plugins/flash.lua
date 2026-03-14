@@ -5,7 +5,7 @@ return {
 	opts = {},
 	keys = {
 		{
-			"<leader>{", -- local search by mohiitp
+			"zk", -- local search by mohiitp
 			mode = { "n", "x", "o" },
 			function()
 				require("flash").jump()
@@ -13,7 +13,7 @@ return {
 			desc = "Flash",
 		},
 		{
-			"<leader>}", -- visual search  by mohiitp
+			"zl", -- visual search  by mohiitp
 			mode = { "n", "x", "o" },
 			function()
 				require("flash").treesitter()
