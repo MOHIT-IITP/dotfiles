@@ -14,10 +14,10 @@
 set $mod Mod4
 
 # Font used by i3 bar and titles
-font pango:JetBrainsMono Nerd Font 12
+font pango:Iosevka Nerd Font 12
 
 exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
-exec_always --no-startup-id wal -i ~/pix/dragon.jpg 
+exec_always --no-startup-id wal -i ~/pix/haha.png
 exec_always --no-startup-id dunst
 
 #############################################

@@ -29,13 +29,13 @@ return {
 			end,
 			desc = "Smart Find Files",
 		},
-		{
-			";r",
-			function()
-				Snacks.picker.grep()
-			end,
-			desc = "Grep",
-		},
+		-- {
+		-- 	";r",
+		-- 	function()
+		-- 		Snacks.picker.grep()
+		-- 	end,
+		-- 	desc = "Grep",
+		-- },
 		{
 			"<leader>:",
 			function()
@@ -58,19 +58,19 @@ return {
 			end,
 			desc = "Find Config File",
 		},
-		{
-			";f",
-			function()
-				Snacks.picker.files({
-          hidden = true,
-          ignored = true,
-          exclude = {
-            "node_modules", ".git", "dist", "build"
-          },
-        })
-			end,
-			desc = "Find Files",
-		},
+		-- {
+		-- 	";f",
+		-- 	function()
+		-- 		Snacks.picker.files({
+		--         hidden = true,
+		--         ignored = true,
+		--         exclude = {
+		--           "node_modules", ".git", "dist", "build"
+		--         },
+		--       })
+		-- 	end,
+		-- 	desc = "Find Files",
+		-- },
 		{
 			"<leader>fg",
 			function()

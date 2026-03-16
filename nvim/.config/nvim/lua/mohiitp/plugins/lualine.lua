@@ -1,29 +1,21 @@
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons" },
+  dependencies = { "echasnovski/mini.icons" },
 
   config = function()
-    local lualine = require("lualine")
-    local lazy_status = require("lazy.status")
+    -- read pywal colors.json
+    local wal_colors =
+      vim.fn.json_decode(
+        table.concat(
+          vim.fn.readfile(vim.fn.expand("~/.cache/wal/colors.json")),
+          "\n"
+        )
+      )
 
-    local colors = {
-      base = "#191724",
-      surface = "#1f1d2e",
-      overlay = "#26233a",
-      muted = "#6e6a86",
-      subtle = "#908caa",
-      text = "#e0def4",
-      love = "#eb6f92",
-      gold = "#f6c177",
-      rose = "#ebbcba",
-      pine = "#31748f",
-      foam = "#9ccfd8",
-      iris = "#c4a7e7",
-    }
+    local colors = wal_colors.colors
+    local special = wal_colors.special
 
-    -----------------------------------------------------------------------
-    -- MODE SHORT
-    -----------------------------------------------------------------------
+    -- short mode names
     local mode_map = {
       n = "N",
       i = "I",
@@ -40,89 +32,94 @@ return {
       return mode_map[vim.fn.mode()] or vim.fn.mode()
     end
 
-    -----------------------------------------------------------------------
-    -- 🌹 ROSE PINE LUALINE THEME
-    -----------------------------------------------------------------------
-    local rose_pine_theme = {
+    -- tmux window name
+    local function tmux_window()
+      if vim.env.TMUX then
+        local handle = io.popen("tmux display-message -p '#W' 2>/dev/null")
+        if handle then
+          local result = handle:read("*l")
+          handle:close()
+          if result ~= "" then
+            return result
+          end
+        end
+      end
+      return ""
+    end
 
+    -- short filetype names
+    local filetype_map = {
+      typescriptreact = "tsx",
+      javascriptreact = "jsx",
+      typescript = "ts",
+      javascript = "js",
+    }
+
+    local function short_filetype()
+      local ft = vim.bo.filetype
+      return filetype_map[ft] or ft
+    end
+
+    local function file_info()
+      local encoding = vim.o.fileencoding
+      local ft = short_filetype()
+
+      if encoding == "" then
+        return ft
+      else
+        return encoding .. " :: " .. ft
+      end
+    end
+
+    local theme = {
       normal = {
-        a = { bg = colors.iris, fg = colors.base, gui = "bold" },
-        b = { bg = colors.overlay, fg = colors.text },
-        c = { bg = colors.base, fg = colors.subtle },
+        a = { bg = colors.color4, fg = special.background, gui = "bold" },
+        b = { bg = colors.color2, fg = special.background },
+        c = { bg = special.background, fg = special.foreground },
       },
 
       insert = {
-        a = { bg = colors.foam, fg = colors.base, gui = "bold" },
-        b = { bg = colors.overlay, fg = colors.text },
-        c = { bg = colors.base, fg = colors.subtle },
+        a = { bg = colors.color2, fg = special.background, gui = "bold" },
       },
 
       visual = {
-        a = { bg = colors.rose, fg = colors.base, gui = "bold" },
-        b = { bg = colors.overlay, fg = colors.text },
-        c = { bg = colors.base, fg = colors.subtle },
+        a = { bg = colors.color5, fg = special.background, gui = "bold" },
       },
 
       replace = {
-        a = { bg = colors.love, fg = colors.base, gui = "bold" },
-        b = { bg = colors.overlay, fg = colors.text },
-        c = { bg = colors.base, fg = colors.subtle },
-      },
-
-      command = {
-        a = { bg = colors.gold, fg = colors.base, gui = "bold" },
-        b = { bg = colors.overlay, fg = colors.text },
-        c = { bg = colors.base, fg = colors.subtle },
+        a = { bg = colors.color1, fg = special.background, gui = "bold" },
       },
 
       inactive = {
-        a = { bg = colors.base, fg = colors.muted },
-        b = { bg = colors.base, fg = colors.muted },
-        c = { bg = colors.base, fg = colors.muted },
+        a = { bg = special.background, fg = special.foreground },
+        b = { bg = special.background, fg = special.foreground },
+        c = { bg = special.background, fg = special.foreground },
       },
     }
 
-    -----------------------------------------------------------------------
-    -- ⚙️ SETUP
-    -----------------------------------------------------------------------
-    lualine.setup({
+    require("lualine").setup({
       options = {
-        theme = rose_pine_theme,
-        section_separators = "",   -- clean minimal
-        component_separators = "", -- clean minimal
-        globalstatus = true,
+        icons_enabled = false,
+        theme = theme,
+        component_separators = "",
+        section_separators = "",
       },
 
       sections = {
-        lualine_a = {
-          { mode_short },
-        },
+        lualine_a = { mode_short },
 
         lualine_b = {
-          { "branch", icon = "" },
+          "branch",
+          tmux_window,
         },
 
-        lualine_c = {
-          { "filename", path = 1 },
-        },
+        lualine_c = { "filename" },
 
-        lualine_x = {
-          {
-            lazy_status.updates,
-            cond = lazy_status.has_updates,
-            color = { fg = colors.gold },
-          },
-          { "encoding", color = { fg = colors.subtle } },
-          { "filetype", color = { fg = colors.subtle } },
-        },
+        lualine_x = { file_info },
 
-        lualine_y = {
-          { "progress", color = { fg = colors.foam } },
-        },
+        lualine_y = { "progress" },
 
-        lualine_z = {
-          { "location", color = { fg = colors.text } },
-        },
+        lualine_z = { "location" },
       },
     })
   end,
