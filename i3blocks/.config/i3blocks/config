@@ -1,52 +1,68 @@
-# --------------------
+# =========================
+# Global Settings
+# =========================
+separator=true
+separator_block_width=15
+markup=pango
+
+# =========================
+# LEFT SIDE
+# =========================
+
 # Volume
-# --------------------
 [volume]
 command=pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}'
 interval=1
 label= 
-color=$(xrdb -query | grep color5 | awk '{print $2}')
+color=#c678dd
 
-# --------------------
 # CPU
-# --------------------
 [cpu]
-command=top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}'
+command=top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1\"%\"}'
 interval=5
 label= 
-color=$(xrdb -query | grep color7 | awk '{print $2}')
+color=#56b6c2
 
-# --------------------
+# =========================
+# CENTER (Window Title)
+# =========================
+
+[window]
+command=i3-msg -t get_tree | jq -r '.. | select(.focused==true).name' | cut -c1-60
+interval=1
+label= 
+align=center
+min_width=40
+color=#abb2bf
+
+# =========================
+# RIGHT SIDE
+# =========================
+
 # Memory
-# --------------------
 [memory]
 command=free -h | awk '/^Mem/ {print $3 "/" $2}'
 interval=10
 label= 
-color=$(xrdb -query | grep color7 | awk '{print $2}')
+color=#98c379
 
-# --------------------
 # Battery
-# --------------------
 [battery]
 command=acpi -b | grep -o '[0-9]*%'
 interval=30
 label= 
-color=$(xrdb -query | grep color7 | awk '{print $2}')
+color=#e5c07b
 
-# --------------------
 # Ethernet
-# --------------------
 [ethernet]
 command=cat /sys/class/net/enp*/operstate 2>/dev/null | grep -q up && echo "Connected" || echo "Disconnected"
 interval=5
 label=󰈀 
-color=$(xrdb -query | grep color7 | awk '{print $2}')
+color=#61afef
 
-# --------------------
-# Date / Time
-# --------------------
+# Time
 [time]
 command=date "+%a %d-%m-%Y %I:%M %p"
 interval=1
-color=$(xrdb -query | grep color7 | awk '{print $2}')
+label= 
+color=#abb2bf

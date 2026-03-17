@@ -16,8 +16,10 @@ set $mod Mod4
 # Font used by i3 bar and titles
 font pango:Iosevka Nerd Font 12
 
+exec_always --no-startup-id wal -R
+exec_always --no-startup-id wal -i ~/pix/dragon.jpg
 exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
-exec_always --no-startup-id wal -i ~/pix/haha.png
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec_always --no-startup-id dunst
 
 #############################################
@@ -26,8 +28,6 @@ exec_always --no-startup-id dunst
 
 # Start XDG autostart applications
 exec --no-startup-id dex --autostart --environment i3
-# start polybar 
-# exec_always --no-startup-id ~/.config/polybar/launch.sh
 # Lock screen when system goes to sleep
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
@@ -300,8 +300,8 @@ workspace 6 gaps vertical 50
 workspace 6 gaps inner 10
 
 # Window borders
-default_border pixel 5
-default_floating_border pixel 5 
+default_border pixel 3
+default_floating_border pixel 7 
 
 
 #############################################
@@ -320,23 +320,23 @@ set_from_resource $color5 color5
 set_from_resource $color6 color6
 set_from_resource $color7 color7
 
-bar {
-    status_command i3blocks
-    position top
-    separator_symbol "::"
-
-    colors {
-        background $background
-        statusline $foreground
-        separator  $color2
-
-        focused_workspace  $color1 $color1 $background
-        inactive_workspace $background $background $foreground
-        active_workspace   $background $background $foreground
-        urgent_workspace   $color1 $color1 $background
-        binding_mode       $color2 $color2 $background
-    }
-}
+# bar {
+#     status_command i3blocks
+#     position top
+#     separator_symbol "::"
+#
+#     colors {
+#         background $background
+#         statusline $foreground
+#         separator  $color2
+#
+#         focused_workspace  $color1 $color1 $background
+#         inactive_workspace $background $background $foreground
+#         active_workspace   $background $background $foreground
+#         urgent_workspace   $color1 $color1 $background
+#         binding_mode       $color2 $color2 $background
+#     }
+# }
 
 # Window borders
 client.focused $color1 $background $foreground $color2 $color3
