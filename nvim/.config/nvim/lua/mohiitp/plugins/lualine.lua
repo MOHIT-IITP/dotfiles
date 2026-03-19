@@ -32,20 +32,6 @@ return {
       return mode_map[vim.fn.mode()] or vim.fn.mode()
     end
 
-    -- tmux window name
-    local function tmux_window()
-      if vim.env.TMUX then
-        local handle = io.popen("tmux display-message -p '#W' 2>/dev/null")
-        if handle then
-          local result = handle:read("*l")
-          handle:close()
-          if result ~= "" then
-            return result
-          end
-        end
-      end
-      return ""
-    end
 
     -- short filetype names
     local filetype_map = {

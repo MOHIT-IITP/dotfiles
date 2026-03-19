@@ -1,6 +1,4 @@
 local opt = vim.opt -- for conciseness
-vim.g.mapleader = ","
-vim.g.maplocalleader = ","
 -- line numbers
 opt.relativenumber = true -- show relative line numbers
 opt.number = true -- shows absolute line number on cursor line (when relative number is on)
