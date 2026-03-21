@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-WALLPAPER_DIR="$HOME/pix/wall"  
+WALLPAPER_DIR="$HOME/pix"  
 LOG_FILE="$HOME/.cache/wallpaper_changer.log"
 
 # Function to log messages
