@@ -3,7 +3,7 @@
 * {
   border: none;
   border-radius: 0;
-  font-family: "Commit Mono Nerd Font";
+  font-family: "SF Pro Display", "JetBrainsMono Nerd Font Propo";
   font-size: 18px;
   min-height: 0;
 }
@@ -15,14 +15,16 @@ window#waybar {
 
 /* Workspaces */
 #workspaces button {
-  padding: 0 6px;
   color: @on_surface_variant;
+  padding: 3px;
   background: transparent;
 }
 
 #workspaces button.active,
 #workspaces button.focused {
   background: @primary;
+  padding: 3px;
+  border-radius: 5px;
   color: @on_primary;
 }
 
