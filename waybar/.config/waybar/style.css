@@ -16,16 +16,17 @@ window#waybar {
 /* Workspaces */
 #workspaces button {
   color: @on_surface_variant;
-  padding: 3px;
+  padding: 0 7px;
   background: transparent;
 }
 
 #workspaces button.active,
 #workspaces button.focused {
   background: @primary;
-  padding: 3px;
-  border-radius: 5px;
+  padding: 0 1px;
+  border-radius: 4px;
   color: @on_primary;
+  margin: 6px;
 }
 
 #workspaces button.urgent {

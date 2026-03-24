@@ -95,8 +95,7 @@
   },
 
   "clock": {
-    "format": "{:%I:%M}",
-    "format-alt": "{:%A, %B %d, %Y}",
+    "format": "{:%A, %B %d, %Y  %I: %M: %p}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "interval": 60
   },

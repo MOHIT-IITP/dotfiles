@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -e  # stop on error
+
+echo "📦 Installing core packages..."
+sudo pacman -S --noconfirm --needed \
+  neovim \
+  vim \
+  fd \
+  ripgrep \
+  tmux \
+  grim \
+  slurp \
+  xclip \
+  wl-clipboard \
+  zoxide \
+  eza \
+  starship \
+  nautilus \
+  yazi \
+  btop \
+  bat \
+  zsh \
+  kitty \
+  udiskie \
+  curl \
+  unzip \
+  7zip \
+  zip \
+  pavucontrol \
+  blueman \
+  bluez \
+  bluez-utils \
+  tree \
+  nodejs \
+  npm \
+  python \
+  gcc \
+  cmake \
+  stow
+
+# Install yay if not installed
+if ! command -v yay &> /dev/null; then
+  echo "⚙️ Installing yay (AUR helper)..."
+  sudo pacman -S --needed --noconfirm base-devel git
+  git clone https://aur.archlinux.org/yay.git
+  cd yay
+  makepkg -si --noconfirm
+  cd ..
+  rm -rf yay
+fi
+
+echo "🐚 Setting Zsh as default shell..."
+chsh -s /bin/zsh
+
+echo "✨ Installing Oh My Zsh..."
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+echo "🧹 Removing default .zshrc..."
+rm -f ~/.zshrc
+
+echo "📁 Applying dotfiles using stow..."
+if [ -d "$HOME/dotfiles/zsh" ]; then
+  cd ~/dotfiles
+  stow zsh
+else
+  echo "⚠️ ~/dotfiles/zsh not found, skipping stow"
+fi
+
+echo "⚙️ Setting up bash configs (fallback)..."
+
+# Starship (bash fallback)
+if ! grep -q "starship init" ~/.bashrc 2>/dev/null; then
+  echo 'eval "$(starship init bash)"' >> ~/.bashrc
+fi
+
+# Zoxide (bash fallback)
+if ! grep -q "zoxide init" ~/.bashrc 2>/dev/null; then
+  echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
+fi
+
+echo "🔵 Enabling services..."
+sudo systemctl enable bluetooth
+sudo systemctl enable auto-cpufreq
+
+echo "✅ Installation complete!"
+echo "🎉 Reboot or log out and back in to start using zsh + your dotfiles"
