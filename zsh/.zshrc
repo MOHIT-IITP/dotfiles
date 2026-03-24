@@ -129,7 +129,7 @@ alias td="tmux kill-session -t"
 alias delete_default="tmux kill-session -t default"
 alias editzsh="nvim ~/.zshrc"
 alias sourcezsh="source ~/.zshrc"
-alias ins="yay -S" 
+alias ins="yay -S --noconfirm --needed" 
 alias sea="yay -Ss" 
 alias open="xdg-open"
 

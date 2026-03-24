@@ -1,20 +1,20 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 20,
+  "height": 25,
   "output": ["DP-1"],
-  "margin-top": 10,
- "margin-bottom": 5,
-  "margin-left": 10,
-  "margin-right": 10,
+  "margin-top": 0,
+ "margin-bottom": 0,
+  "margin-left": 0,
+  "margin-right": 0,
 
-  "modules-left": ["clock"],
-  "modules-center": ["custom/pacman","hyprland/workspaces", "power-profiles-daemon"],
+  "modules-left": ["hyprland/workspaces" ],
+  "modules-center": ["clock"],
   "modules-right": ["pulseaudio", "pulseaudio#microphone", "custom/screenshot", "custom/notify"],
 
   "hyprland/workspaces": {
     "format": "{name}",
-    "format-window-separator": " ",
+    "format-window-separator": "",
     "on-scroll-up": "hyprctl dispatch workspace e+1",
     "on-scroll-down": "hyprctl dispatch workspace e-1",
     "window-rewrite-default": "",
