@@ -199,3 +199,5 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
+
+export PATH=$PATH:/home/mohiitp/.spicetify

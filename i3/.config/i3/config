@@ -16,8 +16,7 @@ set $mod Mod4
 # Font used by i3 bar and titles
 font pango:Iosevka Nerd Font 12
 
-exec_always --no-startup-id wal -R
-exec_always --no-startup-id wal -i ~/pix/dragon.jpg
+exec_always --no-startup-id wal -i ~/pix/car.png
 exec_always --no-startup-id xrdb -merge ~/.cache/wal/colors.Xresources
 exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec_always --no-startup-id dunst
@@ -30,18 +29,14 @@ exec_always --no-startup-id dunst
 exec --no-startup-id dex --autostart --environment i3
 # Lock screen when system goes to sleep
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
-
-
-# Network manager tray applet
 exec --no-startup-id nm-applet
-
 
 #############################################
 # FLOATING WINDOW DEFAULT BEHAVIOR
 #############################################
 
 # Enable floating for floating windows and center them
-for_window [floating] floating enable, move position center, resize set 800 600
+for_window [floating] floating enable, move position center, resize set 1000 800
 
 
 #############################################
@@ -79,10 +74,10 @@ tiling_drag modifier titlebar
 #############################################
 
 # Send focused window to scratchpad
-bindsym $mod+Shift+minus move scratchpad
-
+# bindsym $mod+Shift+minus move scratchpad
+#
 # Show / hide scratchpad window
-bindsym $mod+minus scratchpad show
+# bindsym $mod+minus scratchpad show
 #############################################
 # APPLICATION SHORTCUTS
 #############################################
@@ -91,13 +86,13 @@ bindsym $mod+minus scratchpad show
 bindsym $mod+Return exec kitty
 
 # Open Discord
-bindsym $mod+Shift+Mod1+Ctrl+d exec discord
+bindsym $mod+Shift+Mod1+Ctrl+d exec ~/Downloads/Discord/Discord
 
 # Screenshot tool
 bindsym $mod+Shift+p exec --no-startup-id flameshot gui
 
 # Application launcher
-bindsym $mod+d exec --no-startup-id rofi -show drun
+bindsym $mod+space exec --no-startup-id rofi -show drun
 
 # Close focused window
 bindsym $mod+q kill
@@ -159,7 +154,7 @@ bindsym $mod+e layout toggle split
 bindsym $mod+Shift+Ctrl+Mod1+v floating toggle
 
 # Toggle focus between floating and tiling
-bindsym $mod+space focus mode_toggle
+# bindsym $mod+space focus mode_toggle
 
 # Focus parent container
 bindsym $mod+a focus parent
@@ -290,7 +285,8 @@ set $textlight #f5f5f5
 #############################################
 
 # Default gaps
-gaps inner 10
+gaps inner 5 
+gaps outer 10
 
 # Custom layout for workspace 5
 workspace 5 gaps horizontal 150
@@ -341,7 +337,7 @@ set_from_resource $color7 color7
 # }
 
 # Window borders
-client.focused $color1 $background $foreground $color2 $color3
+client.focused $color2 $background $foreground $color2 $color3
 client.focused_inactive $color8 $background $foreground $color8 $color8
 client.unfocused $color0 $background $foreground $color0 $color0
 client.urgent $color1 $color1 $background $color1 $color1

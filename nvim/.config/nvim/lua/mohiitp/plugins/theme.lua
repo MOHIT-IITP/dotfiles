@@ -5,9 +5,12 @@
 -- 		vim.cmd("colorscheme rose-pine")
 -- 	end
 -- }
+
 return {
-  "AlphaTechnolog/pywal.nvim",
+  'uZer/pywal16.nvim',
+  -- for local dev replace with:
+  -- dir = '~/your/path/pywal16.nvim',
   config = function()
-    require("pywal").setup()
-  end
+    vim.cmd.colorscheme("pywal16")
+  end,
 }

@@ -1,61 +1,41 @@
-@import "~/.cache/wal/colors-rofi-light.rasi"
+@import "~/.cache/wal/colors-rofi-dark.rasi"
 
 configuration {
-font: "DankMono Nerd Font 16";
-show-icons: true;
-drun-display-format: " {name} ";
+    font: "DankMono Nerd Font 14";
+    show-icons: false;
+    drun-display-format: "{name}";
 }
 
-* {
-  background: @normal-background;
-  foreground: @normal-foreground;
-  border-color: @border-color;
-  }
 
 window {
-width: 20%;
-border: 5px;
-border-color: @selected-urgent-background;
-padding: 15px;
-background-color: @normal-background;
+    width: 400px;
+    border: 0;
+    border-radius: 12px;
+    padding: 12px;
 }
 
 mainbox {
-children: [ inputbar, listview ];
+    children: [ inputbar, listview ];
 }
 
 inputbar {
-children: [ prompt, entry ];
-padding: 5px;
-}
-
-prompt {
-text-color: @active-background;
+    children: [ entry ];
+    padding: 6px;
+    margin-bottom: 10px;
+    border-radius: 8px;
 }
 
 entry {
-text-color: @normal-foreground;
+    placeholder: "Search...";
 }
 
 listview {
-lines: 5;
-spacing: 4px;
+    lines: 6;
+    spacing: 6px;
+    scrollbar: false;
 }
 
 element {
-padding: 6px;
+    padding: 8px;
+    border-radius: 8px;
 }
-
-element normal.normal {
-background-color: @normal-background;
-text-color: @normal-foreground;
-}
-
-element selected.normal {
-background-color: @normal-background;
-background-opacity: 0.1;
-text-color: @foreground;
-border: 3px;
-border-color: @selected-active-background;
-}
-

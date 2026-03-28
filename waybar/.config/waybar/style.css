@@ -3,59 +3,80 @@
 * {
   border: none;
   border-radius: 0;
-  font-family: "SF Pro Display", "JetBrainsMono Nerd Font Propo";
-  font-size: 18px;
   min-height: 0;
+  font-family: "SF Pro Display";
+  font-weight: 600;
+  font-size: 16px;
+  padding: 0;
 }
 
 window#waybar {
-  background: @background;
+  background: @surface;
   color: @on_surface;
 }
 
-/* Workspaces */
+tooltip {
+  background-color: @surface_container;
+  color: @on_surface;
+}
+
+#clock,
+#tray,
+#cpu,
+#memory,
+#battery,
+#network,
+#custom-screenshot,
+#pulseaudio {
+  margin: 1px 1px 0px 0px;
+  padding: 2px 4px;
+  margin-right: 3px;
+  color: @on_surface;
+}
+
+#custom-screenshot {
+  margin-right: 10px;
+}
+
+#workspaces {
+  margin: 5px 6px;
+}
+
 #workspaces button {
-  color: @on_surface_variant;
-  padding: 0 7px;
   background: transparent;
-}
-
-#workspaces button.active,
-#workspaces button.focused {
-  background: @primary;
-  padding: 0 1px;
-  border-radius: 4px;
-  color: @on_primary;
-  margin: 6px;
-}
-
-#workspaces button.urgent {
-  background: @error;
-  color: @on_error;
+  border: none;
+  padding: 2px 4px;
+  margin: 0 2px;
+  color: @on_surface_variant;
+  font-size: 12px;
+  transition: all 0.2s ease;
 }
 
 #workspaces button:hover {
-  background: @surface_variant;
+  color: @on_surface;
 }
 
-/* Modules */
+#workspaces button.active {
+  color: @on_primary;
+  background: @primary;
+  border-radius: 15px;
+  padding: 1px 15px;
+}
+
+#workspaces button.focused {
+  color: @primary;
+}
+
+#clock {
+  font-size: 1.1rem;
+}
+
+#battery,
+#screenshot,
+#tray,
 #clock,
+#cpu,
 #pulseaudio,
-#pulseaudio.microphone,
-#custom-screenshot,
-#custom-notify,
-#power-profiles-daemon,
-#custom-pacman {
-  padding: 0 10px;
-  margin: 0;
-}
-
-/* Audio */
-#pulseaudio.muted {
-  color: @outline;
-}
-
-/* Tray */
-#tray {
-  padding: 0 8px;
+#memory {
+  color: @on_surface;
 }

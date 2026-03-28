@@ -10,7 +10,7 @@
 
   "modules-left": ["hyprland/workspaces" ],
   "modules-center": ["clock"],
-  "modules-right": ["pulseaudio", "pulseaudio#microphone", "custom/screenshot", "custom/notify"],
+  "modules-right": ["pulseaudio#audio", "network" ,"pulseaudio#microphone", "custom/screenshot"],
 
   "hyprland/workspaces": {
     "format": "{name}",
@@ -72,7 +72,7 @@
     "exec": "checkupdates | wc -l",
     "on-click": "update-system",
     "signal": 8,
-    "tooltip-format": "{} update available",
+    "tooltip-format": "{} update available"
   },
 
   "custom/colorpicker": {
@@ -86,16 +86,16 @@
     "format": "󰹑",
     "tooltip": "Screenshot",
     "on-click-right": "grim ~/pix/ss/screenshot-$(date +%Y%m%d-%H%M%S).png && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga",
-    "on-click": "grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'",
+    "on-click": "grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'"
   },
 
   "custom/notify": {
     "format": "",
-    "on-click": "swaync-client -t",
+    "on-click": "swaync-client -t"
   },
 
   "clock": {
-    "format": "{:%A, %B %d, %Y  %I: %M: %p}",
+    "format": "{:%A, %B %d,   %I:%M %p}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "interval": 60
   },
@@ -113,7 +113,7 @@
 
   "network": {
     "format-wifi": "{essid} ({signalStrength}%) 󰖩",
-    "format-ethernet": "Net",
+    "format-ethernet": "ETH",
     "tooltip-format": "{ifname} via {gwaddr}",
     "format-linked": "{ifname} (No IP) 󰈀",
     "format-disconnected": "Disconnected ⚠",
@@ -145,7 +145,7 @@
     "tooltip": false
   },
 
-  "pulseaudio": {
+  "pulseaudio#audio": {
     "format": "{icon} {volume}% ",
     "format-bluetooth": "{volume}% {icon} 󰂯",
     "format-bluetooth-muted": "󰂲 󰖁 {icon}",
