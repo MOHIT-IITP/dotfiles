@@ -1,0 +1,37 @@
+@import "~/.cache/wal/colors-rofi-dark.rasi"
+
+configuration {
+    show-icons: true;
+    font: "DankMono Nerd Font 1";
+}
+
+window {
+    width: 900px;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+mainbox {
+    children: [ listview ];
+}
+
+listview {
+    columns: 4;
+    lines: 3;
+    spacing: 10px;
+    scrollbar: false;
+}
+
+element {
+    orientation: vertical;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+element-icon {
+    size: 180px;   /* 🔥 BIG images */
+}
+
+element-text {
+    enabled: false;
+}
