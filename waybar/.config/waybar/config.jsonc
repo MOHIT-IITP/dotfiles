@@ -1,7 +1,7 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 25,
+  "height": 34,
   "output": ["DP-1"],
   "margin-top": 0,
  "margin-bottom": 0,
@@ -22,29 +22,7 @@
       "1":[],
       "2":[],
       "3":[],
-      "4":[],
-      "5":[]
-    },
-    "window-rewrite": {
-      "firefox": "󰈹",
-      "foot": "󰽒",
-      "kitty": "",
-      "zen":"",
-      "alacritty": "",
-      "ghostty": "",
-      "code": "󰨞",
-      "cursor": "󰨞",
-      "discord": "",
-      "vesktop": "",
-      "github": "",
-      "postman": "",
-      "telegram": "",
-      "google-chrome": "",
-      "thunar": "",
-      "org.gnome.Nautilus": "",
-      "spotify": "󰓇",
-      "steam": "󰓓",
-      "org.pwmt.zathura": "󰈙"
+      "4":[]
     },
     "format-icons": {
       "1": "1",

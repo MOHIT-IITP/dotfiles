@@ -11,7 +11,7 @@
 }
 
 window#waybar {
-  background: @surface;
+  background: @inverse_on_surface;
   color: @on_surface;
 }
 
