@@ -3,24 +3,19 @@
 WALLDIR="$HOME/pix"
 
 if command -v rofi &> /dev/null; then
-    launcher="rofi -dmenu -i -p 'Select Wallpaper'"
+    launcher="rofi -dmenu -i -show-icons -theme ~/.config/rofi/wallpaper.rasi -p 'WALLPAPERS'"
 else
     launcher="wofi --dmenu --prompt 'Select Wallpaper'"
 fi
 
-choice=$(ls "$WALLDIR" | $launcher)
+choice=$(find "$WALLDIR" -type f | while read -r img; do
+    echo -en "$(basename "$img")\0icon\x1f$img\n"
+done | eval $launcher)
 
 [ -z "$choice" ] && exit
 
 WALL="$WALLDIR/$choice"
 
-awww img "$WALL" --transition-type center --transition-fps 120 --transition-duration 1
-
-matugen image "$WALL"  --source-color-index 0
 wal -i "$WALL"
-
-
-pkill waybar
-waybar &
 
 echo "$WALL" > ~/.cache/current_wallpaper

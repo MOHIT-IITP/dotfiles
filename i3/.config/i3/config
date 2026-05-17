@@ -86,7 +86,7 @@ tiling_drag modifier titlebar
 bindsym $mod+Return exec kitty
 
 # Open Discord
-bindsym $mod+Shift+Mod1+Ctrl+d exec ~/Downloads/Discord/Discord
+bindsym $mod+d exec ~/Downloads/Discord/Discord
 
 # Screenshot tool
 bindsym $mod+Shift+p exec --no-startup-id flameshot gui
