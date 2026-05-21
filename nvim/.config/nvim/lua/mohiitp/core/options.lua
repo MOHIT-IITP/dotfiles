@@ -120,3 +120,39 @@ vim.api.nvim_create_user_command("Cpp", function()
 
   vim.api.nvim_put(lines, "l", true, true)
 end, {})
+
+vim.api.nvim_create_user_command("React", function()
+  local lines = {
+    'import React from "react";',
+    "",
+    "function App() {",
+    "  return (",
+    "    <div>",
+    "      <h1>Hello React</h1>",
+    "    </div>",
+    "  );",
+    "}",
+    "",
+    "export default App;",
+  }
+
+  vim.api.nvim_put(lines, "l", true, true)
+end, {})
+
+vim.api.nvim_create_user_command("Html", function()
+  local lines = {
+    "<!DOCTYPE html>",
+    '<html lang="en">',
+    "<head>",
+    '    <meta charset="UTF-8">',
+    '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    "    <title>Document</title>",
+    "</head>",
+    "<body>",
+    "    ",
+    "</body>",
+    "</html>",
+  }
+
+  vim.api.nvim_put(lines, "l", true, true)
+end, {})
