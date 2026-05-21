@@ -105,3 +105,18 @@ end
 
 -- Keybind
 vim.keymap.set("n", "<C-b>", Compile_and_run_cpp, { noremap = true, silent = true })
+
+vim.api.nvim_create_user_command("Cpp", function()
+  local lines = {
+    "#include <bits/stdc++.h>",
+    "#include <iostream>",
+    "using namespace std;",
+    "",
+    "int main() {",
+    "    ",
+    "    return 0;",
+    "}",
+  }
+
+  vim.api.nvim_put(lines, "l", true, true)
+end, {})

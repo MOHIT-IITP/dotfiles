@@ -146,9 +146,13 @@ alias mc="cd ~/moLib/moCode"
 alias mn="cd ~/moLib/moNote"
 alias todo="vi  ~/moLib/todo.md"
 alias ml="vi  ~/moLib/moNote/100x_ai/ml_notes1.md"
+
+#npm thingi
 alias nrd="npm run dev"
 alias nrb="npm run build"
 alias bro="bun run dev"
+
+# java thingi
 alias jc="javac"
 alias j="java"
 
@@ -188,9 +192,9 @@ esac
 # pnpm end
 
 echo "Kaise ho Mohiitp bhai"
-uwufetch
-
+#
 # bun completions
+
 [ -s "/Users/mohit_iitp/.bun/_bun" ] && source "/Users/mohit_iitp/.bun/_bun"
 
 # bun
