@@ -8,27 +8,28 @@ format = '$username$directory$character'
 
 [username]
 show_always = true
-style_user = 'bold cyan'
+style_user = 'bold fg:color6'
 format = '$user '
 
 [character]
-success_symbol = '[ λ](bold green)'
-error_symbol = '[ λ](bold red)'
+success_symbol = '[ λ](bold fg:color2)'
+error_symbol = '[ λ](bold fg:color1)'
 
 [hostname]
 ssh_only = false
-format = "$hostname"
+format = "[$hostname](fg:color5)"
 
 [directory]
-format = "$path"
+format = '[$path](fg:color4)'
 truncation_length = 1
 truncate_to_repo = false
 home_symbol = "~"
 
+# Optional alternate prompt style
 # [character]
-# success_symbol = "[\\$](bold white)"
-# error_symbol =  "[\\$](bold red)"
-# vicmd_symbol =  "[\\$](bold green)"
+# success_symbol = "[\\$](bold fg:color7)"
+# error_symbol  = "[\\$](bold fg:color1)"
+# vicmd_symbol  = "[\\$](bold fg:color2)"
 
 [git_branch]
 disabled = true
