@@ -1,14 +1,25 @@
-font_size 16.0
+font_size 18.0
 
 
 ##### WINDOW #####
 background_opacity 1 
-window_padding_width 10
+window_padding_width 5  
 
 ##### CURSOR #####
 cursor_shape block
 cursor_blink_interval 0.6
 cursor_stop_blinking_after 15.0
+
+##### tab mapping #####
+map cmd+1 goto_tab 1
+map cmd+2 goto_tab 2
+map cmd+3 goto_tab 3
+map cmd+4 goto_tab 4
+map cmd+5 goto_tab 5
+map cmd+6 goto_tab 6
+map cmd+7 goto_tab 7
+map cmd+8 goto_tab 8
+map cmd+9 goto_tab 9
 
 ##### SCROLLBACK #####
 scrollback_lines 10000
@@ -42,7 +53,7 @@ cursor_trail_decay 0.05 0.10
 
 
 # BEGIN_KITTY_FONTS
-font_family      family="DankMono Nerd Font Mono"
+font_family      family="Iosevka Nerd Font Mono"
 bold_font        auto
 italic_font      auto
 bold_italic_font auto
@@ -50,6 +61,6 @@ bold_italic_font auto
 
 
 # BEGIN_KITTY_THEME
-# Ayu
-include ~/.cache/wal/colors-kitty.conf 
+# Argonaut
+include current-theme.conf
 # END_KITTY_THEME
