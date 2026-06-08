@@ -6,7 +6,7 @@ export PATH="/home/mohiitp/.local/share/solana/install/active_release/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
 ZSH_THEME="robbyrussell"
-plugins=(git zsh-autosuggestions web-search)
+plugins=(git vi-mode zsh-autosuggestions web-search)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -108,6 +108,7 @@ tmux-fzf() {
 
 zle -N tmux-fzf
 bindkey '^F' tmux-fzf
+bindkey -v
 
 ### ─────────────────────────────────────────────
 ### Aliases

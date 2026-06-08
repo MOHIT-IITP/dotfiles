@@ -4,6 +4,10 @@ alt - k : yabai -m window --focus north
 alt - h : yabai -m window --focus west
 alt - l : yabai -m window --focus east
 
+alt - down : yabai -m window --focus south
+alt - up : yabai -m window --focus north
+alt - left : yabai -m window --focus west
+alt - right : yabai -m window --focus east
 
 #change focus between external displays (left and right)
 alt - s: yabai -m display --focus west
@@ -32,10 +36,10 @@ shift + alt - e : yabai -m space --balance
 
 
 # swap windows
-ctrl + alt - j : yabai -m window --resize right:40:0 
-ctrl + alt - k : yabai -m window --resize right:-40:0
-ctrl + alt - h : yabai -m window --resize bottom:0:40
-ctrl + alt - l : yabai -m window --resize bottom:0:-40
+ctrl + alt - l : yabai -m window --resize right:40:0 
+ctrl + alt - h : yabai -m window --resize right:-40:0
+ctrl + alt - j : yabai -m window --resize bottom:0:40
+ctrl + alt - k : yabai -m window --resize bottom:0:-40
 
 # move window and split
 shift + alt - j : yabai -m window --warp south
