@@ -138,6 +138,7 @@ alias open="xdg-open"
 alias ga="git pull origin main && git add ."
 alias gc="git commit -m"
 alias gp="git push origin main"
+alias lg="lazygit"
 alias gpl="git pull origin main"
 alias gs="git status"
 
