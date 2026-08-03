@@ -4,34 +4,39 @@ return {
   event = "VeryLazy",
 
   dependencies = {
-    { "nvim-lua/plenary.nvim", lazy = true },
+    "nvim-lua/plenary.nvim",
   },
 
   keys = {
-    { ";e", "<cmd>Yazi<cr>", desc = "Open Yazi here" },
-    { "<leader>cw", "<cmd>Yazi cwd<cr>", desc = "Open Yazi (cwd)" },
-    { "<C-Up>", "<cmd>Yazi toggle<cr>", desc = "Resume Yazi" },
+    {
+      ";e",
+      "<cmd>Yazi<CR>",
+      desc = "Open Yazi in current directory",
+    },
+    {
+      "<leader>cw",
+      "<cmd>Yazi cwd<CR>",
+      desc = "Open Yazi in working directory",
+    },
+    {
+      "<C-Up>",
+      "<cmd>Yazi toggle<CR>",
+      desc = "Resume Yazi session",
+    },
   },
 
   opts = {
+    -- Prevent opening Yazi automatically when entering directories.
     open_for_directories = false,
+
     keymaps = {
       show_help = "?",
-    },
-    -- Ensure Yazi uses its own keybindings by disabling conflicting ones
-    hooks = {
-      yazi_opened = function()
-        -- Disable tmux navigation when yazi is open
-        vim.g.tmux_navigator_no_mappings = 1
-      end,
-      yazi_closed_successfully = function()
-        -- Re-enable tmux navigation when yazi is closed
-        vim.g.tmux_navigator_no_mappings = 0
-      end,
     },
   },
 
   init = function()
+    -- Disable netrw since Yazi replaces it.
+    vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
   end,
 }
