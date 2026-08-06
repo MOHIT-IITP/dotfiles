@@ -9,7 +9,7 @@ return {
 
   keys = {
     {
-      ";e",
+      "<leader>yy",
       "<cmd>Yazi<CR>",
       desc = "Open Yazi in current directory",
     },

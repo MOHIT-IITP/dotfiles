@@ -11,12 +11,12 @@ return {
     local map = vim.keymap.set
 
     -- Add file to harpoon
-    map("n", "<leader>a", function()
+    map("n", "<leader>aa", function()
       harpoon:list():add()
     end, { desc = "Harpoon Add File" })
 
     -- Toggle quick menu
-    map("n", "<leader>e", function()
+    map("n", "<leader>hh", function()
       harpoon.ui:toggle_quick_menu(harpoon:list())
     end, { desc = "Harpoon Menu" })
 
