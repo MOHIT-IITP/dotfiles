@@ -8,16 +8,11 @@ local km = vim.keymap.set -- for conciseness
 
 -- use jk to exit insert mode
 km("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
-
 -- clear search highlights
 km("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
 -- delete single character without copying into register
 km("n", "x", '"_x')
-
--- increment/decrement numbers
-km("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
-km("n", "<leader>-", "<C-x>", { desc = "Decrement number" }) -- decrement
 
 -- window management
 km("n", "=", [[<cmd>vertical resize +5<cr>]])
