@@ -10,7 +10,7 @@ IMAGE="$1"
 
 notify-send "theme changing"
 
-swww img "$IMAGE" --transition-type center --transition-duration 3 --transition-fps 120 
+awww img "$IMAGE" --transition-type center --transition-duration 3 --transition-fps 120 
 
 matugen image "$IMAGE"
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WALL_DIR="$HOME/pix/wall"
+WALL_DIR="$HOME/pix"
 
 
 CWD="$(pwd)"

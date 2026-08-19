@@ -9,7 +9,6 @@ command_timeout = 3600
 add_newline = false 
 
 format = """
- 󰳟\
 $directory\
 ${custom.giturl}\
 $git_branch\
@@ -66,13 +65,6 @@ style = "sapphire"
 format = "[ $path ]($style)"
 #truncation_length = 4
 #truncation_symbol = "…/"
-
-[directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
-"Developer" = "󰲋 "
 
 [os]
 disabled = true
@@ -158,9 +150,9 @@ disabled = true
 
 [character]
 disabled = false
-success_symbol = "[❯](color8 bold)"
-error_symbol = "[❯](@{error})"
-vicmd_symbol = "[❮](#f9e2af)"
+success_symbol = "[λ](color8 bold)"
+error_symbol = "[Λ](@{error})"
+vicmd_symbol = "[Λ](#f9e2af)"
 vimcmd_replace_one_symbol = '[](bold fg:purple)'
 vimcmd_replace_symbol = '[](bold fg:purple)'
 vimcmd_visual_symbol = '[](bold fg:lavender)'

@@ -1,157 +1,160 @@
 # ~/.config/starship.toml
 
-# Inserts a blank line between shell prompts
-add_newline = true
+palette = 'colors'
 
-# Overall prompt format
+command_timeout = 3600
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false 
+
 format = """
-$username\
-$hostname\
 $directory\
+${custom.giturl}\
 $git_branch\
+$git_state\
 $git_status\
-$fill\
-$cmd_duration\
 $line_break\
 $character
 """
 
-palette = "catppuccin"
+right_format = """$all"""
 
-[palettes.catppuccin]
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
+[palettes.colors]
+mustard = '#af8700'
+color1 = '#edc06c'
+color2 = '#422d00'
+color3 = '#d1c5b4'
+color4 = '#241f17'
+color5 = '#422d00'
+color6 = '#17130b'
+color7 = '#17130b'
+color8 = '#edc06c'
+color9 = '#b3cea6'
 
-[character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
-vimcmd_symbol = "[❮](bold blue)"
-
-[directory]
-style = "bold blue"
-truncate_to_repo = true
-truncation_length = 3
-read_only = " "
-
-[git_branch]
-symbol = " "
-style = "bold mauve"
-
-[git_status]
-style = "bold red"
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕"
-conflicted = "="
-deleted = "✘"
-renamed = "»"
-modified = "!"
-staged = "+"
-untracked = "?"
-stashed = "$"
-
-[cmd_duration]
-min_time = 500
-format = "[󰔛 $duration](yellow)"
-
-[fill]
-symbol = " "
-
-[nodejs]
-symbol = " "
-style = "green"
-
-[python]
-symbol = " "
-style = "yellow"
-pyenv_version_name = true
-
-[rust]
-symbol = " "
-style = "red"
-
-[golang]
-symbol = " "
-style = "cyan"
-
-[java]
-symbol = " "
-style = "red"
-
-[c]
-symbol = " "
-style = "blue"
-
-[cpp]
-symbol = " "
-style = "blue"
-
-[package]
-symbol = " "
-
-[docker_context]
-symbol = " "
-style = "blue"
-
-[kubernetes]
-disabled = false
-symbol = "☸ "
-style = "cyan"
-
-[aws]
-symbol = " "
-style = "yellow"
-
-[gcloud]
-symbol = " "
-style = "blue"
-
-[time]
-disabled = false
-time_format = "%H:%M"
-format = "[󰥔 $time](bold cyan)"
-
-[hostname]
-ssh_only = true
-style = "green"
+[os.symbols]
+Windows = "󰍲"
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = " "
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+Arch = "󰣇"
+Artix = "󰣇"
+CentOS = ""
+Debian = "󰣚"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
 
 [username]
-show_always = false
-style_user = "green"
-style_root = "red"
+# show_always = true
+# style_user = "bg:transparent fg:color1"
+# style_root = "bg:transparent fg:color1"
+# format = '[ $user ]($style)'
 
-[memory_usage]
-disabled = true
-
-[battery]
-disabled = false
-
-[status]
-disabled = false
-symbol = "✖"
-
-[jobs]
-symbol = "✦"
-
-[shell]
-disabled = false
+[directory]
+style = "sapphire"
+# style = "fg:color8"
+format = "[ $path ]($style)"
+#truncation_length = 4
+#truncation_symbol = "…/"
 
 [os]
 disabled = true
+#style = "bg:surface0 fg:text"
+
+[custom.giturl]
+description = "Display symbol for remote Git server"
+command = """
+GIT_REMOTE=$(command git ls-remote --get-url 2> /dev/null)
+if [[ "$GIT_REMOTE" =~ "github" ]]; then
+    GIT_REMOTE_SYMBOL=" "
+elif [[ "$GIT_REMOTE" =~ "gitlab" ]]; then
+    GIT_REMOTE_SYMBOL=" "
+elif [[ "$GIT_REMOTE" =~ "bitbucket" ]]; then
+    GIT_REMOTE_SYMBOL=" "
+elif [[ "$GIT_REMOTE" =~ "git" ]]; then
+    GIT_REMOTE_SYMBOL=" "
+else
+    GIT_REMOTE_SYMBOL=" "
+fi
+echo "$GIT_REMOTE_SYMBOL "
+"""
+when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
+format = "at $output"
+
+[git_branch]
+symbol = "[](color2) "
+style = "fg:color1 bg:color2"
+format =  '  on [$symbol$branch]($style)[](color2)'
+
+[git_status]
+format = ' [($all_status$ahead_behind )]($style)'
+
+[nodejs]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+
+[c]
+symbol = " "
+format = '[ $symbol( $version) ]($style)'
+
+[rust]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+
+[golang]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+detect_files = ["go.mod"]
+
+[php]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+
+[java]
+symbol = " "
+format = '[ $symbol( $version) ]($style)'
+
+[kotlin]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+
+[haskell]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+
+[python]
+symbol = ""
+format = '[ $symbol( $version) ]($style)'
+
+[docker_context]
+symbol = ""
+format = '[ $symbol( $context) ]($style)'
+
+[time]
+disabled = true
+time_format = "%R"
+style = "bg:peach"
+format = '[[  $time ](fg:mantle bg:foam)]($style)'
+
+[line_break]
+disabled = true 
+
+[character]
+disabled = false
+success_symbol = "[λ](color8 bold)"
+error_symbol = "[Λ](@{error})"
+vicmd_symbol = "[Λ](#f9e2af)"
+vimcmd_replace_one_symbol = '[](bold fg:purple)'
+vimcmd_replace_symbol = '[](bold fg:purple)'
+vimcmd_visual_symbol = '[](bold fg:lavender)'
+
+
