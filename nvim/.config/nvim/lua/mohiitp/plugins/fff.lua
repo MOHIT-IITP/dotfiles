@@ -20,7 +20,7 @@ return {
       function() require('fff').live_grep({ grep = { modes = { 'fuzzy', 'plain' } } }) end,
       desc = 'Live fffuzy grep',
     },
-    { "fc",
+    { "<leader>cc",
       function() require('fff').live_grep({ query = vim.fn.expand("<cword>") }) end,
       desc = 'Search current word',
     },
