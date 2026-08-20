@@ -22,6 +22,8 @@ sudo pacman -S --noconfirm --needed \
   bat \
   zsh \
   kitty \
+  fzf\
+  emacs\
   udiskie \
   curl \
   unzip \
