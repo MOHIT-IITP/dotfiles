@@ -133,6 +133,7 @@ alias editzsh="nvim ~/.zshrc"
 alias sourcezsh="source ~/.zshrc"
 alias ins="yay -S --noconfirm --needed" 
 alias sea="yay -Ss" 
+alias uns="yay -Rns"
 alias open="xdg-open"
 
 # Git shortcuts
