@@ -1,51 +1,104 @@
+-- telescope.nvim
 return {
-  "nvim-telescope/telescope.nvim",
-  dependencies = { "nvim-lua/plenary.nvim",{ 'nvim-telescope/telescope-fzf-native.nvim', build = 'make'} },
-
-  config = function()
-    local telescope = require("telescope")
-    local builtin = require("telescope.builtin")
-
-    telescope.setup({
-      defaults = {
-        prompt_prefix = "   ",
-        selection_caret = "❯ ",
-        path_display = { "smart" },
-        layout_config = { prompt_position = "bottom" },
-        sorting_strategy = "descending",
-
-        file_ignore_patterns = {
-          "node_modules",
-        },
-
-        vimgrep_arguments = {
-          "rg",
-          "--color=never",
-          "--no-heading",
-          "--with-filename",
-          "--line-number",
-          "--column",
-          "--smart-case",
-          "--glob=!node_modules/*",
-        },
+  {
+    "nvim-telescope/telescope.nvim",
+    tag = "0.1.8",
+    -- branch = "0.1.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      {
+        "nvim-telescope/telescope-fzf-native.nvim",
+        build = "make",
+        config = function()
+          -- require("telescope").load_extension("fzf_native")
+        end,
+        -- build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release",
       },
-    })
-
-    local keymap = vim.keymap.set
-
-    -- 🔍 Basic
-    keymap("n", "<leader>ft", "<cmd>Telescope builtin<CR>", { desc = "Telescope Builtins" })
-    -- keymap("n", ";f", "<cmd>Telescope find_files<CR>", {})
-    keymap("n", ";s", "<cmd>Telescope file_browser<CR>", {})
-    -- keymap("n", ";r", builtin.live_grep, {})
-
-    -- 🎨 Colorscheme picker with preview
-    keymap("n", "<leader>fc", function()
-      builtin.colorscheme({
-        enable_preview = true, -- 🔥 live preview
+    },
+    config = function()
+      require("telescope").setup({
+        defaults = {
+          preview = {
+            treesitter = false,
+          },
+          border = {
+            prompt = { 1, 1, 1, 1 },
+            results = { 1, 1, 1, 1 },
+            preview = { 1, 1, 1, 1 },
+          },
+          borderchars = {
+            prompt = { " ", " ", "─", "│", "│", " ", "─", "└" },
+            results = { "─", " ", " ", "│", "┌", "─", " ", "│" },
+            preview = { "─", "│", "─", "│", "┬", "┐", "┘", "┴" },
+          },
+        },
+        extensions = {
+          fzf = {
+            fuzzy = true,                   -- false will only do exact matching
+            override_generic_sorter = true, -- override the generic sorter
+            override_file_sorter = true,    -- override the file sorter
+            case_mode = "smart_case",
+          },
+        },
+        pickers = {
+          colorscheme = {
+            enable_preview = true,
+          },
+          find_files = {
+            hidden = true,
+            find_command = {
+              "rg",
+              "--files",
+              "--glob",
+              "!{.git/*,.next/*,.svelte-kit/*,target/*,node_modules/*}",
+              "--path-separator",
+              "/",
+            },
+          },
+        },
       })
-    end, { desc = "Colorscheme Picker" })
-  end,
+
+      -- require("telescope").load_extension("fzf")
+      require("telescope").load_extension("zoxide")
+      -- telescope setup
+      local builtin = require("telescope.builtin")
+      vim.keymap.set("n", "<leader>ff", ":Telescope find_files<CR>", {})
+      vim.keymap.set("n", "<leader>fb", ":Telescope file_browser<cr>", {})
+      vim.keymap.set("n", "<leader>gg", builtin.live_grep, {})
+      vim.keymap.set("n", "<leader>fd", builtin.diagnostics, {})
+      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols, {})
+      vim.keymap.set("n", "<leader>ws", builtin.lsp_workspace_symbols, {})
+      vim.keymap.set("n", "<leader>fz", ":Telescope zoxide list<CR>", {})
+      vim.keymap.set("n", "<leader>fv", builtin.help_tags, {})
+      vim.keymap.set("n", "<leader>fp", builtin.builtin, {})
+
+      vim.keymap.set(
+        "n",
+        "<leader>jk",
+        "<cmd>lua require'telescope.builtin'.find_files({ find_command = {'rg', '--files', '--hidden', '-g', '!.git' }})<cr>",
+        {}
+      )
+    end,
+  },
+  {
+    "jvgrootveld/telescope-zoxide",
+    config = function() end,
+  },
+  {
+    "nvim-telescope/telescope-ui-select.nvim",
+    config = function()
+      require("telescope").setup({
+        extensions = {
+          ["ui-select"] = {
+            require("telescope.themes").get_dropdown({
+              -- even more opts
+            }),
+          },
+        },
+      })
+      -- To get ui-select loaded and working with telescope, you need to call
+      -- load_extension, somewhere after setup function:
+      require("telescope").load_extension("ui-select")
+    end,
+  },
 }
-
-
