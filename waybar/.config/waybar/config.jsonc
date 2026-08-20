@@ -9,10 +9,17 @@
   "margin-right": 0,
 
   "modules-left": ["hyprland/workspaces" ],
-  "modules-center": ["clock"],
-  "modules-right": ["pulseaudio#audio", "network" ,"pulseaudio#microphone", "custom/screenshot"],
+  "modules-center": ["hyprland/window"],
+  "modules-right": ["pulseaudio#audio", "network","bluetooth" ,"pulseaudio#microphone", "custom/screenshot", "clock"],
 
-  "hyprland/workspaces": {
+  "hyprland/window": {
+	"format": "{}",
+	"rewrite": {
+		"(.*) - Mozilla Firefox": "🌎 $1",
+		"(.*) - zsh": "> [$1]"
+	}
+} , 
+"hyprland/workspaces": {
     "format": "{name}",
     "format-window-separator": "",
     "on-scroll-up": "hyprctl dispatch workspace e+1",
@@ -197,7 +204,7 @@
   },
 
   "tray": {
-    "icon-size": 18,
+    "icon-size": 23,
     "spacing": 8
   }
 }
