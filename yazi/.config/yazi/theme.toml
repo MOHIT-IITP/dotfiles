@@ -1,0 +1,118 @@
+# ~/.config/yazi/theme.toml
+
+[manager]
+cwd = { fg = "cyan" }
+
+hovered = { fg = "black", bg = "cyan" }
+preview_hovered = { fg = "black", bg = "cyan" }
+
+find_keyword = { fg = "yellow", bold = true }
+find_position = { fg = "magenta", bold = true }
+
+marker_selected = { fg = "green", bg = "green" }
+marker_copied = { fg = "yellow", bg = "yellow" }
+marker_cut = { fg = "red", bg = "red" }
+
+tab_active = { fg = "black", bg = "cyan" }
+tab_inactive = { fg = "gray", bg = "dark_gray" }
+
+border_symbol = "│"
+border_style = { fg = "dark_gray" }
+
+
+[status]
+separator_open = ""
+separator_close = ""
+
+progress_label = { fg = "cyan", bold = true }
+progress_normal = { fg = "cyan", bg = "dark_gray" }
+progress_error = { fg = "red", bg = "dark_gray" }
+
+permissions_t = { fg = "green" }
+permissions_r = { fg = "yellow" }
+permissions_w = { fg = "red" }
+permissions_x = { fg = "cyan" }
+permissions_s = { fg = "magenta" }
+
+
+[select]
+border = { fg = "cyan" }
+active = { fg = "black", bg = "cyan" }
+inactive = { fg = "gray" }
+
+
+[input]
+border = { fg = "cyan" }
+title = { fg = "cyan" }
+value = { fg = "white" }
+
+
+[cmp]
+border = { fg = "cyan" }
+active = { fg = "black", bg = "cyan" }
+inactive = { fg = "gray" }
+
+
+[help]
+on = { fg = "cyan" }
+run = { fg = "green" }
+desc = { fg = "gray" }
+hovered = { fg = "black", bg = "cyan" }
+footer = { fg = "gray", bg = "black" }
+
+
+[filetype]
+
+rules = [
+    # Directories
+    { url = "*/", fg = "blue" },
+
+    # Images
+    { mime = "image/*", fg = "yellow" },
+
+    # Video
+    { mime = "video/*", fg = "magenta" },
+
+    # Audio
+    { mime = "audio/*", fg = "magenta" },
+
+    # Archives
+    { mime = "application/zip", fg = "red" },
+    { mime = "application/x-tar", fg = "red" },
+    { mime = "application/x-7z-compressed", fg = "red" },
+    { mime = "application/x-rar", fg = "red" },
+
+    # PDFs
+    { mime = "application/pdf", fg = "red" },
+
+    # Empty files
+    { mime = "inode/empty", fg = "cyan" },
+
+    # Text
+    { mime = "text/*", fg = "white" },
+
+    # Common programming languages
+    { url = "*.lua", fg = "cyan" },
+    { url = "*.py", fg = "cyan" },
+    { url = "*.js", fg = "yellow" },
+    { url = "*.ts", fg = "yellow" },
+    { url = "*.jsx", fg = "yellow" },
+    { url = "*.tsx", fg = "yellow" },
+    { url = "*.rs", fg = "red" },
+    { url = "*.go", fg = "cyan" },
+    { url = "*.c", fg = "blue" },
+    { url = "*.cpp", fg = "blue" },
+    { url = "*.h", fg = "blue" },
+    { url = "*.hpp", fg = "blue" },
+    { url = "*.java", fg = "red" },
+    { url = "*.sh", fg = "green" },
+    { url = "*.fish", fg = "green" },
+
+    # Configuration
+    { url = "*.toml", fg = "yellow" },
+    { url = "*.yaml", fg = "yellow" },
+    { url = "*.yml", fg = "yellow" },
+    { url = "*.json", fg = "yellow" },
+    { url = "*.xml", fg = "yellow" },
+    { url = "*.conf", fg = "yellow" },
+]

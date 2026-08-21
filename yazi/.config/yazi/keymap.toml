@@ -1,4 +1,88 @@
-[[manager.prepend_keymap]]
-on = "."
-run = "toggle_hidden"
-desc = "Toggle hidden files"
+# ~/.config/yazi/keymap.toml
+
+[mgr]
+
+prepend_keymap = [
+
+    # Open terminal here
+    { on = [ "T" ], run = 'shell --block "$TERMINAL" "$@"', desc = "Open terminal here" },
+
+    # Open shell
+    { on = [ "!" ], run = 'shell --block "$SHELL" --confirm', desc = "Open shell" },
+
+    # Show hidden files
+    { on = [ "." ], run = "hidden", desc = "Toggle hidden files" },
+
+    # Create file
+    { on = [ "n" ], run = "create", desc = "Create file" },
+
+    # Rename
+    { on = [ "r" ], run = "rename --cursor=before_ext", desc = "Rename" },
+
+    # Copy
+    { on = [ "y" ], run = "yank", desc = "Copy" },
+
+    # Paste
+    { on = [ "p" ], run = "paste", desc = "Paste" },
+
+    # Cut
+    { on = [ "x" ], run = "yank --cut", desc = "Cut" },
+
+    # Delete
+    { on = [ "d", "d" ], run = "remove", desc = "Delete" },
+
+    # Trash
+    { on = [ "D" ], run = "remove --permanently", desc = "Delete permanently" },
+
+    # Find
+    { on = [ "/" ], run = "find --smart", desc = "Find" },
+
+    # Search
+    { on = [ "f" ], run = "search --via=fd --args='--color=never --hidden --follow'", desc = "Search files" },
+
+    # Jump
+    { on = [ "z" ], run = "jump", desc = "Jump" },
+
+    # Sort menu
+    { on = [ "s" ], run = "sort --reverse", desc = "Reverse sort" },
+
+    # Shell command
+    { on = [ "c" ], run = "shell --interactive", desc = "Run shell command" },
+
+    # Open with
+    { on = [ "o" ], run = "open --interactive", desc = "Open with..." },
+
+    # Quit
+    { on = [ "q" ], run = "quit", desc = "Quit" },
+
+    # Quit without changing directory
+    { on = [ "Q" ], run = "quit --no-cwd-file", desc = "Quit" },
+]
+
+
+[tasks]
+
+prepend_keymap = [
+    { on = [ "q" ], run = "close", desc = "Close task manager" },
+]
+
+
+[spot]
+
+prepend_keymap = [
+    { on = [ "q" ], run = "close", desc = "Close spot" },
+]
+
+
+[input]
+
+prepend_keymap = [
+    { on = [ "<Esc>" ], run = "close", desc = "Cancel" },
+]
+
+
+[confirm]
+
+prepend_keymap = [
+    { on = [ "n" ], run = "close", desc = "Cancel" },
+]
