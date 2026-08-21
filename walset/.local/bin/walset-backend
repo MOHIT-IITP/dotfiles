@@ -11,6 +11,7 @@ IMAGE="$1"
 notify-send "theme changing"
 
 awww img "$IMAGE" --transition-type center --transition-duration 3 --transition-fps 120 
+wal -i "$IMAGE"
 
 matugen image "$IMAGE"
 
