@@ -6,7 +6,7 @@ export PATH="/home/mohiitp/.local/share/solana/install/active_release/bin:$PATH"
 export PATH="$HOME/.emacs.d/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
-ZSH_THEME="robbyrussell"
+ZSH_THEME="alanpeabody"
 plugins=(git vi-mode zsh-autosuggestions web-search)
 
 source $ZSH/oh-my-zsh.sh
@@ -160,10 +160,6 @@ alias bro="bun run dev"
 alias jc="javac"
 alias j="java"
 
-### ─────────────────────────────────────────────
-### Tmux auto-attach
-### ─────────────────────────────────────────────
-[ -z "$TMUX" ] && (tmux attach-session -t todo || tmux new-session -s default)
 
 ### ─────────────────────────────────────────────
 ### NVM
@@ -197,10 +193,7 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-echo "Kaise ho Mohiitp bhai"
-#
 # bun completions
-
 [ -s "/Users/mohit_iitp/.bun/_bun" ] && source "/Users/mohit_iitp/.bun/_bun"
 
 # bun
