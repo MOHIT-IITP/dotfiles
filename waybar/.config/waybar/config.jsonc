@@ -95,7 +95,7 @@
 
   "network": {
     "format-wifi": "{essid} ({signalStrength}%) 󰖩",
-    "format-ethernet": "ETH",
+    "format-ethernet": "ETH 󰈀 ",
     "tooltip-format": "{ifname} via {gwaddr}",
     "format-linked": "{ifname} (No IP) 󰈀",
     "format-disconnected": "Disconnected ⚠",
