@@ -2,7 +2,7 @@
 
 configuration {
     show-icons: false;
-    font: "DankMono Nerd Font 15";
+    font: "IosevkaNerd Font 15";
     drun-display-format: "{name}";
 }
 

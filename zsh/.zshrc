@@ -17,7 +17,7 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#525252'
 ### ─────────────────────────────────────────────
 ###  Shell Enhancements
 ### ─────────────────────────────────────────────
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"  # replaces cd
 
 # Open buffer line in EDITOR
