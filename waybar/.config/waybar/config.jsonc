@@ -6,11 +6,11 @@
   "margin-top": 0,
  "margin-bottom": 0,
   "margin-left": 1,
-  "margin-right": 10,
+  "margin-right": 2,
 
   "modules-left": ["hyprland/workspaces" ],
   "modules-center": ["hyprland/window"],
-  "modules-right": ["cpu","memory" ,"pulseaudio#audio", "pulseaudio#microphone","network","bluetooth" , "custom/screenshot", "clock"],
+  "modules-right": ["pulseaudio#audio", "pulseaudio#microphone","network","bluetooth" , "custom/screenshot", "clock","custom/notify",],
 
   "hyprland/window": {
 	"format": "{}",

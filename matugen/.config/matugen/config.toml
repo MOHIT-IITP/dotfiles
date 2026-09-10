@@ -12,8 +12,8 @@ output_path = "~/.config/waybar/colors.css"  # Output file
 post_hook = 'pkill waybar; waybar &'
 
 [templates.hyprland]
-input_path = "~/.config/matugen/templates/hypr.conf"  # Template file
-output_path = '~/.config/hypr/colors.conf'
+input_path = "~/.config/matugen/templates/hyprland-colors.lua"  # Template file
+output_path = '~/.config/hypr/colors.lua'
 post_hook = 'hyprctl reload'
 
 

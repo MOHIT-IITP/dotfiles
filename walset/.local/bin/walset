@@ -9,7 +9,7 @@ cd "$WALL_DIR" || exit
 
 IFS=$'\n'
 
-SELECTED_WALL=$(for a in *.jpg *.png; do echo -en "$a\0icon\x1f$a\n" ; done | rofi -dmenu -p "  Select Wallpaper" -theme ~/.config/rofi/config.rasi)
+SELECTED_WALL=$(for a in *.jpg *.png; do echo -en "$a\0icon\x1f$a\n" ; done | rofi -dmenu -p "  Select Wallpaper" -theme ~/.config/rofi/type-2/launcher.sh)
 
 
 if [ -n "$SELECTED_WALL" ]; then
