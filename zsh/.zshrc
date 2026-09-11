@@ -120,6 +120,7 @@ alias python="/usr/bin/python3"
 # navigation + tools
 alias vi="nvim"
 alias v="vim"
+alias wl="walset"
 # alias ls="eza --icons"
 # alias ll="eza --long"
 # alias la="eza --long --all"
@@ -148,8 +149,6 @@ alias gs="git status"
 alias mg="cd ~/moLib/moGit"
 alias mc="cd ~/moLib/moCode"
 alias mn="cd ~/moLib/moNote"
-alias todo="vi  ~/moLib/todo.md"
-alias ml="vi  ~/moLib/moNote/100x_ai/ml_notes1.md"
 
 #npm thingi
 alias nrd="npm run dev"
@@ -195,7 +194,7 @@ esac
 
 # bun completions
 [ -s "/Users/mohit_iitp/.bun/_bun" ] && source "/Users/mohit_iitp/.bun/_bun"
-
+uwufetch
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"

@@ -14,6 +14,7 @@ hl.bind(mainMod .. " + SHIFT + ALT + CTRL + F", hl.dsp.window.fullscreen({ mode 
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + R ", hl.dsp.exec_cmd("/home/mohiitp/.config/waybar/launch.sh"))
+hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("/home/mohiitp/.local/bin/walset"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys

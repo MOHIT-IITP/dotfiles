@@ -1,3 +1,504 @@
-@import 'matugen/colors.css';
-@import 'themes/nova-dark/notifications.css';
-@import 'themes/nova-dark/central_control.css';
+@import "matugen/colors.css";
+
+* {
+	font-family: "Geist", "JetBrainsMono Nerd Font Propo";
+	font-weight: 700;
+	all: unset;
+
+	/* Global style variables */
+	--border-radius: 16px;
+	--border-radius-s: 8px;
+	--border-radius-xl: 18px;
+
+	/* Shadows */
+	--shadow: 2px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================
+   Notifications
+   ========================= */
+
+.notification {
+	padding: 5px;
+}
+
+.notification-background {
+	background: @surface_container;
+	border-radius: var(--border-radius);
+	margin: 8px;
+	padding: 0;
+	border: 1px solid @outline_variant;
+}
+
+.notification-background .close-button {
+	margin: 6px;
+	padding: 2px;
+	border-radius: 6px;
+	background: transparent;
+	color: @on_surface;
+}
+
+.notification-background .close-button:hover {
+	background: @surface_container_high;
+}
+
+.notification.critical {
+	border: 2px solid @error;
+	border-radius: var(--border-radius);
+}
+
+.notification-content {
+	color: @on_surface;
+	margin: 10px;
+	font-weight: 700;
+}
+
+.notification-content .text-box {
+	margin: 0 0 0 15px;
+}
+
+.notification-content .time {
+	padding: 2px;
+	font-size: 0.95rem;
+	font-weight: 800;
+	color: @on_surface_variant;
+}
+
+.notification-content .summary {
+	font-size: 1rem;
+	font-weight: 800;
+	padding: 2px 0;
+	margin-bottom: 2px;
+	color: @on_surface;
+}
+
+.notification-content .body {
+	color: @on_surface_variant;
+	font-size: 0.8rem;
+}
+
+.notification-row .inline-reply-entry,
+.notification-row .inline-reply-button {
+	margin: 5px -5px -5px -5px;
+	padding: 10px 15px;
+	border-radius: var(--border-radius);
+	background: @surface_container_high;
+}
+
+.notification-row .inline-reply-entry {
+	margin-right: 10px;
+}
+
+.notification-row .inline-reply-button:hover {
+	background: @primary_container;
+}
+
+.notification-alt-actions {
+	padding: 5px 0;
+}
+
+.notification-action {
+	font-weight: 700;
+	border-radius: var(--border-radius);
+	background: @surface_container_high;
+	color: @on_surface;
+	margin: 0 5px;
+	padding: 10px 0;
+}
+
+.notification-action:hover,
+.notification-action:active {
+	background: @primary_container;
+	color: @on_primary_container;
+}
+
+
+/* =========================
+   Control Center
+   ========================= */
+
+.control-center {
+	background: @surface;
+	border-radius: var(--border-radius);
+	margin: 5px;
+	padding: 5px 5px 0 5px;
+	border: 1px solid @outline_variant;
+}
+
+.control-center .notification-background {
+	background: @surface_container;
+	box-shadow: var(--shadow);
+	border: none;
+}
+
+/* Remove close buttons in notification center */
+.control-center .notification-background .close-button,
+.notification-group-close-button {
+	opacity: 0;
+}
+
+.notification-group {
+	transition: 200ms;
+}
+
+/* Notifications expanded-group extra margin */
+.notification-group:not(.collapsed) {
+	margin: 8px;
+}
+
+.notification-group-headers,
+.notification-group-buttons {
+	color: @on_surface;
+	font-weight: bold;
+	background: @surface_container_low;
+	border-radius: var(--border-radius);
+	padding: 4px 8px;
+}
+
+.notification-group-headers > label {
+	margin: 0 3px;
+	font-size: 1rem;
+}
+
+.notification-group-icon {
+	color: @on_surface;
+}
+
+.notification-group-buttons .image-button {
+	background: transparent;
+	color: @on_surface;
+	padding: 4px;
+	border-radius: var(--border-radius);
+}
+
+.notification-group-buttons .image-button:hover {
+	background: @surface_container_high;
+}
+
+
+/* =========================
+   Widgets
+   ========================= */
+
+.widget {
+	margin: 5px;
+	color: @on_surface;
+}
+
+.widget-mpris-album-art {
+	border-radius: var(--border-radius);
+	margin: 6px 4px;
+}
+
+.widget-mpris-title {
+	font-weight: 700;
+	font-size: 1.2rem;
+	margin: 0 3px;
+	color: @on_surface;
+}
+
+.widget-mpris-subtitle {
+	color: @on_surface_variant;
+	font-weight: 700;
+	font-size: 0.9rem;
+	margin: 0 3px;
+}
+
+.mpris-background {
+	border-radius: 14px;
+	margin: 3px;
+}
+
+.widget-mpris {
+	border-radius: var(--border-radius);
+	box-shadow: var(--shadow);
+}
+
+.mpris-overlay {
+	border-radius: var(--border-radius);
+	padding: 10px;
+	background: alpha(@surface_container_lowest, 0.85);
+}
+
+/* Control buttons container */
+.mpris-overlay > box:last-child {
+	border-radius: var(--border-radius-xl);
+	padding: 0 5px;
+	background: alpha(@surface_container_high, 0.7);
+}
+
+/* Control buttons */
+.widget-mpris-player button {
+	padding: 5px;
+	margin: 0 2.5px;
+	color: @on_surface;
+}
+
+/* Hover for control buttons */
+.widget-mpris-player button:hover {
+	border-radius: var(--border-radius-s);
+	background: @primary_container;
+	color: @on_primary_container;
+}
+
+
+/* =========================
+   Do Not Disturb
+   ========================= */
+
+.widget-dnd {
+	padding: 10px 15px;
+	border-radius: var(--border-radius);
+	background: @surface_container_high;
+	box-shadow: var(--shadow);
+	color: @on_surface;
+}
+
+.widget-dnd > label {
+	font-size: 1rem;
+	font-weight: 700;
+}
+
+.widget-dnd switch {
+	background: @surface_container_highest;
+	border-radius: var(--border-radius-s);
+	box-shadow: none;
+	padding: 2px;
+	transition: 200ms;
+}
+
+.widget-dnd switch slider {
+	background: @on_surface;
+	border-radius: var(--border-radius-s);
+}
+
+.widget-dnd switch:hover,
+.widget-dnd switch:checked {
+	background-color: @primary;
+}
+
+.widget-dnd switch:checked slider {
+	background: @on_primary;
+}
+
+
+/* =========================
+   Notifications Widget
+   ========================= */
+
+.widget-notifications {
+	margin: 0;
+}
+
+
+/* =========================
+   Quick Buttons
+   ========================= */
+
+.widget-buttons-grid {
+	border-radius: var(--border-radius);
+	padding: 5px 15px;
+	margin-bottom: 5px;
+	background: @surface_container;
+	box-shadow: var(--shadow);
+}
+
+.widget-buttons-grid button {
+	padding: 10px;
+	margin: 3px;
+	min-width: 2rem;
+	background: @surface_container_high;
+	border-radius: var(--border-radius);
+	transition: 200ms;
+}
+
+.widget-buttons-grid button > label {
+	font-family: "CaskaydiaCove Nerd Font Propo";
+	font-size: 16px;
+	color: @on_surface;
+}
+
+.widget-buttons-grid button:hover {
+	background: @primary_container;
+}
+
+.widget-buttons-grid button:hover > label {
+	color: @on_primary_container;
+}
+
+.widget-buttons-grid button:checked {
+	background-color: @primary;
+}
+
+.widget-buttons-grid button:checked > label {
+	color: @on_primary;
+}
+
+
+/* =========================
+   Volume
+   ========================= */
+
+.widget-volume {
+	padding: 8px 14px;
+	margin: 5px 0;
+	border-radius: 12px;
+	color: @on_surface;
+	font-weight: 800;
+	background: @surface_container;
+}
+
+.widget-volume label {
+	font-size: 1.1rem;
+}
+
+.widget-volume slider {
+	border-radius: 24px;
+	margin: -8px;
+	background: @primary;
+	box-shadow:
+		inset 0 1px 2px rgba(255, 255, 255, 0.15),
+		0 4px 4px rgba(0, 0, 0, 0.4);
+	opacity: 1;
+}
+
+.widget-volume trough {
+	background: @surface_container_highest;
+	margin-left: 8px;
+	border-radius: 12px;
+}
+
+.widget-volume highlight {
+	padding: 3.5px;
+	border-radius: 12px;
+	background: @primary;
+}
+
+
+/* =========================
+   Backlight
+   ========================= */
+
+.widget-backlight {
+	padding: 8px 14px;
+	margin: 5px 0;
+	border-radius: 12px;
+	color: @on_surface;
+	font-weight: 800;
+	background: @surface_container;
+}
+
+.widget-backlight label {
+	font-size: 1.1rem;
+}
+
+.widget-backlight slider {
+	border-radius: 24px;
+	margin: -8px;
+	background: @primary;
+	box-shadow:
+		inset 0 1px 2px rgba(255, 255, 255, 0.15),
+		0 4px 4px rgba(0, 0, 0, 0.4);
+	opacity: 1;
+}
+
+.widget-backlight trough {
+	background: @surface_container_highest;
+	margin-left: 8px;
+	border-radius: 12px;
+}
+
+.widget-backlight highlight {
+	padding: 3.5px;
+	border-radius: 12px;
+	background: @primary;
+}
+
+
+/* =========================
+   Empty Notifications
+   ========================= */
+
+.control-center-list-placeholder {
+	color: @on_surface_variant;
+}
+
+
+/* =========================
+   Blank Window
+   ========================= */
+
+.blank-window {
+	background: transparent;
+}
+
+
+/* =========================
+   Matugen Color Palette
+   ========================= */
+
+@define-color background #15130c;
+
+@define-color error #ffb4ab;
+@define-color error_container #93000a;
+
+@define-color inverse_on_surface #323027;
+@define-color inverse_primary #695f12;
+@define-color inverse_surface #e7e2d5;
+
+@define-color on_background #e7e2d5;
+@define-color on_error #690005;
+@define-color on_error_container #ffdad6;
+
+@define-color on_primary #373100;
+@define-color on_primary_container #f2e48a;
+@define-color on_primary_fixed #201c00;
+@define-color on_primary_fixed_variant #504700;
+
+@define-color on_secondary #353117;
+@define-color on_secondary_container #ebe3bd;
+@define-color on_secondary_fixed #1f1c05;
+@define-color on_secondary_fixed_variant #4c472b;
+
+@define-color on_surface #e7e2d5;
+@define-color on_surface_variant #ccc6b5;
+
+@define-color on_tertiary #113725;
+@define-color on_tertiary_container #c3ecd2;
+@define-color on_tertiary_fixed #002113;
+@define-color on_tertiary_fixed_variant #294e3b;
+
+@define-color outline #959181;
+@define-color outline_variant #4a4739;
+
+@define-color primary #d5c871;
+@define-color primary_container #504700;
+@define-color primary_fixed #f2e48a;
+@define-color primary_fixed_dim #d5c871;
+
+@define-color scrim #000000;
+
+@define-color secondary #cfc7a2;
+@define-color secondary_container #4c472b;
+@define-color secondary_fixed #ebe3bd;
+@define-color secondary_fixed_dim #cfc7a2;
+
+@define-color shadow #000000;
+
+@define-color source_color #7a7665;
+
+@define-color surface #15130c;
+@define-color surface_bright #3b3930;
+@define-color surface_container #212017;
+@define-color surface_container_high #2c2a21;
+@define-color surface_container_highest #37352c;
+@define-color surface_container_low #1d1c13;
+@define-color surface_container_lowest #100e07;
+@define-color surface_dim #15130c;
+@define-color surface_tint #d5c871;
+@define-color surface_variant #4a4739;
+
+@define-color tertiary #a7d0b7;
+@define-color tertiary_container #294e3b;
+@define-color tertiary_fixed #c3ecd2;
+@define-color tertiary_fixed_dim #a7d0b7;
