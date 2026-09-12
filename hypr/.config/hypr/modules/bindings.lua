@@ -14,7 +14,7 @@ hl.bind(mainMod .. " + SHIFT + ALT + CTRL + F", hl.dsp.window.fullscreen({ mode 
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + R ", hl.dsp.exec_cmd("/home/mohiitp/.config/waybar/launch.sh"))
-hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("/home/mohiitp/.local/bin/walset"))
+hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("/home/mohiitp/.local/bin/another.sh"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys
@@ -68,4 +68,17 @@ hl.bind(mainMod .. " + CTRL + l", hl.dsp.window.resize({ x = 100, y = 0, relativ
 hl.bind(mainMod .. " + CTRL + h", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { repeating = true }, { description = "Reduce window width with keyboard" })
 hl.bind(mainMod .. " + CTRL + j", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { repeating = true }, { description = "Increase window height with keyboard" })
 hl.bind(mainMod .. " + CTRL + k", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { repeating = true }, { description = "Reduce window height with keyboard" })
+
+
+
+-- Toggle between dwindle and scrolling layout globally
+hl.bind(mainMod.. " + ALT + L", function()
+    local current_layout = hl.get_config("general.layout")
+    
+    if current_layout == "dwindle" then
+        hl.config({ general = { layout = "scrolling" } })
+    else
+        hl.config({ general = { layout = "dwindle" } })
+    end
+end, { description = "Toggle Scrolling Layout globally" })
 
