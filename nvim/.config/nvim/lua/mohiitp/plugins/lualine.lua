@@ -17,15 +17,15 @@ return {
 
     -- short mode names
     local mode_map = {
-      n = "N",
-      i = "I",
-      v = "V",
-      V = "V",
-      [""] = "V",
-      c = "C",
-      r = "R",
-      R = "R",
-      t = "T",
+      n = "NORMAL",
+      i = "INSERT",
+      v = "VISUAL",
+      V = "VISUAL",
+      [""] = "VISUAL",
+      c = "COMMAND",
+      r = "REPLACE",
+      R = "REPLACE",
+      t = "TERM",
     }
 
     local function mode_short()

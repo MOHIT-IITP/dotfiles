@@ -13,8 +13,9 @@ hl.bind(mainMod .. " + SHIFT + CTRL + ALT + V", hl.dsp.window.float({ action = "
 hl.bind(mainMod .. " + SHIFT + ALT + CTRL + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), { description = "Toggle Fullscreen" })
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + R ", hl.dsp.exec_cmd("/home/mohiitp/.config/waybar/launch.sh"))
+hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("/home/mohiitp/.config/waybar/launch.sh"))
 hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("/home/mohiitp/.local/bin/another.sh"))
+hl.bind(mainMod .. " + CTRL + W ", hl.dsp.exec_cmd("wlogout"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys

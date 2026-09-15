@@ -1,16 +1,16 @@
 {
   "layer": "top",
   "position": "bottom",
-  "height": 25,
+  "height": 30,
   "output": ["DP-1"],
   "margin-top": 0,
  "margin-bottom": 0,
-  "margin-left": 1,
-  "margin-right": 2,
+  "margin-left": 0,
+  "margin-right":0 ,
 
   "modules-left": ["hyprland/workspaces" ],
   "modules-center": ["hyprland/window"],
-  "modules-right": ["pulseaudio#audio", "pulseaudio#microphone","network","bluetooth" , "custom/screenshot", "clock","custom/notify",],
+  "modules-right": ["pulseaudio#audio", "pulseaudio#microphone","network","bluetooth" , "custom/screenshot", "clock","custom/notify"],
 
   "hyprland/window": {
 	"format": "{}",
