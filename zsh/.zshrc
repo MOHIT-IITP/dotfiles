@@ -206,3 +206,7 @@ export PATH=$PATH:/home/mohiitp/.spicetify
 
 # Added by Antigravity IDE
 export PATH="/Users/mohiitp/.antigravity-ide/antigravity-ide/bin:$PATH"
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/mohiitp/.local/bin:$PATH"

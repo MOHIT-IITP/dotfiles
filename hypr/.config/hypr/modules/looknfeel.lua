@@ -2,11 +2,11 @@ local color = require("../colors")
 
 hl.config({
     general = {
-        gaps_in  = 0,
-        gaps_out = 0,
-        border_size = 3,
+        gaps_in  = 10,
+        gaps_out = 20,
+        border_size = 1,
         col = {
-            active_border = color.primary,
+            active_border = color.on_secondary,
             inactive_border = color.on_primary,
         },
         resize_on_border = true,
@@ -15,7 +15,7 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 0,
+        rounding       = 20,
         rounding_power = 4,
 
         -- Change transparency of focused and unfocused windows

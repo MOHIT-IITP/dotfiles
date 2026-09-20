@@ -1,21 +1,25 @@
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 local terminal    = "kitty"
-local fileManager = "dolphin"
+local fileManager = "thunar"
 local menu = "~/.config/rofi/type-2/launcher.sh"
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + RETURN  ", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + Q", hl.dsp.window.close())
+hl.bind(mainMod .. "+ CTRL + Q", hl.dsp.window.close())
 hl.bind(mainMod .. "+ SHIFT + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + SHIFT + CTRL + ALT + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + SHIFT + ALT + CTRL + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), { description = "Toggle Fullscreen" })
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("/home/mohiitp/.config/waybar/launch.sh"))
-hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("/home/mohiitp/.local/bin/another.sh"))
-hl.bind(mainMod .. " + CTRL + W ", hl.dsp.exec_cmd("wlogout"))
+-- hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("/home/mohiitp/.config/waybar/launch.sh"))
+hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("qs ipc call mohiitp wallpaper"))
+hl.bind(mainMod .. " + CTRL + W ", hl.dsp.exec_cmd("qs ipc call mohiitp power"))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call mohiitp launcher"))
+hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder \"\" "))
+hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer \"\" "))
+hl.bind(mainMod .. " + CTRL + C ", hl.dsp.exec_cmd("qs ipc call mohiitp clipboard  "))
+hl.bind(mainMod .. " + CTRL + S ", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys
