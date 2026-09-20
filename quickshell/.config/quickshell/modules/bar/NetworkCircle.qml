@@ -1594,7 +1594,7 @@ Rectangle {
               if (modelData.connected) {
                 // disconnect
               } else {
-                modelData.connect();
+                AuthState.prompt(modelData.name);
               }
             }
           }
@@ -1637,7 +1637,7 @@ Rectangle {
           acceptedButtons: Qt.LeftButton
           onClicked: {
             if (!modelData.connected) {
-              modelData.connect();
+              AuthState.prompt(modelData.name);
             }
           }
         }

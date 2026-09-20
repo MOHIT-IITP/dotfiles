@@ -62,5 +62,9 @@ Scope {
     function screenshotDisplay(): void {
       ScreenshotState.capture("display");
     }
+
+    function wifiAuth(ssid: string): void {
+      AuthState.prompt(ssid);
+    }
   }
 }

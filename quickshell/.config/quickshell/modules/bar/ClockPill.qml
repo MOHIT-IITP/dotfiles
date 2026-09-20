@@ -64,13 +64,14 @@ Rectangle {
   readonly property bool showPower: PowerState.open && !showLauncher && !showWallpaper
   readonly property bool showClipboard: ClipboardState.open && !showLauncher && !showWallpaper && !showPower
   readonly property bool showMixer: MixerState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
-  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open
+  readonly property bool showAuth: AuthState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
+  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showWeather ? 265 : 168)))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showWeather ? 520 : 300)))))) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showWeather ? 265 : 168))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showWeather ? 520 : 300))))))) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
 
-  radius: isExpanded ? (showLauncher ? 26 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showWeather ? 20 : 28)))))) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 26 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showWeather ? 20 : 28))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
@@ -106,6 +107,12 @@ Rectangle {
     }
   }
 
+  function forceFocusAuth() {
+    if (authContent) {
+      authContent.forceFocus();
+    }
+  }
+
   Behavior on implicitWidth {
     NumberAnimation {
       duration: 280
@@ -137,7 +144,7 @@ Rectangle {
       if (CalendarState.open) {
         root.isWeatherView = true;
         CalendarState.refreshWeather();
-      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -149,7 +156,7 @@ Rectangle {
       if (LauncherState.open) {
         root.isWeatherView = false;
         forceFocusLauncher();
-      } else if (!mouse.containsMouse && !CalendarState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -161,7 +168,7 @@ Rectangle {
       if (WallpaperState.open) {
         root.isWeatherView = false;
         forceFocusWallpaper();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -173,7 +180,7 @@ Rectangle {
       if (PowerState.open) {
         root.isWeatherView = false;
         forceFocusPower();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -185,7 +192,7 @@ Rectangle {
       if (ClipboardState.open) {
         root.isWeatherView = false;
         forceFocusClipboard();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -197,7 +204,19 @@ Rectangle {
       if (MixerState.open) {
         root.isWeatherView = false;
         forceFocusMixer();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !AuthState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: AuthState
+    function onOpenChanged() {
+      if (AuthState.open) {
+        root.isWeatherView = false;
+        forceFocusAuth();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
         root.isWeatherView = false;
       }
     }
@@ -207,7 +226,7 @@ Rectangle {
   Connections {
     target: mouse
     function onContainsMouseChanged() {
-      if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+      if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -366,7 +385,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -445,7 +464,7 @@ Rectangle {
   // ========================================================
   WeatherCalendarView {
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer) ? 1 : 0
+    opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -524,6 +543,20 @@ Rectangle {
   }
 
   // ========================================================
+  // 10. EMBEDDED SYSTEM & WI-FI AUTHENTICATION VIEW (Directly inside Center Bar)
+  // ========================================================
+  AuthContent {
+    id: authContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showAuth) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
+  // ========================================================
   // GESTURE & INTERACTION HANDLER
   // ========================================================
   property real _pressX: 0
@@ -533,7 +566,7 @@ Rectangle {
   MouseArea {
     id: mouse
     anchors.fill: parent
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton

@@ -36,7 +36,7 @@ Scope {
         // the bar instead of underneath it.
         exclusiveZone: Math.round(44 * SettingsState.uiScale)
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || (netCircle && netCircle.fontDropdownOpen)
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || (netCircle && netCircle.fontDropdownOpen)
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -55,6 +55,7 @@ Scope {
               else if (PowerState.open && clockPill) clockPill.forceFocusPower();
               else if (ClipboardState.open && clockPill) clockPill.forceFocusClipboard();
               else if (MixerState.open && clockPill) clockPill.forceFocusMixer();
+              else if (AuthState.open && clockPill) clockPill.forceFocusAuth();
             });
           }
         }
@@ -77,6 +78,7 @@ Scope {
             if (PowerState.open) PowerState.close();
             if (ClipboardState.open) ClipboardState.close();
             if (MixerState.open) MixerState.close();
+            if (AuthState.open) AuthState.close();
           }
         }
 
