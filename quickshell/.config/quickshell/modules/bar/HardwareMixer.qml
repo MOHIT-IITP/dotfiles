@@ -19,8 +19,8 @@ Rectangle {
   radius: 28
   clip: true
 
-  color: "#121512"
-  border.color: "#3a4a35"
+  color: SettingsState.bgSurface
+  border.color: SettingsState.borderBase
   border.width: 1
 
   opacity: open ? 1 : 0
@@ -89,8 +89,9 @@ Rectangle {
         // Japanese Kanji Glyph "調" (Tune / Mix)
         Text {
           anchors.verticalCenter: parent.verticalCenter
+          visible: SettingsState.japaneseGlyphs
           text: "調"
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: 20
           font.bold: true
         }
@@ -99,7 +100,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "MIXER"
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: 15
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -114,8 +115,8 @@ Rectangle {
         height: 32
         width: toggleRow.implicitWidth + 8
         radius: 16
-        color: "#181d18"
-        border.color: "#283028"
+        color: SettingsState.bgCard
+        border.color: SettingsState.borderBase
         border.width: 1
 
         Row {
@@ -128,13 +129,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: !outMuted ? "#2a3826" : (sndBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: !outMuted ? SettingsState.bgActivePill : (sndBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: outMuted ? "sound-mute" : "sound"
-              glyph: !outMuted ? "#c9dfae" : (outMuted ? "#ff8a8a" : "#9aa39a")
+              glyph: !outMuted ? SettingsState.textActive : (outMuted ? "#ff8a8a" : SettingsState.textSecondary)
             }
             MouseArea {
               id: sndBtnMouse
@@ -150,13 +151,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: !inMuted ? "#2a3826" : (micBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: !inMuted ? SettingsState.bgActivePill : (micBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: inMuted ? "mic-mute" : "mic"
-              glyph: !inMuted ? "#c9dfae" : (inMuted ? "#ff8a8a" : "#9aa39a")
+              glyph: !inMuted ? SettingsState.textActive : (inMuted ? "#ff8a8a" : SettingsState.textSecondary)
             }
             MouseArea {
               id: micBtnMouse
@@ -172,13 +173,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: NotifCenter.dnd ? "#2a3826" : (dndBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: NotifCenter.dnd ? SettingsState.bgActivePill : (dndBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: "bell-slash"
-              glyph: NotifCenter.dnd ? "#c9dfae" : "#9aa39a"
+              glyph: NotifCenter.dnd ? SettingsState.textActive : SettingsState.textSecondary
             }
             MouseArea {
               id: dndBtnMouse
@@ -194,13 +195,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: NightlightState.active ? "#3a2d1d" : (eyeBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: NightlightState.active ? SettingsState.bgActivePill : (eyeBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: "sunset"
-              glyph: NightlightState.active ? "#ffb877" : "#9aa39a"
+              glyph: NightlightState.active ? SettingsState.textActive : SettingsState.textSecondary
             }
             MouseArea {
               id: eyeBtnMouse
@@ -216,13 +217,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: brBtnMouse.containsMouse ? "#222822" : "transparent"
+            color: brBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: "sun"
-              glyph: "#9aa39a"
+              glyph: SettingsState.textSecondary
             }
             MouseArea {
               id: brBtnMouse
@@ -240,7 +241,7 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 1
-      color: "#252b25"
+      color: SettingsState.borderBase
     }
 
     // 4 Vertical Faders Row (Matching Reference UI)
@@ -256,7 +257,7 @@ Rectangle {
         label: "Brightness"
         icon: "sun"
         value: BrightnessState.brightness
-        activeColor: "#e05f65"
+        activeColor: SettingsState.accent
         onSeeked: function (v) {
           BrightnessState.setBrightness(v);
         }
@@ -269,7 +270,7 @@ Rectangle {
         label: "Display"
         icon: "display"
         value: BrightnessState.brightness
-        activeColor: "#e05f65"
+        activeColor: SettingsState.accent
         onSeeked: function (v) {
           BrightnessState.setBrightness(v);
         }
@@ -283,7 +284,7 @@ Rectangle {
         icon: "sound"
         value: outVol
         muted: outMuted
-        activeColor: "#e05f65"
+        activeColor: SettingsState.accent
         onSeeked: function (v) {
           AudioState.setOutVol(v);
         }
@@ -298,7 +299,7 @@ Rectangle {
         icon: "mic"
         value: inVol
         muted: inMuted
-        activeColor: "#e05f65"
+        activeColor: SettingsState.accent
         onSeeked: function (v) {
           AudioState.setInVol(v);
         }

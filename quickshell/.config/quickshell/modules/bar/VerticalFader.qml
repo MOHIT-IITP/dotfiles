@@ -9,7 +9,7 @@ Item {
   property string icon: "sound"
   property real value: 0.5
   property bool muted: false
-  property color activeColor: "#e05f65"
+  property color activeColor: SettingsState.accent
   property bool showLabel: true
 
   signal seeked(real v)

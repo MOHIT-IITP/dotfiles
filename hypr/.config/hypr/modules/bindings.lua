@@ -16,10 +16,11 @@ hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("qs ipc call mohiitp wallpaper"))
 hl.bind(mainMod .. " + CTRL + W ", hl.dsp.exec_cmd("qs ipc call mohiitp power"))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call mohiitp launcher"))
-hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder \"\" "))
-hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer \"\" "))
+hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder"))
+hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer "))
 hl.bind(mainMod .. " + CTRL + C ", hl.dsp.exec_cmd("qs ipc call mohiitp clipboard  "))
-hl.bind(mainMod .. " + CTRL + S ", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'"))
+-- hl.bind(mainMod .. " + CTRL + S ", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'"))
+hl.bind(mainMod .. " + CTRL + S ", hl.dsp.exec_cmd("qs ipc call mohiitp screenshot"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys

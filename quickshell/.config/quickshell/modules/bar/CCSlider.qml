@@ -1,8 +1,8 @@
 import QtQuick
 import "../services"
 
-// Material 3 pill-shaped slider: chunky rounded track with integrated icon
-// and a prominent dropdown button to choose input/output audio devices.
+// Sleek modern slider with a slim track, crystal-clear icon & header,
+// and prominent device selector dropdown.
 Column {
   id: root
 
@@ -26,22 +26,47 @@ Column {
   spacing: 6
   opacity: available ? 1 : 0.4
 
-  // Header: Label (Left) + Device Dropdown Button & Percentage Badge (Right)
+  // Header: Icon + Label (Left) | Device Selector Dropdown + Percentage Badge (Right)
   Item {
     width: parent.width
-    height: 26
+    height: 22
 
-    // Left: Label ("Sound" / "Microphone") + clickable to open device list
+    // Left: Clickable Mute Icon + Label
     Row {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
       spacing: 6
 
+      // Clickable icon circle
+      Rectangle {
+        width: 22
+        height: 22
+        radius: 11
+        anchors.verticalCenter: parent.verticalCenter
+        color: root.muted ? (SettingsState.isDark ? "#30ef5350" : "#20ef5350") : (iconMouse.containsMouse ? SettingsState.bgActivePill : "transparent")
+
+        CCIcon {
+          anchors.centerIn: parent
+          width: 15
+          height: 15
+          kind: root.muted ? (root.icon + "-mute") : root.icon
+          glyph: root.muted ? "#ef5350" : (iconMouse.containsMouse ? SettingsState.textActive : SettingsState.accent)
+        }
+
+        MouseArea {
+          id: iconMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: root.iconClicked()
+        }
+      }
+
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: root.label
-        color: "#d4dbd4"
-        font.pixelSize: 14
+        color: SettingsState.textMain
+        font.pixelSize: 13
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -56,11 +81,11 @@ Column {
       // Device selector dropdown pill button
       Rectangle {
         id: devChip
-        height: 24
-        width: Math.min(200, devRow.implicitWidth + 18)
-        radius: 12
-        color: devChipMouse.containsMouse ? "#2b3b28" : "#1a221a"
-        border.color: devChipMouse.containsMouse ? "#4e6a45" : "#2e3a2e"
+        height: 22
+        width: Math.min(190, devRow.implicitWidth + 16)
+        radius: 11
+        color: devChipMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgCard
+        border.color: devChipMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
         border.width: 1
         clip: true
 
@@ -71,33 +96,33 @@ Column {
         Row {
           id: devRow
           anchors.centerIn: parent
-          spacing: 5
+          spacing: 4
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 13
-            height: 13
+            width: 12
+            height: 12
             kind: root.icon
-            glyph: devChipMouse.containsMouse ? "#c9dfae" : "#8ea08e"
+            glyph: devChipMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
           }
 
           Text {
             id: devText
             anchors.verticalCenter: parent.verticalCenter
             text: root.currentDeviceName ? root.currentDeviceName : "Select device"
-            color: devChipMouse.containsMouse ? "#c9dfae" : "#d0dad0"
+            color: devChipMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 11
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
-            width: Math.min(implicitWidth, 120)
+            width: Math.min(implicitWidth, 115)
           }
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "›"
-            color: devChipMouse.containsMouse ? "#c9dfae" : "#8ea08e"
-            font.pixelSize: 14
+            color: devChipMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
+            font.pixelSize: 13
             font.bold: true
           }
         }
@@ -114,18 +139,18 @@ Column {
       // Percentage badge
       Rectangle {
         id: percBadge
-        height: 24
-        width: percText.implicitWidth + 14
-        radius: 12
-        color: root.muted ? "#2a2222" : "#1f261f"
-        border.color: root.muted ? "#4a2c2c" : "#2f3a2f"
+        height: 22
+        width: percText.implicitWidth + 12
+        radius: 11
+        color: root.muted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgCard
+        border.color: root.muted ? (SettingsState.isDark ? "#4a2c2c" : "#ffb8b8") : SettingsState.borderBase
         border.width: 1
 
         Text {
           id: percText
           anchors.centerIn: parent
           text: root.muted ? "Muted" : Math.round(root.shown * 100) + "%"
-          color: root.muted ? "#ff8a8a" : "#c9dfae"
+          color: root.muted ? "#ef5350" : SettingsState.textActive
           font.pixelSize: 11
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -134,104 +159,53 @@ Column {
     }
   }
 
-  // Material 3 Chunky Pill Track with right-side dropdown button
-  Rectangle {
-    id: track
+  // Slim Track Bar
+  Item {
     width: parent.width
-    height: 40
-    radius: 20
-    color: "#181d18"
-    border.color: "#283028"
-    border.width: 1
-    clip: true
+    height: 16
 
-    // Active fill pill
     Rectangle {
-      width: Math.max(height, parent.width * root.shown)
-      height: parent.height
-      radius: parent.radius
-      color: root.muted ? "#424b42" : "#c9dfae"
-
-      Behavior on width {
-        enabled: !root._drag
-        NumberAnimation { duration: 120 }
-      }
-    }
-
-    // Left Icon Circle inside Track (Mute / Unmute)
-    Rectangle {
-      id: iconPill
+      id: track
       anchors.left: parent.left
-      anchors.leftMargin: 4
-      anchors.verticalCenter: parent.verticalCenter
-      width: 32
-      height: 32
-      radius: 16
-      color: iconMouse.containsMouse ? "#2f382f" : "#1b221b"
-
-      CCIcon {
-        anchors.centerIn: parent
-        width: 18
-        height: 18
-        kind: root.muted ? (root.icon + "-mute") : root.icon
-        glyph: root.muted ? "#ff8a8a" : (root.shown > 0.15 ? "#c9dfae" : "#9aa39a")
-      }
-
-      MouseArea {
-        id: iconMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: root.iconClicked()
-      }
-    }
-
-    // Right chevron button inside Track (Opens Device Selector)
-    Rectangle {
-      id: arrowPill
       anchors.right: parent.right
-      anchors.rightMargin: 4
       anchors.verticalCenter: parent.verticalCenter
-      width: 32
-      height: 32
-      radius: 16
-      color: arrowMouse.containsMouse ? "#2f382f" : "#1b221b"
-      border.color: arrowMouse.containsMouse ? "#4e6a45" : "transparent"
+      height: 10
+      radius: 5
+      color: SettingsState.bgCard
+      border.color: sliderMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
       border.width: 1
+      clip: true
 
-      Text {
-        anchors.centerIn: parent
-        text: "›"
-        color: arrowMouse.containsMouse ? "#c9dfae" : "#8ea08e"
-        font.pixelSize: 16
-        font.bold: true
-      }
+      // Active fill bar
+      Rectangle {
+        width: Math.max(0, parent.width * root.shown)
+        height: parent.height
+        radius: parent.radius
+        color: root.muted ? SettingsState.borderBase : SettingsState.accent
 
-      MouseArea {
-        id: arrowMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: root.openDevices()
+        Behavior on width {
+          enabled: !root._drag
+          NumberAnimation { duration: 100 }
+        }
       }
     }
 
-    // Drag / click mouse area across the center of track
+    // Expanded interactive drag & click target for easy mouse grabbing
     MouseArea {
-      anchors.left: iconPill.right
-      anchors.right: arrowPill.left
-      anchors.top: parent.top
-      anchors.bottom: parent.bottom
+      id: sliderMouse
+      anchors.fill: parent
+      hoverEnabled: true
       enabled: root.available
       cursorShape: Qt.PointingHandCursor
+
       onPressed: function (ev) {
         root._drag = true;
-        root._v = Math.min(1, Math.max(0, (ev.x + iconPill.width + 4) / track.width));
+        root._v = Math.min(1, Math.max(0, ev.x / width));
         root.seeked(root._v);
       }
       onPositionChanged: function (ev) {
         if (root._drag) {
-          root._v = Math.min(1, Math.max(0, (ev.x + iconPill.width + 4) / track.width));
+          root._v = Math.min(1, Math.max(0, ev.x / width));
           root.seeked(root._v);
         }
       }

@@ -2,8 +2,6 @@ import QtQuick
 import "../services"
 
 // Crisp icon representation rendering directly with the selected font.
-// Supported kinds: "wifi" | "wifi-off" | "bt" | "bt-connected" | "sound" | "speaker" | "audio" | "sound-mute" | "mic" | "microphone" | "mic-mute" | "bell" | "apps" | "launcher" | "wallpaper" | "image" | "wall" | "lock" | "logout" | "exit" | "moon" | "sleep" | "suspend" | "reboot" | "restart" | "power" | "shutdown" | "clipboard" | "clip" | "copy" | "gear" | "settings" | "config" | "time" | "clock" | "stopwatch" | "music" | "note" | "palette" | "theme" | "folder" | "scale" | "wave" | "motion" | "font" | "eye" | "autohide" | "hide" | "ethernet" | "wired"
-
 Item {
   id: root
   width: 20
@@ -21,8 +19,8 @@ Item {
     if (k === "wifi-off") return "󰤮";
     if (k === "bt" || k === "bluetooth") return "";
     if (k === "bt-connected") return "󰂱";
-    if (k === "sound" || k === "speaker" || k === "audio") return "";
-    if (k === "sound-mute" || k === "speaker-mute" || k === "muted") return "";
+    if (k === "sound" || k === "speaker" || k === "audio" || k === "volume") return "";
+    if (k === "sound-mute" || k === "speaker-mute" || k === "muted" || k === "volume-mute") return "";
     if (k === "mic" || k === "microphone") return "";
     if (k === "mic-mute" || k === "microphone-mute") return "";
     if (k === "bell" || k === "notif") return "";
@@ -40,6 +38,9 @@ Item {
     if (k === "bell-slash" || k === "dnd") return "󰂛";
     if (k === "mixer" || k === "tune" || k === "fader" || k === "sliders") return "󰕾";
     if (k === "record" || k === "recorder" || k === "rec" || k === "video") return "󰕧";
+    if (k === "camera" || k === "screenshot" || k === "shot" || k === "still" || k === "photo") return "";
+    if (k === "window" || k === "app-window") return "";
+    if (k === "area" || k === "crop" || k === "selection") return "";
     if (k === "play") return "";
     if (k === "stop") return "";
     if (k === "reboot" || k === "restart") return "";
@@ -61,7 +62,9 @@ Item {
     anchors.fill: parent
     text: root.iconSymbol
     color: root.glyph
-    font.family: SettingsState.fontFamily
+    font.family: (SettingsState.fontFamily && SettingsState.fontFamily.indexOf("Nerd Font") !== -1)
+      ? SettingsState.fontFamily
+      : (SettingsState.fontFamily + ", JetBrainsMono Nerd Font, Symbols Nerd Font, Cascadia Code Nerd Font, monospace")
     font.pixelSize: root.iconSize
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter

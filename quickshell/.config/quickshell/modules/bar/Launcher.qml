@@ -2,8 +2,8 @@ import Quickshell
 import QtQuick
 import "../services"
 
-// Material Design 3 Pill-Shaped App Launcher
-// Search filters installed apps; Up/Down navigates, Enter/click launches, Esc closes.
+// Minimalist, fast Spotlight/Raycast-style App Launcher.
+// Features keyboard navigation (Up/Down/Enter/Esc), search filtering, and sleek theming.
 Rectangle {
   id: root
   readonly property bool open: LauncherState.open
@@ -29,7 +29,7 @@ Rectangle {
 
   Timer {
     id: focusRetryTimer
-    interval: 40
+    interval: 30
     repeat: true
     property int count: 0
     onRunningChanged: {
@@ -38,7 +38,7 @@ Rectangle {
     onTriggered: {
       count++;
       forceFocus();
-      if (search.activeFocus || count > 8) {
+      if (search.activeFocus || count > 6) {
         running = false;
       }
     }
@@ -62,7 +62,7 @@ Rectangle {
         if (hay.toLowerCase().indexOf(q) !== -1)
           out.push(a);
       }
-      if (out.length >= 30)
+      if (out.length >= 25)
         break;
     }
     return out;
@@ -79,180 +79,166 @@ Rectangle {
       launch(filtered[sel]);
   }
 
-  implicitWidth: 460
-  implicitHeight: open ? content.implicitHeight + 36 : 0
-  radius: 30
+  implicitWidth: 420
+  implicitHeight: open ? contentCol.implicitHeight + 24 : 0
+  radius: 16
   clip: true
 
-  color: "#121512"
-  border.color: "#3a4a35"
+  color: SettingsState.bgSurface
+  border.color: SettingsState.borderBase
   border.width: 1
   opacity: open ? 1 : 0
   visible: open || opacity > 0
 
   Behavior on implicitHeight {
     NumberAnimation {
-      duration: 300
+      duration: 220
       easing.type: Easing.OutCubic
     }
   }
   Behavior on opacity {
     NumberAnimation {
-      duration: 200
+      duration: 160
     }
   }
 
   Column {
-    id: content
+    id: contentCol
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: 18
-    spacing: 12
+    anchors.margins: 12
+    spacing: 10
 
-    // Material 3 Pill Search Bar
-    Rectangle {
+    // Minimal Search Input Bar
+    Row {
       width: parent.width
-      height: 48
-      radius: 24
-      color: search.activeFocus ? "#1e261e" : "#171c17"
-      border.color: search.activeFocus ? "#4e6a45" : "#2a342a"
-      border.width: 1
+      height: 32
+      spacing: 10
 
-      Behavior on color {
-        ColorAnimation { duration: 150 }
+      // Search Icon
+      CCIcon {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 16
+        height: 16
+        kind: "apps"
+        glyph: search.text.length > 0 ? SettingsState.accent : SettingsState.textSecondary
       }
-      Behavior on border.color {
-        ColorAnimation { duration: 150 }
-      }
 
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 10
+      // Input field + Placeholder
+      Item {
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width - 54
+        height: parent.height
 
-        // Left Search Icon Avatar
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 32
-          height: 32
-          radius: 16
-          color: search.activeFocus ? "#c9dfae" : "#242c24"
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "apps"
-            glyph: search.activeFocus ? "#182415" : "#8e998e"
-          }
+        Text {
+          anchors.fill: parent
+          verticalAlignment: Text.AlignVCenter
+          visible: search.text === ""
+          text: "Search apps..."
+          color: SettingsState.textMuted
+          font.pixelSize: 13
+          font.family: SettingsState.fontFamily
         }
 
-        // Input Field & Placeholder
-        Item {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 80
-          height: parent.height
-
-          Text {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            visible: search.text === ""
-            text: "Search applications..."
-            color: "#6e756e"
-            font.pixelSize: 14
-            font.family: SettingsState.fontFamily
+        TextInput {
+          id: search
+          anchors.fill: parent
+          verticalAlignment: TextInput.AlignVCenter
+          color: SettingsState.textMain
+          font.pixelSize: 13
+          font.family: SettingsState.fontFamily
+          clip: true
+          focus: true
+          activeFocusOnTab: true
+          selectByMouse: true
+          onTextChanged: {
+            query = text;
+            sel = 0;
           }
-
-          TextInput {
-            id: search
-            anchors.fill: parent
-            verticalAlignment: TextInput.AlignVCenter
-            color: "#f2f2f2"
-            font.pixelSize: 14
-            font.bold: true
-            font.family: SettingsState.fontFamily
-            clip: true
-            focus: true
-            activeFocusOnTab: true
-            selectByMouse: true
-            onTextChanged: {
-              query = text;
-              sel = 0;
-            }
-            Keys.onPressed: function (ev) {
-              if (ev.key === Qt.Key_Down) {
-                sel = Math.min(filtered.length - 1, sel + 1);
-                ev.accepted = true;
-              } else if (ev.key === Qt.Key_Up) {
-                sel = Math.max(0, sel - 1);
-                ev.accepted = true;
-              } else if (ev.key === Qt.Key_Return || ev.key === Qt.Key_Enter) {
-                launchSelected();
-                ev.accepted = true;
-              } else if (ev.key === Qt.Key_Escape) {
-                LauncherState.close();
-                ev.accepted = true;
-              }
+          Keys.onPressed: function (ev) {
+            if (ev.key === Qt.Key_Down) {
+              sel = Math.min(filtered.length - 1, sel + 1);
+              appListView.positionViewAtIndex(sel, ListView.Contain);
+              ev.accepted = true;
+            } else if (ev.key === Qt.Key_Up) {
+              sel = Math.max(0, sel - 1);
+              appListView.positionViewAtIndex(sel, ListView.Contain);
+              ev.accepted = true;
+            } else if (ev.key === Qt.Key_Return || ev.key === Qt.Key_Enter) {
+              launchSelected();
+              ev.accepted = true;
+            } else if (ev.key === Qt.Key_Escape) {
+              LauncherState.close();
+              ev.accepted = true;
             }
           }
         }
+      }
 
-        // Clear button
-        Rectangle {
-          visible: search.text.length > 0
-          anchors.verticalCenter: parent.verticalCenter
-          width: 24
-          height: 24
-          radius: 12
-          color: clearMouse.containsMouse ? "#2e382e" : "transparent"
+      // Clear or Escape hint
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 20
+        height: 20
+        radius: 10
+        color: clearMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
-          Text {
-            anchors.centerIn: parent
-            text: "✕"
-            color: "#8e998e"
-            font.pixelSize: 11
-            font.bold: true
-          }
+        Text {
+          anchors.centerIn: parent
+          text: search.text.length > 0 ? "✕" : "⎋"
+          color: clearMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted
+          font.pixelSize: 11
+          font.bold: true
+        }
 
-          MouseArea {
-            id: clearMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
+        MouseArea {
+          id: clearMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            if (search.text.length > 0) {
               search.text = "";
               search.forceActiveFocus();
+            } else {
+              LauncherState.close();
             }
           }
         }
       }
     }
 
-    // Results Empty State
+    // Subtle 1px Divider
+    Rectangle {
+      width: parent.width
+      height: 1
+      color: SettingsState.borderBase
+      visible: filtered.length > 0 || search.text.length > 0
+    }
+
+    // Empty state
     Text {
       visible: filtered.length === 0
       anchors.horizontalCenter: parent.horizontalCenter
       text: "No applications found"
-      color: "#6e756e"
-      font.pixelSize: 13
+      color: SettingsState.textMuted
+      font.pixelSize: 12
       font.italic: true
       font.family: SettingsState.fontFamily
-      padding: 12
+      padding: 10
     }
 
-    // Results Material Pill List
+    // Minimal App List
     ListView {
       id: appListView
       width: parent.width
-      height: Math.min(6, filtered.length) * 58
+      height: Math.min(7, filtered.length) * 38
       visible: filtered.length > 0
-      spacing: 6
+      spacing: 2
       clip: true
       model: filtered
       currentIndex: sel
-      highlightFollowsCurrentItem: true
 
       delegate: Rectangle {
         required property var modelData
@@ -260,37 +246,32 @@ Rectangle {
         readonly property bool isSelected: index === root.sel
 
         width: ListView.view.width
-        height: 52
-        radius: 20
-        color: isSelected ? "#243322" : (itemMouse.containsMouse ? "#1c221c" : "#161b16")
-        border.color: isSelected ? "#3f5938" : (itemMouse.containsMouse ? "#283228" : "transparent")
+        height: 36
+        radius: 8
+        color: isSelected ? SettingsState.bgActivePill : (itemMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
+        border.color: isSelected ? SettingsState.borderActive : "transparent"
         border.width: 1
 
         Behavior on color {
-          ColorAnimation { duration: 100 }
+          ColorAnimation { duration: 80 }
         }
 
         Row {
           anchors.fill: parent
-          anchors.margins: 8
-          spacing: 12
+          anchors.leftMargin: 8
+          anchors.rightMargin: 8
+          spacing: 10
 
-          // Material App Icon Avatar
-          Rectangle {
+          // App Icon
+          Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: 36
-            height: 36
-            radius: 18
-            color: isSelected ? "#c9dfae" : "#222a22"
-
-            Behavior on color {
-              ColorAnimation { duration: 100 }
-            }
+            width: 22
+            height: 22
 
             Image {
               anchors.centerIn: parent
-              width: 24
-              height: 24
+              width: 20
+              height: 20
               visible: modelData && modelData.icon !== ""
               source: (modelData && modelData.icon !== "") ? Quickshell.iconPath(modelData.icon, "application-x-executable") : ""
               smooth: true
@@ -301,52 +282,39 @@ Rectangle {
               anchors.centerIn: parent
               visible: !modelData || modelData.icon === ""
               text: (modelData && modelData.name) ? modelData.name.substring(0, 1).toUpperCase() : "?"
-              color: isSelected ? "#182415" : "#9aa39a"
-              font.pixelSize: 15
+              color: isSelected ? SettingsState.textActive : SettingsState.textSecondary
+              font.pixelSize: 12
               font.bold: true
+              font.family: SettingsState.fontFamily
             }
           }
 
-          // App Details
-          Column {
+          // App Name
+          Text {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 90
-            spacing: 2
-
-            Text {
-              width: parent.width
-              text: (modelData && modelData.name) ? modelData.name : ""
-              color: isSelected ? "#c9dfae" : "#f2f2f2"
-              font.pixelSize: 13
-              font.bold: isSelected
-              font.family: SettingsState.fontFamily
-              elide: Text.ElideRight
-            }
-
-            Text {
-              width: parent.width
-              text: (modelData && (modelData.genericName || modelData.comment)) ? (modelData.genericName || modelData.comment) : "Application"
-              color: isSelected ? "#8ea87e" : "#6e756e"
-              font.pixelSize: 11
-              font.family: SettingsState.fontFamily
-              elide: Text.ElideRight
-            }
+            width: parent.width - (isSelected ? 62 : 36)
+            text: (modelData && modelData.name) ? modelData.name : ""
+            color: isSelected ? SettingsState.textActive : SettingsState.textMain
+            font.pixelSize: 13
+            font.bold: isSelected
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
           }
 
-          // Launch Action Indicator (Enter ⏎)
+          // Return / Launch Hint Badge
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             visible: isSelected
-            width: 22
-            height: 22
-            radius: 11
-            color: "#3f5938"
+            width: 18
+            height: 18
+            radius: 4
+            color: SettingsState.accent
 
             Text {
               anchors.centerIn: parent
               text: "⏎"
-              color: "#c9dfae"
-              font.pixelSize: 11
+              color: SettingsState.isDark ? "#121612" : "#ffffff"
+              font.pixelSize: 10
               font.bold: true
             }
           }
@@ -357,7 +325,7 @@ Rectangle {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
-          onPositionChanged: {
+          onEntered: {
             root.sel = index;
           }
           onClicked: {

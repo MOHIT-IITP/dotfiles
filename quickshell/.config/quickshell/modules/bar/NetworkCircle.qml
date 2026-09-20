@@ -45,9 +45,29 @@ Rectangle {
     return res;
   }
 
-  implicitWidth: netMouse.containsMouse ? (root.activePage === "power" ? 340 : (root.activePage === "mixer" ? 420 : (root.activePage === "recorder" ? 420 : (root.activePage === "settings" ? 420 : 410)))) : 34
-  implicitHeight: netMouse.containsMouse ? (root.activePage === "power" ? 130 : (root.activePage === "settings" ? (settingsCol.implicitHeight + 56) : ((root.activePage === "sound" || root.activePage === "mic") ? 520 : (root.activePage === "mixer" ? 380 : (root.activePage === "recorder" ? (460 + (root.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0) + ((RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(180, RecorderState.recentRecordings.length * 60) : 30)) : (mainPage.implicitHeight + 40)))))) : 34
+  implicitWidth: {
+    if (!netMouse.containsMouse) return 34;
+    if (root.activePage === "power") return 340;
+    if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
+    return 410;
+  }
+
+  implicitHeight: {
+    if (!netMouse.containsMouse) return 34;
+    if (root.activePage === "power") return 130;
+    if (root.activePage === "settings") return settingsCol.implicitHeight + 56;
+    if (root.activePage === "sound" || root.activePage === "mic") return 520;
+    if (root.activePage === "mixer") return 380;
+    if (root.activePage === "screenshot") return 254;
+    if (root.activePage === "recorder") {
+      var extraMic = root.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0;
+      var extraList = (RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(180, RecorderState.recentRecordings.length * 60) : 30;
+      return 460 + extraMic + extraList;
+    }
+    return mainPage.implicitHeight + 36;
+  }
   radius: netMouse.containsMouse ? 30 : 17
+  clip: true
 
   color: netMouse.containsMouse ? SettingsState.bgSurface : SettingsState.bgSurface
   border.color: SettingsState.borderBase
@@ -153,7 +173,9 @@ Rectangle {
   // =========================================================================
   Column {
     id: mainPage
-    anchors.fill: parent
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.margins: 18
     spacing: 12
     opacity: (netMouse.containsMouse && root.activePage === "main") ? 1 : 0
@@ -175,8 +197,8 @@ Rectangle {
         width: (parent.width - 10) / 2
         height: 68
         radius: 24
-        color: wifiUp ? "#243322" : (wifiCardMouse.containsMouse ? "#1e241e" : "#181d18")
-        border.color: wifiUp ? "#3d5438" : (wifiCardMouse.containsMouse ? "#2d382d" : "#242a24")
+        color: wifiUp ? SettingsState.bgActivePill : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: wifiUp ? SettingsState.borderActive : (wifiCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Row {
@@ -189,14 +211,14 @@ Rectangle {
             width: 42
             height: 42
             radius: 21
-            color: wifiUp ? "#c9dfae" : "#283028"
+            color: wifiUp ? SettingsState.accent : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 20
               height: 20
               kind: "wifi"
-              glyph: wifiUp ? "#182415" : "#838e83"
+              glyph: wifiUp ? (SettingsState.isDark ? "#121612" : "#ffffff") : (wifiCardMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -207,15 +229,17 @@ Rectangle {
 
             Text {
               text: "Wi-Fi"
-              color: "#f2f2f2"
+              color: SettingsState.textMain
               font.pixelSize: 15
               font.bold: true
+              font.family: SettingsState.fontFamily
             }
             Text {
               width: parent.width
               text: wifiUp ? wifiName : (wiredUp ? wiredName : (wifiEnabled ? "Disconnected" : "Off"))
-              color: wifiUp ? "#c9dfae" : "#9aa39a"
+              color: wifiUp ? SettingsState.textActive : SettingsState.textSecondary
               font.pixelSize: 12
+              font.family: SettingsState.fontFamily
               elide: Text.ElideRight
               maximumLineCount: 1
             }
@@ -238,8 +262,8 @@ Rectangle {
         width: (parent.width - 10) / 2
         height: 68
         radius: 24
-        color: (btOn && BluetoothState.btDevice) ? "#243322" : (btCardMouse.containsMouse ? "#1e241e" : "#181d18")
-        border.color: (btOn && BluetoothState.btDevice) ? "#3d5438" : (btCardMouse.containsMouse ? "#2d382d" : "#242a24")
+        color: (btOn && BluetoothState.btDevice) ? SettingsState.bgActivePill : (btCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: (btOn && BluetoothState.btDevice) ? SettingsState.borderActive : (btCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Row {
@@ -252,14 +276,14 @@ Rectangle {
             width: 42
             height: 42
             radius: 21
-            color: (btOn && BluetoothState.btDevice) ? "#c9dfae" : "#283028"
+            color: (btOn && BluetoothState.btDevice) ? SettingsState.accent : (btCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 20
               height: 20
               kind: "bt"
-              glyph: (btOn && BluetoothState.btDevice) ? "#182415" : "#838e83"
+              glyph: (btOn && BluetoothState.btDevice) ? (SettingsState.isDark ? "#121612" : "#ffffff") : (btCardMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -270,15 +294,17 @@ Rectangle {
 
             Text {
               text: "Bluetooth"
-              color: "#f2f2f2"
+              color: SettingsState.textMain
               font.pixelSize: 15
               font.bold: true
+              font.family: SettingsState.fontFamily
             }
             Text {
               width: parent.width
               text: btName
-              color: (btOn && BluetoothState.btDevice) ? "#c9dfae" : "#9aa39a"
+              color: (btOn && BluetoothState.btDevice) ? SettingsState.textActive : SettingsState.textSecondary
               font.pixelSize: 12
+              font.family: SettingsState.fontFamily
               elide: Text.ElideRight
               maximumLineCount: 1
             }
@@ -309,8 +335,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: LauncherState.open ? "#243322" : (appMouse.containsMouse ? "#202620" : "#171c17")
-        border.color: LauncherState.open ? "#3f5938" : (appMouse.containsMouse ? "#2e392e" : "#222722")
+        color: LauncherState.open ? SettingsState.bgActivePill : (appMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: LauncherState.open ? SettingsState.borderActive : (appMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -328,14 +354,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: LauncherState.open ? "#c9dfae" : (appMouse.containsMouse ? "#2a332a" : "#222722")
+            color: LauncherState.open ? SettingsState.accent : (appMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "apps"
-              glyph: LauncherState.open ? "#182415" : (appMouse.containsMouse ? "#c9dfae" : "#9aa39a")
+              glyph: LauncherState.open ? (SettingsState.isDark ? "#121612" : "#ffffff") : (appMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -343,7 +369,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "Apps"
-            color: LauncherState.open ? "#c9dfae" : "#f2f2f2"
+            color: LauncherState.open ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -421,8 +447,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: ClipboardState.open ? "#243322" : (clipMouse.containsMouse ? "#202620" : "#171c17")
-        border.color: ClipboardState.open ? "#3f5938" : (clipMouse.containsMouse ? "#2e392e" : "#222722")
+        color: ClipboardState.open ? SettingsState.bgActivePill : (clipMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: ClipboardState.open ? SettingsState.borderActive : (clipMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -440,14 +466,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: ClipboardState.open ? "#c9dfae" : (clipMouse.containsMouse ? "#2a332a" : "#222722")
+            color: ClipboardState.open ? SettingsState.accent : (clipMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "clipboard"
-              glyph: ClipboardState.open ? "#182415" : (clipMouse.containsMouse ? "#c9dfae" : "#9aa39a")
+              glyph: ClipboardState.open ? (SettingsState.isDark ? "#121612" : "#ffffff") : (clipMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -455,7 +481,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "Clip"
-            color: ClipboardState.open ? "#c9dfae" : "#f2f2f2"
+            color: ClipboardState.open ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -477,8 +503,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: NightlightState.active ? "#382c1e" : (nightMouse.containsMouse ? "#26221c" : "#171c17")
-        border.color: NightlightState.active ? "#664928" : (nightMouse.containsMouse ? "#3d3224" : "#222722")
+        color: NightlightState.active ? SettingsState.bgActivePill : (nightMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: NightlightState.active ? SettingsState.borderActive : (nightMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -496,14 +522,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: NightlightState.active ? "#ffb877" : (nightMouse.containsMouse ? "#332a20" : "#222722")
+            color: NightlightState.active ? SettingsState.accent : (nightMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "sunset"
-              glyph: NightlightState.active ? "#2a1d0d" : (nightMouse.containsMouse ? "#ffb877" : "#9aa39a")
+              glyph: NightlightState.active ? (SettingsState.isDark ? "#121612" : "#ffffff") : (nightMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -511,7 +537,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "Night"
-            color: NightlightState.active ? "#ffb877" : "#f2f2f2"
+            color: NightlightState.active ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -533,8 +559,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: (root.activePage === "mixer") ? "#243322" : (mixerMouse.containsMouse ? "#202620" : "#171c17")
-        border.color: (root.activePage === "mixer") ? "#3f5938" : (mixerMouse.containsMouse ? "#2e392e" : "#222722")
+        color: (root.activePage === "mixer") ? SettingsState.bgActivePill : (mixerMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: (root.activePage === "mixer") ? SettingsState.borderActive : (mixerMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -552,14 +578,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: (root.activePage === "mixer") ? "#c9dfae" : (mixerMouse.containsMouse ? "#2a332a" : "#222722")
+            color: (root.activePage === "mixer") ? SettingsState.accent : (mixerMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "mixer"
-              glyph: (root.activePage === "mixer") ? "#182415" : (mixerMouse.containsMouse ? "#c9dfae" : "#9aa39a")
+              glyph: (root.activePage === "mixer") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (mixerMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -567,7 +593,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "Mixer"
-            color: (root.activePage === "mixer") ? "#c9dfae" : "#f2f2f2"
+            color: (root.activePage === "mixer") ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -591,8 +617,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: (root.activePage === "recorder" || RecorderState.isRecording) ? "#3a1e1e" : (recMouse.containsMouse ? "#202620" : "#171c17")
-        border.color: (root.activePage === "recorder" || RecorderState.isRecording) ? "#662c2c" : (recMouse.containsMouse ? "#2e392e" : "#222722")
+        color: (root.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? (SettingsState.isDark ? "#3a1e1e" : "#ffe5e5") : SettingsState.bgActivePill) : (recMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: (root.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.borderActive) : (recMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -610,14 +636,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: (root.activePage === "recorder" || RecorderState.isRecording) ? "#ff8a8a" : (recMouse.containsMouse ? "#2a332a" : "#222722")
+            color: (root.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.accent) : (recMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "record"
-              glyph: (root.activePage === "recorder" || RecorderState.isRecording) ? "#2a0e0e" : (recMouse.containsMouse ? "#c9dfae" : "#9aa39a")
+              glyph: (root.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#ffffff" : (SettingsState.isDark ? "#121612" : "#ffffff")) : (recMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -625,7 +651,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: RecorderState.isRecording ? RecorderState.formattedTime : "Record"
-            color: (root.activePage === "recorder" || RecorderState.isRecording) ? "#ff8a8a" : "#f2f2f2"
+            color: (root.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.textActive) : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -646,13 +672,13 @@ Rectangle {
         }
       }
 
-      // 7. Settings Pill
+      // 7. Screenshot / Capture Pill
       Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: (root.activePage === "settings") ? "#243322" : (setMouse.containsMouse ? "#202620" : "#171c17")
-        border.color: (root.activePage === "settings") ? "#3f5938" : (setMouse.containsMouse ? "#2e392e" : "#222722")
+        color: (root.activePage === "screenshot") ? SettingsState.bgActivePill : (shotMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: (root.activePage === "screenshot") ? SettingsState.borderActive : (shotMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -670,14 +696,73 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: (root.activePage === "settings") ? "#c9dfae" : (setMouse.containsMouse ? "#2a332a" : "#222722")
+            color: (root.activePage === "screenshot") ? SettingsState.accent : (shotMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
+
+            CCIcon {
+              anchors.centerIn: parent
+              width: 16
+              height: 16
+              kind: "camera"
+              glyph: (root.activePage === "screenshot") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (shotMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+            }
+          }
+
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 46
+            text: "Shot"
+            color: (root.activePage === "screenshot") ? SettingsState.textActive : SettingsState.textMain
+            font.pixelSize: 12
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+        }
+
+        MouseArea {
+          id: shotMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            root.activePage = "screenshot";
+            ScreenshotState.refreshLast();
+          }
+        }
+      }
+
+      // 8. Settings Pill
+      Rectangle {
+        width: (parent.width - 16) / 3
+        height: 48
+        radius: 24
+        color: (root.activePage === "settings") ? SettingsState.bgActivePill : (setMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: (root.activePage === "settings") ? SettingsState.borderActive : (setMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+        border.width: 1
+
+        Behavior on color {
+          ColorAnimation { duration: 150 }
+        }
+
+        Row {
+          anchors.fill: parent
+          anchors.leftMargin: 6
+          anchors.rightMargin: 8
+          spacing: 6
+
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 34
+            height: 34
+            radius: 17
+            color: (root.activePage === "settings") ? SettingsState.accent : (setMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "gear"
-              glyph: (root.activePage === "settings") ? "#182415" : (setMouse.containsMouse ? "#c9dfae" : "#9aa39a")
+              glyph: (root.activePage === "settings") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (setMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -685,7 +770,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "Config"
-            color: (root.activePage === "settings") ? "#c9dfae" : "#f2f2f2"
+            color: (root.activePage === "settings") ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -709,8 +794,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: NotifCenter.dnd ? "#243322" : (dndMouse.containsMouse ? "#202620" : "#171c17")
-        border.color: NotifCenter.dnd ? "#3f5938" : (dndMouse.containsMouse ? "#2e392e" : "#222722")
+        color: NotifCenter.dnd ? SettingsState.bgActivePill : (dndMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: NotifCenter.dnd ? SettingsState.borderActive : (dndMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -728,14 +813,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: NotifCenter.dnd ? "#c9dfae" : (dndMouse.containsMouse ? "#2a332a" : "#222722")
+            color: NotifCenter.dnd ? SettingsState.accent : (dndMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "bell-slash"
-              glyph: NotifCenter.dnd ? "#182415" : (dndMouse.containsMouse ? "#c9dfae" : "#9aa39a")
+              glyph: NotifCenter.dnd ? (SettingsState.isDark ? "#121612" : "#ffffff") : (dndMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
             }
           }
 
@@ -743,7 +828,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "DND"
-            color: NotifCenter.dnd ? "#c9dfae" : "#f2f2f2"
+            color: NotifCenter.dnd ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -765,8 +850,8 @@ Rectangle {
         width: (parent.width - 16) / 3
         height: 48
         radius: 24
-        color: (root.activePage === "power") ? "#381e1e" : (powerMouse.containsMouse ? "#261c1c" : "#171c17")
-        border.color: (root.activePage === "power") ? "#662c2c" : (powerMouse.containsMouse ? "#3d2222" : "#222722")
+        color: (root.activePage === "power") ? SettingsState.bgActivePill : (powerMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: (root.activePage === "power") ? SettingsState.borderActive : (powerMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -784,14 +869,14 @@ Rectangle {
             width: 34
             height: 34
             radius: 17
-            color: (root.activePage === "power" || powerMouse.containsMouse) ? "#ff8a8a" : "#222722"
+            color: (root.activePage === "power" || powerMouse.containsMouse) ? SettingsState.accent : SettingsState.bgSurface
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "power"
-              glyph: (root.activePage === "power" || powerMouse.containsMouse) ? "#2a0e0e" : "#9aa39a"
+              glyph: (root.activePage === "power" || powerMouse.containsMouse) ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
             }
           }
 
@@ -799,7 +884,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 46
             text: "Power"
-            color: (root.activePage === "power" || powerMouse.containsMouse) ? "#ff8a8a" : "#f2f2f2"
+            color: (root.activePage === "power" || powerMouse.containsMouse) ? SettingsState.textActive : SettingsState.textMain
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -880,15 +965,15 @@ Rectangle {
         height: 24
         width: clearAllText.implicitWidth + 16
         radius: 12
-        color: NotifCenter.count > 0 ? (clearMouse.containsMouse ? "#2a342a" : "#1f261f") : "transparent"
-        border.color: NotifCenter.count > 0 ? "#333f33" : "transparent"
+        color: NotifCenter.count > 0 ? (clearMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard) : "transparent"
+        border.color: NotifCenter.count > 0 ? SettingsState.borderBase : "transparent"
         border.width: 1
 
         Text {
           id: clearAllText
           anchors.centerIn: parent
           text: "Clear all"
-          color: NotifCenter.count > 0 ? "#c9dfae" : "#525252"
+          color: NotifCenter.count > 0 ? SettingsState.accent : SettingsState.textMuted
           font.pixelSize: 12
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -1112,7 +1197,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: BluetoothState.discovering ? "Scanning..." : (BluetoothState.btOn ? "Ready" : "Off")
-          color: BluetoothState.discovering ? "#e05f65" : (BluetoothState.btOn ? "#7ee2a8" : "#6e756e")
+          color: BluetoothState.discovering ? SettingsState.accent : (BluetoothState.btOn ? SettingsState.textActive : SettingsState.textMuted)
           font.pixelSize: 12
           font.family: SettingsState.fontFamily
         }
@@ -1122,7 +1207,7 @@ Rectangle {
           width: 40
           height: 22
           radius: 11
-          color: BluetoothState.btOn ? "#e05f65" : "#252b25"
+          color: BluetoothState.btOn ? SettingsState.accent : SettingsState.bgCard
           anchors.verticalCenter: parent.verticalCenter
 
           Behavior on color {
@@ -1133,7 +1218,7 @@ Rectangle {
             width: 16
             height: 16
             radius: 8
-            color: "#ffffff"
+            color: BluetoothState.btOn ? (SettingsState.isDark ? "#ffffff" : "#000000") : SettingsState.textMuted
             anchors.verticalCenter: parent.verticalCenter
             x: BluetoothState.btOn ? parent.width - width - 3 : 3
 
@@ -1155,14 +1240,14 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 1
-      color: "#252b25"
+      color: SettingsState.borderBase
     }
 
     // Empty or Off state
     Text {
       visible: !BluetoothState.btOn || root.btDevicesList.length === 0
       text: !BluetoothState.btOn ? "Bluetooth is turned off" : "No Bluetooth devices found"
-      color: "#6e756e"
+      color: SettingsState.textMuted
       font.pixelSize: 13
       font.family: SettingsState.fontFamily
       anchors.horizontalCenter: parent.horizontalCenter
@@ -1182,8 +1267,8 @@ Rectangle {
         width: ListView.view.width
         height: 56
         radius: 14
-        color: modelData.connected ? "#1e261e" : (btRowMouse.containsMouse ? "#191d19" : "#141714")
-        border.color: modelData.connected ? "#3a4a35" : (btRowMouse.containsMouse ? "#283028" : "transparent")
+        color: modelData.connected ? SettingsState.bgActivePill : (btRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: modelData.connected ? SettingsState.borderActive : (btRowMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         readonly property bool isAudio: {
@@ -1201,14 +1286,14 @@ Rectangle {
           width: 36
           height: 36
           radius: 10
-          color: modelData.connected ? "#2c382c" : "#202520"
+          color: modelData.connected ? SettingsState.accent : SettingsState.bgSurface
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: btRow.isAudio ? "speaker" : "bt"
-            glyph: modelData.connected ? "#7ee2a8" : "#8e998e"
+            glyph: modelData.connected ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
           }
         }
 
@@ -1221,8 +1306,8 @@ Rectangle {
           height: 26
           width: btnText.implicitWidth + 18
           radius: 13
-          color: btnMouse.containsMouse ? "#2e362e" : "#222722"
-          border.color: "#303830"
+          color: btnMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
+          border.color: SettingsState.borderBase
           border.width: 1
           z: 5
 
@@ -1230,7 +1315,7 @@ Rectangle {
             id: btnText
             anchors.centerIn: parent
             text: modelData.connected ? "Disconnect" : (modelData.paired ? "Connect" : "Pair")
-            color: modelData.connected ? "#e05f65" : "#d0d8d0"
+            color: modelData.connected ? "#ff8a8a" : SettingsState.textMain
             font.pixelSize: 11
             font.family: SettingsState.fontFamily
           }
@@ -1452,8 +1537,8 @@ Rectangle {
         width: ListView.view.width
         height: 56
         radius: 14
-        color: modelData.connected ? "#1e261e" : (wifiRowMouse.containsMouse ? "#191d19" : "#141714")
-        border.color: modelData.connected ? "#3a4a35" : (wifiRowMouse.containsMouse ? "#283028" : "transparent")
+        color: modelData.connected ? SettingsState.bgActivePill : (wifiRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: modelData.connected ? SettingsState.borderActive : (wifiRowMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         // Left Icon Box
@@ -1465,14 +1550,14 @@ Rectangle {
           width: 36
           height: 36
           radius: 10
-          color: modelData.connected ? "#2c382c" : "#202520"
+          color: modelData.connected ? SettingsState.accent : SettingsState.bgSurface
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: "wifi"
-            glyph: modelData.connected ? "#7ee2a8" : "#8e998e"
+            glyph: modelData.connected ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
           }
         }
 
@@ -1485,8 +1570,8 @@ Rectangle {
           height: 26
           width: wBtnText.implicitWidth + 18
           radius: 13
-          color: wBtnMouse.containsMouse ? "#2e362e" : "#222722"
-          border.color: "#303830"
+          color: wBtnMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
+          border.color: SettingsState.borderBase
           border.width: 1
           z: 5
 
@@ -1494,7 +1579,7 @@ Rectangle {
             id: wBtnText
             anchors.centerIn: parent
             text: modelData.connected ? "Disconnect" : "Connect"
-            color: modelData.connected ? "#e05f65" : "#d0d8d0"
+            color: modelData.connected ? "#ff8a8a" : SettingsState.textMain
             font.pixelSize: 11
             font.family: SettingsState.fontFamily
           }
@@ -1526,7 +1611,7 @@ Rectangle {
           Text {
             width: parent.width
             text: modelData.name || "Hidden Network"
-            color: "#f2f2f2"
+            color: SettingsState.textMain
             font.pixelSize: 13
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -1536,7 +1621,7 @@ Rectangle {
           Text {
             width: parent.width
             text: (modelData.connected ? "connected" : "available") + " · " + Math.round((modelData.signalStrength || 0) * 100) + "% signal"
-            color: modelData.connected ? "#7ee2a8" : "#6e756e"
+            color: modelData.connected ? SettingsState.textActive : SettingsState.textMuted
             font.pixelSize: 11
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -2826,14 +2911,14 @@ Rectangle {
           width: 18
           height: 18
           kind: "sound"
-          glyph: "#c9dfae"
+          glyph: SettingsState.accent
         }
 
         // Title
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "SOUND OUTPUT"
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: 14
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -2849,7 +2934,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: outMuted ? "Muted" : (Math.round(outVol * 100) + "%")
-          color: outMuted ? "#ff8a8a" : "#c9dfae"
+          color: outMuted ? "#ff8a8a" : SettingsState.textActive
           font.pixelSize: 12
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -2860,7 +2945,7 @@ Rectangle {
           width: 40
           height: 22
           radius: 11
-          color: !outMuted ? "#3f5938" : "#252b25"
+          color: !outMuted ? SettingsState.accent : SettingsState.bgCard
           anchors.verticalCenter: parent.verticalCenter
 
           Behavior on color {
@@ -2871,7 +2956,7 @@ Rectangle {
             width: 16
             height: 16
             radius: 8
-            color: !outMuted ? "#c9dfae" : "#888888"
+            color: !outMuted ? (SettingsState.isDark ? "#ffffff" : "#000000") : SettingsState.textMuted
             anchors.verticalCenter: parent.verticalCenter
             x: !outMuted ? parent.width - width - 3 : 3
 
@@ -2893,7 +2978,7 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 1
-      color: "#252b25"
+      color: SettingsState.borderBase
     }
 
     // Volume Slider
@@ -2919,7 +3004,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         text: "Select Output Device"
-        color: "#9aa39a"
+        color: SettingsState.textSecondary
         font.pixelSize: 12
         font.bold: true
         font.family: SettingsState.fontFamily
@@ -2929,7 +3014,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         text: (AudioState.sinks.length || 0) + " available"
-        color: "#6e756e"
+        color: SettingsState.textMuted
         font.pixelSize: 11
         font.family: SettingsState.fontFamily
       }
@@ -2948,8 +3033,8 @@ Rectangle {
         width: ListView.view.width
         height: 52
         radius: 16
-        color: modelData.isDefault ? "#243322" : (sDevMouse.containsMouse ? "#1e251e" : "#171c17")
-        border.color: modelData.isDefault ? "#3f5938" : (sDevMouse.containsMouse ? "#2b362b" : "#222822")
+        color: modelData.isDefault ? SettingsState.bgActivePill : (sDevMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: modelData.isDefault ? SettingsState.borderActive : (sDevMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -2967,14 +3052,14 @@ Rectangle {
             width: 32
             height: 32
             radius: 16
-            color: modelData.isDefault ? "#c9dfae" : "#242c24"
+            color: modelData.isDefault ? SettingsState.accent : SettingsState.bgSurface
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "sound"
-              glyph: modelData.isDefault ? "#182415" : "#8e998e"
+              glyph: modelData.isDefault ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
             }
           }
 
@@ -2987,7 +3072,7 @@ Rectangle {
             Text {
               width: parent.width
               text: modelData.description || modelData.name || "Output Device"
-              color: modelData.isDefault ? "#c9dfae" : "#f2f2f2"
+              color: modelData.isDefault ? SettingsState.textActive : SettingsState.textMain
               font.pixelSize: 13
               font.bold: modelData.isDefault
               font.family: SettingsState.fontFamily
@@ -2997,7 +3082,7 @@ Rectangle {
             Text {
               width: parent.width
               text: modelData.isDefault ? "Active Output Route" : (modelData.name || "Audio Sink")
-              color: modelData.isDefault ? "#8ea87e" : "#6e756e"
+              color: modelData.isDefault ? SettingsState.textActive : SettingsState.textSecondary
               font.pixelSize: 11
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
@@ -3010,15 +3095,15 @@ Rectangle {
             width: 22
             height: 22
             radius: 11
-            color: modelData.isDefault ? "#3f5938" : "transparent"
-            border.color: modelData.isDefault ? "#527549" : "#333d33"
+            color: modelData.isDefault ? SettingsState.accent : "transparent"
+            border.color: modelData.isDefault ? SettingsState.accent : SettingsState.borderBase
             border.width: 1
 
             Text {
               anchors.centerIn: parent
               visible: modelData.isDefault
               text: "✓"
-              color: "#c9dfae"
+              color: SettingsState.isDark ? "#121612" : "#ffffff"
               font.pixelSize: 12
               font.bold: true
             }
@@ -3096,14 +3181,14 @@ Rectangle {
           width: 18
           height: 18
           kind: "mic"
-          glyph: "#c9dfae"
+          glyph: SettingsState.accent
         }
 
         // Title
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "MICROPHONE INPUT"
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: 14
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -3119,7 +3204,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: inMuted ? "Muted" : (Math.round(inVol * 100) + "%")
-          color: inMuted ? "#ff8a8a" : "#c9dfae"
+          color: inMuted ? "#ff8a8a" : SettingsState.textActive
           font.pixelSize: 12
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -3130,7 +3215,7 @@ Rectangle {
           width: 40
           height: 22
           radius: 11
-          color: !inMuted ? "#3f5938" : "#252b25"
+          color: !inMuted ? SettingsState.accent : SettingsState.bgCard
           anchors.verticalCenter: parent.verticalCenter
 
           Behavior on color {
@@ -3141,7 +3226,7 @@ Rectangle {
             width: 16
             height: 16
             radius: 8
-            color: !inMuted ? "#c9dfae" : "#888888"
+            color: !inMuted ? (SettingsState.isDark ? "#ffffff" : "#000000") : SettingsState.textMuted
             anchors.verticalCenter: parent.verticalCenter
             x: !inMuted ? parent.width - width - 3 : 3
 
@@ -3163,7 +3248,7 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 1
-      color: "#252b25"
+      color: SettingsState.borderBase
     }
 
     // Input Volume Slider
@@ -3189,7 +3274,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         text: "Select Input Device"
-        color: "#9aa39a"
+        color: SettingsState.textSecondary
         font.pixelSize: 12
         font.bold: true
         font.family: SettingsState.fontFamily
@@ -3199,7 +3284,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         text: (AudioState.sources.length || 0) + " available"
-        color: "#6e756e"
+        color: SettingsState.textMuted
         font.pixelSize: 11
         font.family: SettingsState.fontFamily
       }
@@ -3218,8 +3303,8 @@ Rectangle {
         width: ListView.view.width
         height: 52
         radius: 16
-        color: modelData.isDefault ? "#243322" : (mDevMouse.containsMouse ? "#1e251e" : "#171c17")
-        border.color: modelData.isDefault ? "#3f5938" : (mDevMouse.containsMouse ? "#2b362b" : "#222822")
+        color: modelData.isDefault ? SettingsState.bgActivePill : (mDevMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: modelData.isDefault ? SettingsState.borderActive : (mDevMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
         border.width: 1
 
         Behavior on color {
@@ -3237,14 +3322,14 @@ Rectangle {
             width: 32
             height: 32
             radius: 16
-            color: modelData.isDefault ? "#c9dfae" : "#242c24"
+            color: modelData.isDefault ? SettingsState.accent : SettingsState.bgSurface
 
             CCIcon {
               anchors.centerIn: parent
               width: 16
               height: 16
               kind: "mic"
-              glyph: modelData.isDefault ? "#182415" : "#8e998e"
+              glyph: modelData.isDefault ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
             }
           }
 
@@ -3257,7 +3342,7 @@ Rectangle {
             Text {
               width: parent.width
               text: modelData.description || modelData.name || "Input Device"
-              color: modelData.isDefault ? "#c9dfae" : "#f2f2f2"
+              color: modelData.isDefault ? SettingsState.textActive : SettingsState.textMain
               font.pixelSize: 13
               font.bold: modelData.isDefault
               font.family: SettingsState.fontFamily
@@ -3267,7 +3352,7 @@ Rectangle {
             Text {
               width: parent.width
               text: modelData.isDefault ? "Active Input Route" : (modelData.name || "Audio Source")
-              color: modelData.isDefault ? "#8ea87e" : "#6e756e"
+              color: modelData.isDefault ? SettingsState.textActive : SettingsState.textSecondary
               font.pixelSize: 11
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
@@ -3280,15 +3365,15 @@ Rectangle {
             width: 22
             height: 22
             radius: 11
-            color: modelData.isDefault ? "#3f5938" : "transparent"
-            border.color: modelData.isDefault ? "#527549" : "#333d33"
+            color: modelData.isDefault ? SettingsState.accent : "transparent"
+            border.color: modelData.isDefault ? SettingsState.accent : SettingsState.borderBase
             border.width: 1
 
             Text {
               anchors.centerIn: parent
               visible: modelData.isDefault
               text: "✓"
-              color: "#c9dfae"
+              color: SettingsState.isDark ? "#121612" : "#ffffff"
               font.pixelSize: 12
               font.bold: true
             }
@@ -3390,8 +3475,8 @@ Rectangle {
         height: 32
         width: toggleRow.implicitWidth + 8
         radius: 16
-        color: "#181d18"
-        border.color: "#283028"
+        color: SettingsState.bgCard
+        border.color: SettingsState.borderBase
         border.width: 1
 
         Row {
@@ -3404,13 +3489,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: !outMuted ? "#2a3826" : (sndBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: !outMuted ? SettingsState.bgActivePill : (sndBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: outMuted ? "sound-mute" : "sound"
-              glyph: !outMuted ? "#c9dfae" : (outMuted ? "#ff8a8a" : "#9aa39a")
+              glyph: !outMuted ? SettingsState.textActive : (outMuted ? "#ff8a8a" : SettingsState.textSecondary)
             }
             MouseArea {
               id: sndBtnMouse
@@ -3426,13 +3511,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: !inMuted ? "#2a3826" : (micBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: !inMuted ? SettingsState.bgActivePill : (micBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: inMuted ? "mic-mute" : "mic"
-              glyph: !inMuted ? "#c9dfae" : (inMuted ? "#ff8a8a" : "#9aa39a")
+              glyph: !inMuted ? SettingsState.textActive : (inMuted ? "#ff8a8a" : SettingsState.textSecondary)
             }
             MouseArea {
               id: micBtnMouse
@@ -3448,13 +3533,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: NotifCenter.dnd ? "#2a3826" : (dndBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: NotifCenter.dnd ? SettingsState.bgActivePill : (dndBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: "bell-slash"
-              glyph: NotifCenter.dnd ? "#c9dfae" : "#9aa39a"
+              glyph: NotifCenter.dnd ? SettingsState.textActive : SettingsState.textSecondary
             }
             MouseArea {
               id: dndBtnMouse
@@ -3470,13 +3555,13 @@ Rectangle {
             width: 28
             height: 26
             radius: 13
-            color: NightlightState.active ? "#3a2d1d" : (eyeBtnMouse.containsMouse ? "#222822" : "transparent")
+            color: NightlightState.active ? SettingsState.bgActivePill : (eyeBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
             CCIcon {
               anchors.centerIn: parent
               width: 14
               height: 14
               kind: "sunset"
-              glyph: NightlightState.active ? "#ffb877" : "#9aa39a"
+              glyph: NightlightState.active ? SettingsState.textActive : SettingsState.textSecondary
             }
             MouseArea {
               id: eyeBtnMouse
@@ -3657,45 +3742,93 @@ Rectangle {
         }
       }
 
-      // Right Status Badge
-      Rectangle {
+      Row {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        height: 24
-        width: recStatusRow.implicitWidth + 16
-        radius: 12
-        color: RecorderState.isRecording ? "#3a1b1b" : "#171c17"
-        border.color: RecorderState.isRecording ? "#662c2c" : "#283028"
-        border.width: 1
+        spacing: 6
 
-        Row {
-          id: recStatusRow
-          anchors.centerIn: parent
-          spacing: 6
+        // Still button
+        Rectangle {
+          height: 24
+          width: stillSwitchRow.implicitWidth + 14
+          radius: 12
+          color: stillSwitchMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
+          border.color: stillSwitchMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
+          border.width: 1
 
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 8
-            height: 8
-            radius: 4
-            color: RecorderState.isRecording ? "#ff5252" : "#7ee2a8"
+          Row {
+            id: stillSwitchRow
+            anchors.centerIn: parent
+            spacing: 4
 
-            SequentialAnimation on opacity {
-              running: RecorderState.isRecording
-              loops: Animation.Infinite
-              NumberAnimation { to: 0.3; duration: 600 }
-              NumberAnimation { to: 1.0; duration: 600 }
+            CCIcon {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 12
+              height: 12
+              kind: "camera"
+              glyph: stillSwitchMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: "Still"
+              color: stillSwitchMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
+              font.pixelSize: 11
+              font.bold: true
+              font.family: SettingsState.fontFamily
             }
           }
 
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: RecorderState.isRecording ? ("REC " + RecorderState.formattedTime) : "IDLE"
-            color: RecorderState.isRecording ? "#ff8a8a" : "#7ee2a8"
-            font.pixelSize: 11
-            font.bold: true
-            font.family: SettingsState.fontFamily
-            font.letterSpacing: 1
+          MouseArea {
+            id: stillSwitchMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+              root.activePage = "screenshot";
+              ScreenshotState.refreshLast();
+            }
+          }
+        }
+
+        // Right Status Badge
+        Rectangle {
+          height: 24
+          width: recStatusRow.implicitWidth + 16
+          radius: 12
+          color: RecorderState.isRecording ? "#3a1b1b" : "#171c17"
+          border.color: RecorderState.isRecording ? "#662c2c" : "#283028"
+          border.width: 1
+
+          Row {
+            id: recStatusRow
+            anchors.centerIn: parent
+            spacing: 6
+
+            Rectangle {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 8
+              height: 8
+              radius: 4
+              color: RecorderState.isRecording ? "#ff5252" : "#7ee2a8"
+
+              SequentialAnimation on opacity {
+                running: RecorderState.isRecording
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.3; duration: 600 }
+                NumberAnimation { to: 1.0; duration: 600 }
+              }
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: RecorderState.isRecording ? ("REC " + RecorderState.formattedTime) : "IDLE"
+              color: RecorderState.isRecording ? "#ff8a8a" : "#7ee2a8"
+              font.pixelSize: 11
+              font.bold: true
+              font.family: SettingsState.fontFamily
+              font.letterSpacing: 1
+            }
           }
         }
       }
@@ -3871,13 +4004,13 @@ Rectangle {
             width: 24
             height: 24
             radius: 12
-            color: AudioState.inMuted ? "#2a1e1e" : "#222a22"
+            color: AudioState.inMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgCard
             CCIcon {
               anchors.centerIn: parent
               width: 12
               height: 12
               kind: "mic"
-              glyph: AudioState.inMuted ? "#ff8a8a" : "#c9dfae"
+              glyph: AudioState.inMuted ? "#ff8a8a" : SettingsState.accent
             }
             MouseArea {
               anchors.fill: parent
@@ -3893,8 +4026,8 @@ Rectangle {
             height: 24
             width: Math.min(150, rMicDevRow.implicitWidth + 16)
             radius: 12
-            color: root.recMicDropdownOpen ? "#2c3b28" : (rMicDevMouse.containsMouse ? "#242e24" : "#1a221a")
-            border.color: root.recMicDropdownOpen ? "#4a6842" : (rMicDevMouse.containsMouse ? "#324032" : "#263026")
+            color: root.recMicDropdownOpen ? SettingsState.bgActivePill : (rMicDevMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+            border.color: root.recMicDropdownOpen ? SettingsState.borderActive : (rMicDevMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
             border.width: 1
             clip: true
 
@@ -3905,7 +4038,7 @@ Rectangle {
 
               Text {
                 text: AudioState.sourceName
-                color: root.recMicDropdownOpen ? "#c9dfae" : "#d0dad0"
+                color: root.recMicDropdownOpen ? SettingsState.textActive : SettingsState.textMain
                 font.pixelSize: 11
                 font.bold: true
                 font.family: SettingsState.fontFamily
@@ -3915,7 +4048,7 @@ Rectangle {
 
               Text {
                 text: root.recMicDropdownOpen ? "▲" : "▼"
-                color: "#8ea08e"
+                color: SettingsState.textSecondary
                 font.pixelSize: 8
               }
             }
@@ -3939,14 +4072,14 @@ Rectangle {
             width: parent.width - 24 - 8 - rMicDevChip.width - 8 - 38 - 8
             height: 10
             radius: 5
-            color: "#1f261f"
+            color: SettingsState.bgCardHover
             clip: true
 
             Rectangle {
               height: parent.height
               width: Math.max(parent.height, parent.width * (AudioState.inMuted ? 0 : AudioState.inVol))
               radius: parent.radius
-              color: AudioState.inMuted ? "#525252" : "#e05f65"
+              color: AudioState.inMuted ? SettingsState.borderBase : SettingsState.accent
             }
 
             MouseArea {
@@ -3963,7 +4096,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: 38
             text: AudioState.inMuted ? "Mute" : (Math.round(AudioState.inVol * 100) + "%")
-            color: AudioState.inMuted ? "#ff8a8a" : "#9aa39a"
+            color: AudioState.inMuted ? "#ff8a8a" : SettingsState.textSecondary
             font.pixelSize: 11
             font.family: SettingsState.fontFamily
             horizontalAlignment: Text.AlignRight
@@ -3983,8 +4116,8 @@ Rectangle {
             width: ListView.view.width
             height: 40
             radius: 10
-            color: modelData.isDefault ? "#243322" : (mPickMouse.containsMouse ? "#1e261e" : "#131713")
-            border.color: modelData.isDefault ? "#3f5938" : (mPickMouse.containsMouse ? "#2d382d" : "#202620")
+            color: modelData.isDefault ? SettingsState.bgActivePill : (mPickMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+            border.color: modelData.isDefault ? SettingsState.borderActive : (mPickMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
             border.width: 1
 
             Row {
@@ -3998,14 +4131,14 @@ Rectangle {
                 width: 14
                 height: 14
                 kind: "mic"
-                glyph: modelData.isDefault ? "#c9dfae" : "#8ea08e"
+                glyph: modelData.isDefault ? SettingsState.accent : SettingsState.textSecondary
               }
 
               Text {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width - 48
                 text: modelData.description || modelData.name || "Microphone"
-                color: modelData.isDefault ? "#f2f2f2" : "#9aa39a"
+                color: modelData.isDefault ? SettingsState.textActive : SettingsState.textMain
                 font.pixelSize: 11
                 font.bold: modelData.isDefault
                 font.family: SettingsState.fontFamily
@@ -4016,7 +4149,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: modelData.isDefault
                 text: "✓"
-                color: "#c9dfae"
+                color: SettingsState.isDark ? "#121612" : "#ffffff"
                 font.pixelSize: 12
                 font.bold: true
               }
@@ -4046,13 +4179,13 @@ Rectangle {
             width: 24
             height: 24
             radius: 12
-            color: AudioState.outMuted ? "#2a1e1e" : "#222a22"
+            color: AudioState.outMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgCard
             CCIcon {
               anchors.centerIn: parent
               width: 12
               height: 12
               kind: "sound"
-              glyph: AudioState.outMuted ? "#ff8a8a" : "#c9dfae"
+              glyph: AudioState.outMuted ? "#ff8a8a" : SettingsState.accent
             }
             MouseArea {
               anchors.fill: parent
@@ -4065,7 +4198,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: 72
             text: "Desktop"
-            color: "#d4dbd4"
+            color: SettingsState.textMain
             font.pixelSize: 11
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -4079,14 +4212,14 @@ Rectangle {
             width: parent.width - 152
             height: 10
             radius: 5
-            color: "#1f261f"
+            color: SettingsState.bgCardHover
             clip: true
 
             Rectangle {
               height: parent.height
               width: Math.max(parent.height, parent.width * (AudioState.outMuted ? 0 : AudioState.outVol))
               radius: parent.radius
-              color: AudioState.outMuted ? "#525252" : "#e05f65"
+              color: AudioState.outMuted ? SettingsState.borderBase : SettingsState.accent
             }
 
             MouseArea {
@@ -4103,7 +4236,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: 38
             text: AudioState.outMuted ? "Mute" : (Math.round(AudioState.outVol * 100) + "%")
-            color: AudioState.outMuted ? "#ff8a8a" : "#9aa39a"
+            color: AudioState.outMuted ? "#ff8a8a" : SettingsState.textSecondary
             font.pixelSize: 11
             font.family: SettingsState.fontFamily
             horizontalAlignment: Text.AlignRight
@@ -4117,8 +4250,8 @@ Rectangle {
       width: parent.width
       height: 34
       radius: 12
-      color: "#161b16"
-      border.color: "#252c25"
+      color: SettingsState.bgCard
+      border.color: SettingsState.borderBase
       border.width: 1
 
       Row {
@@ -4132,13 +4265,13 @@ Rectangle {
           width: 14
           height: 14
           kind: "folder"
-          glyph: "#9aa39a"
+          glyph: SettingsState.textSecondary
         }
 
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "SAVE TO"
-          color: "#6e756e"
+          color: SettingsState.textMuted
           font.pixelSize: 10
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -4148,7 +4281,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "~/Videos/Recordings"
-          color: "#d4dbd4"
+          color: SettingsState.textMain
           font.pixelSize: 11
           font.family: SettingsState.fontFamily
         }
@@ -4161,15 +4294,15 @@ Rectangle {
         height: 22
         width: openBtnText.implicitWidth + 14
         radius: 11
-        color: openDirMouse.containsMouse ? "#2a342a" : "#1f261f"
-        border.color: "#303c30"
+        color: openDirMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
+        border.color: SettingsState.borderBase
         border.width: 1
 
         Text {
           id: openBtnText
           anchors.centerIn: parent
           text: "OPEN"
-          color: "#c9dfae"
+          color: SettingsState.accent
           font.pixelSize: 10
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -4198,7 +4331,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "録"
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: 13
           font.bold: true
         }
@@ -4206,7 +4339,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "RECENT • " + (RecorderState.recentRecordings ? RecorderState.recentRecordings.length : 0)
-          color: "#d4dbd4"
+          color: SettingsState.textSecondary
           font.pixelSize: 11
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -4249,7 +4382,7 @@ Rectangle {
     Text {
       visible: !RecorderState.recentRecordings || RecorderState.recentRecordings.length === 0
       text: "No recent recordings"
-      color: "#6e756e"
+      color: SettingsState.textMuted
       font.pixelSize: 12
       font.family: SettingsState.fontFamily
       anchors.horizontalCenter: parent.horizontalCenter
@@ -4269,8 +4402,8 @@ Rectangle {
         width: ListView.view.width
         height: 54
         radius: 12
-        color: recCardMouse.containsMouse ? "#1e251e" : "#161b16"
-        border.color: recCardMouse.containsMouse ? "#2f3d2f" : "#242c24"
+        color: recCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
+        border.color: recCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
         border.width: 1
 
         Row {
@@ -4284,8 +4417,8 @@ Rectangle {
             width: 46
             height: 38
             radius: 8
-            color: recCardMouse.containsMouse ? "#242e24" : "#101410"
-            border.color: "#222a22"
+            color: recCardMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
+            border.color: SettingsState.borderBase
             border.width: 1
 
             CCIcon {
@@ -4293,7 +4426,7 @@ Rectangle {
               width: 16
               height: 16
               kind: "play"
-              glyph: recCardMouse.containsMouse ? "#e05f65" : "#c9dfae"
+              glyph: recCardMouse.containsMouse ? "#e05f65" : SettingsState.accent
             }
           }
 
@@ -4306,7 +4439,7 @@ Rectangle {
             Text {
               width: parent.width
               text: modelData.name || "Recording"
-              color: "#f2f2f2"
+              color: SettingsState.textMain
               font.pixelSize: 12
               font.bold: true
               font.family: SettingsState.fontFamily
@@ -4317,18 +4450,18 @@ Rectangle {
               spacing: 8
               Text {
                 text: modelData.date || ""
-                color: "#8e998e"
+                color: SettingsState.textSecondary
                 font.pixelSize: 11
                 font.family: SettingsState.fontFamily
               }
               Text {
                 text: "•"
-                color: "#4e584e"
+                color: SettingsState.textMuted
                 font.pixelSize: 11
               }
               Text {
                 text: modelData.size || ""
-                color: "#c9dfae"
+                color: SettingsState.accent
                 font.pixelSize: 11
                 font.family: SettingsState.fontFamily
               }
@@ -4343,6 +4476,456 @@ Rectangle {
           cursorShape: Qt.PointingHandCursor
           onClicked: {
             RecorderState.play(modelData.path);
+          }
+        }
+      }
+    }
+  }
+
+  // ==========================================
+  // SUBVIEW 7: SCREENSHOT / CAPTURE VIEW
+  // ==========================================
+  Item {
+    id: screenshotPage
+    anchors.fill: parent
+    anchors.margins: 18
+    visible: opacity > 0
+    opacity: (netMouse.containsMouse && root.activePage === "screenshot") ? 1 : 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+
+    Column {
+      id: screenshotCol
+      anchors.fill: parent
+      spacing: 12
+
+      // 1. Header: Back button + Title ("Capture" / "Screen capture") + Mode Tabs ("Still" / "Record")
+      Item {
+        width: parent.width
+        height: 36
+
+        Row {
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 10
+
+          // Back button
+          Rectangle {
+            width: 28
+            height: 28
+            radius: 14
+            color: shotBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
+            anchors.verticalCenter: parent.verticalCenter
+
+            Text {
+              anchors.centerIn: parent
+              text: "‹"
+              color: SettingsState.textMain
+              font.pixelSize: 20
+              font.bold: true
+            }
+
+            MouseArea {
+              id: shotBackMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                root.activePage = "main";
+              }
+            }
+          }
+
+          Column {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 1
+
+            Text {
+              text: "Capture"
+              color: SettingsState.textMain
+              font.pixelSize: 16
+              font.bold: true
+              font.family: SettingsState.fontFamily
+            }
+
+            Text {
+              text: "Screen capture"
+              color: SettingsState.textMuted
+              font.pixelSize: 11
+              font.family: SettingsState.fontFamily
+            }
+          }
+        }
+
+        // Right side: Still / Record Tabs
+        Row {
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Still Tab (Active)
+          Rectangle {
+            height: 26
+            width: stillTextRow.implicitWidth + 16
+            radius: 13
+            color: SettingsState.bgActivePill
+            border.color: SettingsState.borderActive
+            border.width: 1
+
+            Row {
+              id: stillTextRow
+              anchors.centerIn: parent
+              spacing: 5
+
+              CCIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 12
+                height: 12
+                kind: "camera"
+                glyph: SettingsState.textActive
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Still"
+                color: SettingsState.textActive
+                font.pixelSize: 11
+                font.bold: true
+                font.family: SettingsState.fontFamily
+              }
+            }
+          }
+
+          // Record Tab (Inactive, switches to recorder subview)
+          Rectangle {
+            height: 26
+            width: recTabRow.implicitWidth + 16
+            radius: 13
+            color: recTabMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
+            border.color: recTabMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
+            border.width: 1
+
+            Row {
+              id: recTabRow
+              anchors.centerIn: parent
+              spacing: 5
+
+              Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 7
+                height: 7
+                radius: 3.5
+                color: recTabMouse.containsMouse ? "#ff5252" : SettingsState.textSecondary
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Record"
+                color: recTabMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
+                font.pixelSize: 11
+                font.bold: true
+                font.family: SettingsState.fontFamily
+              }
+            }
+
+            MouseArea {
+              id: recTabMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                root.activePage = "recorder";
+                RecorderState.refreshRecent();
+              }
+            }
+          }
+        }
+      }
+
+      // 2. Middle Section: Mode List (Left) + Target Preview Box (Right)
+      Row {
+        width: parent.width
+        height: 136
+        spacing: 12
+
+        // Left Column: 3 Selection Cards (Display, Window, Area)
+        Column {
+          width: 115
+          height: parent.height
+          spacing: 6
+
+          // Mode 1: Display
+          Rectangle {
+            width: parent.width
+            height: 38
+            radius: 12
+            color: (ScreenshotState.mode === "display") ? SettingsState.bgActivePill : (dispMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+            border.color: (ScreenshotState.mode === "display") ? SettingsState.borderActive : (dispMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+            border.width: 1
+
+            Row {
+              anchors.fill: parent
+              anchors.leftMargin: 10
+              spacing: 8
+
+              CCIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 16
+                height: 16
+                kind: "display"
+                glyph: (ScreenshotState.mode === "display") ? SettingsState.textActive : (dispMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Display"
+                color: (ScreenshotState.mode === "display") ? SettingsState.textActive : SettingsState.textMain
+                font.pixelSize: 12
+                font.bold: ScreenshotState.mode === "display"
+                font.family: SettingsState.fontFamily
+              }
+            }
+
+            MouseArea {
+              id: dispMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                ScreenshotState.mode = "display";
+                root.activePage = "main";
+                ScreenshotState.capture("display");
+              }
+            }
+          }
+
+          // Mode 2: Window
+          Rectangle {
+            width: parent.width
+            height: 38
+            radius: 12
+            color: (ScreenshotState.mode === "window") ? SettingsState.bgActivePill : (winMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+            border.color: (ScreenshotState.mode === "window") ? SettingsState.borderActive : (winMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+            border.width: 1
+
+            Row {
+              anchors.fill: parent
+              anchors.leftMargin: 10
+              spacing: 8
+
+              CCIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 16
+                height: 16
+                kind: "window"
+                glyph: (ScreenshotState.mode === "window") ? SettingsState.textActive : (winMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Window"
+                color: (ScreenshotState.mode === "window") ? SettingsState.textActive : SettingsState.textMain
+                font.pixelSize: 12
+                font.bold: ScreenshotState.mode === "window"
+                font.family: SettingsState.fontFamily
+              }
+            }
+
+            MouseArea {
+              id: winMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                ScreenshotState.mode = "window";
+                root.activePage = "main";
+                ScreenshotState.capture("window");
+              }
+            }
+          }
+
+          // Mode 3: Area
+          Rectangle {
+            width: parent.width
+            height: 38
+            radius: 12
+            color: (ScreenshotState.mode === "area") ? SettingsState.bgActivePill : (areaMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+            border.color: (ScreenshotState.mode === "area") ? SettingsState.borderActive : (areaMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+            border.width: 1
+
+            Row {
+              anchors.fill: parent
+              anchors.leftMargin: 10
+              spacing: 8
+
+              CCIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 16
+                height: 16
+                kind: "area"
+                glyph: (ScreenshotState.mode === "area") ? SettingsState.textActive : (areaMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Area"
+                color: (ScreenshotState.mode === "area") ? SettingsState.textActive : SettingsState.textMain
+                font.pixelSize: 12
+                font.bold: ScreenshotState.mode === "area"
+                font.family: SettingsState.fontFamily
+              }
+            }
+
+            MouseArea {
+              id: areaMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                ScreenshotState.mode = "area";
+                root.activePage = "main";
+                ScreenshotState.capture("area");
+              }
+            }
+          }
+        }
+
+        // Right Column: Target Graphic Preview Box
+        Rectangle {
+          width: parent.width - 115 - 12
+          height: parent.height
+          radius: 14
+          color: SettingsState.bgCard
+          border.color: SettingsState.borderBase
+          border.width: 1
+
+          Column {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 8
+
+            Text {
+              text: ScreenshotState.mode === "display" ? "Display" : (ScreenshotState.mode === "window" ? "Window" : "Area")
+              color: SettingsState.textActive
+              font.pixelSize: 12
+              font.bold: true
+              font.family: SettingsState.fontFamily
+            }
+
+            // Graphic Illustration Box
+            Rectangle {
+              width: parent.width
+              height: 64
+              radius: 10
+              color: SettingsState.isDark ? "#121612" : "#f0f4f0"
+              border.color: SettingsState.borderActive
+              border.width: 1
+
+              // Window Mockup (when window mode)
+              Item {
+                anchors.fill: parent
+                visible: ScreenshotState.mode === "window"
+
+                Row {
+                  anchors.top: parent.top
+                  anchors.left: parent.left
+                  anchors.margins: 6
+                  spacing: 4
+
+                  Rectangle { width: 5; height: 5; radius: 2.5; color: "#ff5f56" }
+                  Rectangle { width: 5; height: 5; radius: 2.5; color: "#ffbd2e" }
+                  Rectangle { width: 5; height: 5; radius: 2.5; color: "#27c93f" }
+                }
+
+                Rectangle {
+                  anchors.centerIn: parent
+                  width: parent.width - 24
+                  height: parent.height - 20
+                  radius: 6
+                  color: "transparent"
+                  border.color: SettingsState.textSecondary
+                  border.width: 1
+                  opacity: 0.4
+                }
+              }
+
+              // Display Mockup (when display mode)
+              Item {
+                anchors.fill: parent
+                visible: ScreenshotState.mode === "display"
+
+                CCIcon {
+                  anchors.centerIn: parent
+                  width: 32
+                  height: 32
+                  kind: "display"
+                  glyph: SettingsState.textActive
+                }
+              }
+
+              // Area Mockup (when area mode)
+              Item {
+                anchors.fill: parent
+                visible: ScreenshotState.mode === "area"
+
+                CCIcon {
+                  anchors.centerIn: parent
+                  width: 32
+                  height: 32
+                  kind: "area"
+                  glyph: SettingsState.textActive
+                }
+              }
+            }
+
+            // Bottom Target Hint
+            Text {
+              text: ScreenshotState.mode === "display" ? "Capture entire screen" : (ScreenshotState.mode === "window" ? "Pick an open window" : "Drag a region to crop")
+              color: SettingsState.textSecondary
+              font.pixelSize: 11
+              font.family: SettingsState.fontFamily
+            }
+          }
+        }
+      }
+
+      // 3. Bottom Path Footer
+      Item {
+        width: parent.width
+        height: 20
+
+        Row {
+          anchors.fill: parent
+          spacing: 8
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 14
+            height: 14
+            kind: "screenshot"
+            glyph: SettingsState.textMuted
+          }
+
+          Text {
+            width: parent.width - 22
+            anchors.verticalCenter: parent.verticalCenter
+            text: ScreenshotState.lastPath
+            color: lastPathMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted
+            font.pixelSize: 11
+            font.family: "monospace"
+            elide: Text.ElideMiddle
+          }
+        }
+
+        MouseArea {
+          id: lastPathMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            ScreenshotState.openLast();
           }
         }
       }

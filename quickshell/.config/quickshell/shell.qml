@@ -42,5 +42,13 @@ Scope {
     function recorder(): void {
       RecorderState.toggle();
     }
+
+    function calendar(): void {
+      CalendarState.toggle();
+    }
+
+    function screenshot(): void {
+      ScreenshotState.capture(ScreenshotState.mode);
+    }
   }
 }

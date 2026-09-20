@@ -109,7 +109,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "控"
-          color: "#c9dfae"
+          color: SettingsState.accent
           font.pixelSize: 17
           font.bold: true
         }

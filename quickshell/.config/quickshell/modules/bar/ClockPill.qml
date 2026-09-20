@@ -3,10 +3,11 @@ import Quickshell.Hyprland
 import QtQuick
 import "../services"
 
-// Center time pill.
-// Normal state: configurable time format (24h/12h, seconds, font).
-// Workspace switch: temporarily reveals workspace dots + active red bar, then hides back to time.
+// Center Date & Time pill.
+// Normal state: configurable time format (24h/12h, seconds, font) + Cava visualizer.
+// Workspace switch: temporarily reveals workspace dots + active bar.
 // Hovered: big clock + 7-day strip.
+// Right swipe on hover: seamlessly morphs the center bar itself into the Weather & Calendar dual-pane widget!
 Rectangle {
   id: root
 
@@ -15,6 +16,7 @@ Rectangle {
   // Track workspace changes
   readonly property int currentWsId: Hyprland.focusedWorkspace?.id ?? 1
   property bool showWorkspaces: false
+  property bool isWeatherView: false
 
   onCurrentWsIdChanged: {
     showWorkspaces = true;
@@ -30,7 +32,7 @@ Rectangle {
     }
   }
 
-  // Determine highest workspace number to display (at least 3, up to highest active/occupied or 10)
+  // Determine highest workspace number to display
   readonly property int maxWs: {
     var m = 3;
     if (currentWsId > m) {
@@ -56,35 +58,62 @@ Rectangle {
     return false;
   }
 
-  implicitHeight: mouse.containsMouse ? 168 : 34
-  implicitWidth: mouse.containsMouse ? 300 : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
+  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open
+  readonly property bool showWeather: isWeatherView || CalendarState.open
 
-  radius: mouse.containsMouse ? 28 : implicitHeight / 2
-  color: mouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
+  implicitHeight: isExpanded ? (showWeather ? 265 : 168) : 34
+  implicitWidth: isExpanded ? (showWeather ? 520 : 300) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
+
+  radius: isExpanded ? (showWeather ? 20 : 28) : implicitHeight / 2
+  color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
+  clip: true
 
   Behavior on implicitWidth {
     NumberAnimation {
-      duration: 300
+      duration: 280
       easing.type: Easing.OutCubic
     }
   }
   Behavior on implicitHeight {
     NumberAnimation {
-      duration: 350
+      duration: 300
       easing.type: Easing.OutCubic
     }
   }
   Behavior on radius {
     NumberAnimation {
-      duration: 350
+      duration: 300
       easing.type: Easing.OutCubic
     }
   }
   Behavior on color {
     ColorAnimation {
-      duration: 200
+      duration: 180
+    }
+  }
+
+  // Handle IPC and keybind toggle
+  Connections {
+    target: CalendarState
+    function onOpenChanged() {
+      if (CalendarState.open) {
+        root.isWeatherView = true;
+        CalendarState.refreshWeather();
+      } else if (!mouse.containsMouse) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  // Reset to default clock view when mouse leaves
+  Connections {
+    target: mouse
+    function onContainsMouseChanged() {
+      if (!mouse.containsMouse && !CalendarState.open) {
+        root.isWeatherView = false;
+      }
     }
   }
 
@@ -118,7 +147,9 @@ Rectangle {
     }
   }
 
-  // ---- Collapsed content: cava visualizer + time ----
+  // ========================================================
+  // 1. COLLAPSED VIEW: Cava Visualizer + Time Pill
+  // ========================================================
   Row {
     id: collapsedRow
     anchors.centerIn: parent
@@ -127,9 +158,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: 180
-      }
+      NumberAnimation { duration: 160 }
     }
 
     // Cava visualizer bars on the left of time
@@ -178,7 +207,9 @@ Rectangle {
     }
   }
 
-  // ---- Workspace switcher indicators (shown briefly on workspace switch) ----
+  // ========================================================
+  // 2. WORKSPACE SWITCHER INDICATORS
+  // ========================================================
   Row {
     id: wsRow
     anchors.centerIn: parent
@@ -187,9 +218,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: 180
-      }
+      NumberAnimation { duration: 160 }
     }
 
     Repeater {
@@ -218,9 +247,7 @@ Rectangle {
           color: wsItem.isCurrent ? SettingsState.accent : (wsItem.occupied ? SettingsState.textSecondary : SettingsState.borderBase)
 
           Behavior on color {
-            ColorAnimation {
-              duration: 200
-            }
+            ColorAnimation { duration: 200 }
           }
         }
 
@@ -229,7 +256,7 @@ Rectangle {
           anchors.margins: -6
           cursorShape: Qt.PointingHandCursor
           onClicked: {
-            Hyprland.dispatch("workspace", "" + wsItem.wsId);
+            Hyprland.dispatch("workspace " + wsItem.wsId);
             root.showWorkspaces = true;
             wsTimer.restart();
           }
@@ -238,92 +265,182 @@ Rectangle {
     }
   }
 
-  // ---- Expanded content: big time + 7-day strip ----
-  Column {
-    anchors.centerIn: parent
-    spacing: 12
-    opacity: mouse.containsMouse ? 1 : 0
+  // ========================================================
+  // 3. EXPANDED HOVER VIEW: Big Time + 7-Day Strip + Swipe Hint
+  // ========================================================
+  Item {
+    anchors.fill: parent
+    opacity: (root.isExpanded && !root.showWeather) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: 280
-      }
+      NumberAnimation { duration: 200 }
     }
 
-    // Big 12hr time
-    Row {
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 6
+    Column {
+      anchors.centerIn: parent
+      spacing: 12
 
-      Text {
-        text: Qt.formatDateTime(root.date, "hh:mm")
-        color: SettingsState.accent
-        font.pixelSize: 34
-        font.bold: true
-        font.family: SettingsState.fontFamily
+      // Big 12hr time
+      Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 6
+
+        Text {
+          text: Qt.formatDateTime(root.date, "hh:mm")
+          color: SettingsState.accent
+          font.pixelSize: 34
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+        Text {
+          anchors.baseline: parent.children[0].baseline
+          text: Qt.formatDateTime(root.date, "AP")
+          color: SettingsState.accent
+          opacity: 0.8
+          font.pixelSize: 15
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
       }
-      Text {
-        anchors.baseline: parent.children[0].baseline
-        text: Qt.formatDateTime(root.date, "AP")
-        color: SettingsState.accent
-        opacity: 0.8
-        font.pixelSize: 15
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-    }
 
-    // 7-day strip centered on today (today-3 .. today+3)
-    Row {
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 14
+      // 7-day strip centered on today (today-3 .. today+3)
+      Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 14
 
-      Repeater {
-        model: 7
+        Repeater {
+          model: 7
 
-        delegate: Column {
-          spacing: 4
+          delegate: Column {
+            spacing: 4
 
-          property var dayDate: {
-            var d = new Date(root.date);
-            d.setDate(d.getDate() + (index - 3));
-            return d;
-          }
-          property bool isToday: index === 3
+            property var dayDate: {
+              var d = new Date(root.date);
+              d.setDate(d.getDate() + (index - 3));
+              return d;
+            }
+            property bool isToday: index === 3
 
-          Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: isToday ? Qt.formatDateTime(dayDate, "ddd").toUpperCase() : Qt.formatDateTime(dayDate, "ddd").substring(0, 1).toUpperCase()
-            color: isToday ? SettingsState.accent : SettingsState.textMuted
-            font.pixelSize: isToday ? 13 : 12
-            font.bold: isToday
-            font.family: SettingsState.fontFamily
-          }
-          Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDateTime(dayDate, "d")
-            color: isToday ? SettingsState.accent : SettingsState.textSecondary
-            font.pixelSize: isToday ? 18 : 15
-            font.bold: isToday
-            font.family: SettingsState.fontFamily
+            Text {
+              anchors.horizontalCenter: parent.horizontalCenter
+              text: isToday ? Qt.formatDateTime(dayDate, "ddd").toUpperCase() : Qt.formatDateTime(dayDate, "ddd").substring(0, 1).toUpperCase()
+              color: isToday ? SettingsState.accent : SettingsState.textMuted
+              font.pixelSize: isToday ? 13 : 12
+              font.bold: isToday
+              font.family: SettingsState.fontFamily
+            }
+            Text {
+              anchors.horizontalCenter: parent.horizontalCenter
+              text: Qt.formatDateTime(dayDate, "d")
+              color: isToday ? SettingsState.accent : SettingsState.textSecondary
+              font.pixelSize: isToday ? 18 : 15
+              font.bold: isToday
+              font.family: SettingsState.fontFamily
+            }
           }
         }
       }
     }
+
+    // Right Swipe Navigation Hint Button
+    Rectangle {
+      anchors.right: parent.right
+      anchors.rightMargin: 8
+      anchors.verticalCenter: parent.verticalCenter
+      width: 24
+      height: 36
+      radius: 12
+      color: rightArrowMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
+
+      Text {
+        anchors.centerIn: parent
+        text: "›"
+        color: rightArrowMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted
+        font.pixelSize: 18
+        font.bold: true
+      }
+
+      MouseArea {
+        id: rightArrowMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+          root.isWeatherView = true;
+          CalendarState.refreshWeather();
+        }
+      }
+    }
   }
+
+  // ========================================================
+  // 4. WEATHER & CALENDAR VIEW (Directly inside Center Bar)
+  // ========================================================
+  WeatherCalendarView {
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showWeather) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 220 }
+    }
+  }
+
+  // ========================================================
+  // GESTURE & INTERACTION HANDLER
+  // ========================================================
+  property real _pressX: 0
+  property real _pressY: 0
+  property bool _swiped: false
 
   MouseArea {
     id: mouse
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
-    acceptedButtons: Qt.NoButton
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+    onPressed: function(ev) {
+      root._pressX = ev.x;
+      root._pressY = ev.y;
+      root._swiped = false;
+    }
+
+    onPositionChanged: function(ev) {
+      if (!root._swiped) {
+        var dx = ev.x - root._pressX;
+        var dy = Math.abs(ev.y - root._pressY);
+
+        // Right swipe while hovered -> Open Weather & Calendar inside center bar
+        if (dx > 18 && dy < 45) {
+          root._swiped = true;
+          root.isWeatherView = true;
+          CalendarState.refreshWeather();
+        }
+        // Left swipe while hovered -> Return to clock view
+        else if (dx < -18 && dy < 45) {
+          root._swiped = true;
+          root.isWeatherView = false;
+        }
+      }
+    }
+
     onWheel: wheel => {
-      if (wheel.angleDelta.y > 0) {
-        Hyprland.dispatch("workspace", "e-1");
+      // Touchpad horizontal swipe right -> Open Weather & Calendar inside center bar
+      if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
+        root.isWeatherView = true;
+        CalendarState.refreshWeather();
+      }
+      // Touchpad horizontal swipe left -> Return to clock view
+      else if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
+        root.isWeatherView = false;
+      }
+      // Vertical scroll -> Workspace switch
+      else if (wheel.angleDelta.y > 0) {
+        Hyprland.dispatch("workspace e-1");
       } else if (wheel.angleDelta.y < 0) {
-        Hyprland.dispatch("workspace", "e+1");
+        Hyprland.dispatch("workspace e+1");
       }
     }
   }
