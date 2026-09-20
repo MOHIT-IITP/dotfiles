@@ -258,7 +258,7 @@ Rectangle {
         height: 32
         radius: 16
         color: lMouse.containsMouse ? "#2a302a" : "#181b18"
-        z: 30
+        z: 200
         visible: root.count > 1
 
         Text {
@@ -286,7 +286,7 @@ Rectangle {
         height: 32
         radius: 16
         color: rMouse.containsMouse ? "#2a302a" : "#181b18"
-        z: 30
+        z: 200
         visible: root.count > 1
 
         Text {
@@ -312,7 +312,7 @@ Rectangle {
         visible: root.count > 0
         model: root.list
         currentIndex: WallpaperState.currentIndex
-        highlightMoveDuration: 300
+        highlightMoveDuration: 280
         onCurrentIndexChanged: {
           if (currentIndex !== WallpaperState.currentIndex) {
             WallpaperState.selectIndex(currentIndex);
@@ -324,34 +324,56 @@ Rectangle {
         highlightRangeMode: PathView.StrictlyEnforceRange
 
         path: Path {
-          startX: 60
+          startX: 80
           startY: carouselArea.height / 2
+          PathAttribute { name: "itemZ"; value: 10 }
+          PathAttribute { name: "itemScale"; value: 0.72 }
+          PathAttribute { name: "itemOpacity"; value: 0.60 }
+
+          PathLine {
+            x: carouselArea.width * 0.28
+            y: carouselArea.height / 2
+          }
+          PathAttribute { name: "itemZ"; value: 50 }
+          PathAttribute { name: "itemScale"; value: 0.86 }
+          PathAttribute { name: "itemOpacity"; value: 0.85 }
+
           PathLine {
             x: carouselArea.width / 2
             y: carouselArea.height / 2
           }
+          PathAttribute { name: "itemZ"; value: 100 }
+          PathAttribute { name: "itemScale"; value: 1.0 }
+          PathAttribute { name: "itemOpacity"; value: 1.0 }
+
           PathLine {
-            x: carouselArea.width - 60
+            x: carouselArea.width * 0.72
             y: carouselArea.height / 2
           }
+          PathAttribute { name: "itemZ"; value: 50 }
+          PathAttribute { name: "itemScale"; value: 0.86 }
+          PathAttribute { name: "itemOpacity"; value: 0.85 }
+
+          PathLine {
+            x: carouselArea.width - 80
+            y: carouselArea.height / 2
+          }
+          PathAttribute { name: "itemZ"; value: 10 }
+          PathAttribute { name: "itemScale"; value: 0.72 }
+          PathAttribute { name: "itemOpacity"; value: 0.60 }
         }
 
         delegate: Item {
           id: cardItem
-          width: isCur ? 224 : 160
-          height: isCur ? 138 : 100
-          z: isCur ? 20 : 10
+          width: 224
+          height: 138
+          z: Math.round(PathView.itemZ || (isCur ? 100 : 10))
+          scale: PathView.itemScale || (isCur ? 1.0 : 0.85)
+          opacity: PathView.itemOpacity || (isCur ? 1.0 : 0.7)
 
           readonly property bool isCur: PathView.isCurrentItem
           readonly property bool isApplying: WallpaperState.isApplying && WallpaperState.lastApplied === modelData.path
-          readonly property real cardRadius: isCur ? 16 : 12
-
-          Behavior on width {
-            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-          }
-          Behavior on height {
-            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-          }
+          readonly property real cardRadius: isCur ? 16 : 14
 
           // Clipped wallpaper image item
           Item {

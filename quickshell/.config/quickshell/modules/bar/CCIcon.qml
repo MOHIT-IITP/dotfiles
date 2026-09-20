@@ -20,7 +20,7 @@ Item {
     if (k === "bt" || k === "bluetooth") return "";
     if (k === "bt-connected") return "󰂱";
     if (k === "sound" || k === "speaker" || k === "audio" || k === "volume") return "";
-    if (k === "sound-mute" || k === "speaker-mute" || k === "muted" || k === "volume-mute") return "";
+    if (k === "sound-mute" || k === "speaker-mute" || k === "muted" || k === "volume-mute" || k === "mute") return "󰖁";
     if (k === "mic" || k === "microphone") return "";
     if (k === "mic-mute" || k === "microphone-mute") return "";
     if (k === "bell" || k === "notif") return "";

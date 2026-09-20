@@ -6,6 +6,7 @@ import "../utils"
 // Left media player. Collapsed: art thumbnail circle.
 // Hovered: full player card (art, metadata, progress, controls).
 Rectangle {
+  id: root
   readonly property var player: MediaState.activePlayer
   readonly property bool hasPlayer: MediaState.hasPlayer
   readonly property bool isPlaying: MediaState.isPlaying
@@ -13,6 +14,7 @@ Rectangle {
   implicitWidth: playerMouse.containsMouse ? 370 : 34
   implicitHeight: playerMouse.containsMouse ? 168 : 34
   radius: playerMouse.containsMouse ? 24 : 17
+  clip: true
 
   color: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
@@ -20,19 +22,19 @@ Rectangle {
 
   Behavior on implicitWidth {
     NumberAnimation {
-      duration: 350
+      duration: 320
       easing.type: Easing.OutCubic
     }
   }
   Behavior on implicitHeight {
     NumberAnimation {
-      duration: 350
+      duration: 320
       easing.type: Easing.OutCubic
     }
   }
   Behavior on radius {
     NumberAnimation {
-      duration: 350
+      duration: 320
       easing.type: Easing.OutCubic
     }
   }
@@ -52,7 +54,7 @@ Rectangle {
 
     Behavior on opacity {
       NumberAnimation {
-        duration: 180
+        duration: playerMouse.containsMouse ? 100 : 180
       }
     }
 
@@ -80,14 +82,19 @@ Rectangle {
 
   // ---- Expanded: player card ----
   Item {
-    anchors.fill: parent
-    anchors.margins: 16
+    id: expandedView
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.topMargin: 16
+    anchors.rightMargin: 16
+    width: 338
+    height: 136
     opacity: playerMouse.containsMouse ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
       NumberAnimation {
-        duration: 280
+        duration: playerMouse.containsMouse ? 200 : 120
       }
     }
 
@@ -123,7 +130,7 @@ Rectangle {
       }
 
       Column {
-        width: parent.width - 124
+        width: 214
         anchors.verticalCenter: parent.verticalCenter
         spacing: 6
 
