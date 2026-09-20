@@ -3,12 +3,11 @@ import QtQuick
 import QtQuick.Effects
 import "../services"
 
-// Clipboard history dropdown modal matching reference UI.
+// Embedded Clipboard History subview directly inside ClockPill.
 // Supports search filtering, mouse selection, and full keyboard navigation (Up/Down/Enter/Delete/Esc).
-Rectangle {
+Item {
   id: root
 
-  readonly property bool open: ClipboardState.open
   property string query: ""
   property int sel: 0
 
@@ -27,28 +26,43 @@ Rectangle {
     return out;
   }
 
-  onOpenChanged: {
-    if (open) {
-      ClipboardState.refresh();
-      query = "";
-      sel = 0;
-      searchInput.text = "";
-      searchInput.focus = true;
-      clipFocusTimer.restart();
+  implicitWidth: 460
+  implicitHeight: 420
+
+  function forceFocus() {
+    searchInput.focus = true;
+    searchInput.forceActiveFocus();
+  }
+
+  Connections {
+    target: ClipboardState
+    function onOpenChanged() {
+      if (ClipboardState.open) {
+        ClipboardState.refresh();
+        query = "";
+        sel = 0;
+        searchInput.text = "";
+        forceFocus();
+        clipFocusTimer.restart();
+      }
     }
   }
 
   Timer {
     id: clipFocusTimer
     interval: 30
-    repeat: false
-    onTriggered: {
-      searchInput.forceActiveFocus();
+    repeat: true
+    property int count: 0
+    onRunningChanged: {
+      if (running) count = 0;
     }
-  }
-
-  function forceFocus() {
-    searchInput.forceActiveFocus();
+    onTriggered: {
+      count++;
+      forceFocus();
+      if (searchInput.activeFocus || count > 8) {
+        running = false;
+      }
+    }
   }
 
   function copySelected() {
@@ -64,31 +78,6 @@ Rectangle {
       if (sel >= filtered.length - 1) {
         sel = Math.max(0, filtered.length - 2);
       }
-    }
-  }
-
-  implicitWidth: 460
-  implicitHeight: open ? 420 : 0
-  radius: 20
-  clip: true
-
-  color: "#101210"
-  border.color: "#2e362e"
-  border.width: 1
-
-  opacity: open ? 1 : 0
-  visible: open || opacity > 0
-
-  Behavior on implicitHeight {
-    NumberAnimation {
-      duration: 260
-      easing.type: Easing.OutCubic
-    }
-  }
-
-  Behavior on opacity {
-    NumberAnimation {
-      duration: 180
     }
   }
 
@@ -130,7 +119,7 @@ Rectangle {
             verticalAlignment: Text.AlignVCenter
             visible: searchInput.text === ""
             text: "Search clipboard"
-            color: "#525e52"
+            color: SettingsState.textMuted
             font.pixelSize: 14
             font.family: SettingsState.fontFamily
           }
@@ -139,7 +128,7 @@ Rectangle {
             id: searchInput
             anchors.fill: parent
             verticalAlignment: TextInput.AlignVCenter
-            color: "#f2f2f2"
+            color: SettingsState.textMain
             font.pixelSize: 14
             font.family: SettingsState.fontFamily
             clip: true
@@ -184,7 +173,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: filtered.length + " / " + (allItems ? allItems.length : 0)
-          color: "#6e7a6e"
+          color: SettingsState.textSecondary
           font.pixelSize: 12
           font.family: "monospace"
         }
@@ -195,12 +184,12 @@ Rectangle {
           height: 24
           radius: 12
           anchors.verticalCenter: parent.verticalCenter
-          color: clearMouse.containsMouse ? "#3a2222" : "transparent"
+          color: clearMouse.containsMouse ? (SettingsState.isDark ? "#3a2222" : "#ffebee") : "transparent"
 
           Text {
             anchors.centerIn: parent
             text: "掃"
-            color: clearMouse.containsMouse ? "#ef5350" : "#6e7a6e"
+            color: clearMouse.containsMouse ? "#ef5350" : SettingsState.textSecondary
             font.pixelSize: 14
             font.bold: true
           }
@@ -220,14 +209,14 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 1
-      color: "#252b25"
+      color: SettingsState.borderBase
     }
 
     // Empty state
     Text {
       visible: filtered.length === 0
       text: ClipboardState.loading ? "Loading clipboard..." : "Clipboard is empty"
-      color: "#525e52"
+      color: SettingsState.textMuted
       font.pixelSize: 13
       font.family: "monospace"
       anchors.horizontalCenter: parent.horizontalCenter
@@ -250,8 +239,8 @@ Rectangle {
         width: ListView.view.width
         height: 34
         radius: 8
-        color: isSelected ? "#232a20" : (itemMouse.containsMouse ? "#181d18" : "transparent")
-        border.color: isSelected ? "#3a4a35" : (itemMouse.containsMouse ? "#242a24" : "transparent")
+        color: isSelected ? SettingsState.bgActivePill : (itemMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
+        border.color: isSelected ? SettingsState.borderActive : (itemMouse.containsMouse ? SettingsState.borderBase : "transparent")
         border.width: 1
 
         readonly property bool isSelected: root.sel === index
@@ -266,7 +255,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - (delBtn.visible ? 30 : 10)
             text: modelData.text || ""
-            color: isSelected ? "#f2f2f2" : (itemMouse.containsMouse ? "#d8ded8" : "#9aa39a")
+            color: isSelected ? SettingsState.textActive : (itemMouse.containsMouse ? SettingsState.textMain : SettingsState.textSecondary)
             font.pixelSize: 13
             font.family: SettingsState.fontFamily
             font.bold: isSelected
@@ -281,13 +270,13 @@ Rectangle {
             height: 20
             radius: 10
             anchors.verticalCenter: parent.verticalCenter
-            color: delMouse.containsMouse ? "#452424" : "transparent"
+            color: delMouse.containsMouse ? (SettingsState.isDark ? "#452424" : "#ffcdd2") : "transparent"
             visible: isSelected || itemMouse.containsMouse
 
             Text {
               anchors.centerIn: parent
               text: "✕"
-              color: delMouse.containsMouse ? "#ef5350" : "#6e7a6e"
+              color: delMouse.containsMouse ? "#ef5350" : SettingsState.textSecondary
               font.pixelSize: 11
             }
 

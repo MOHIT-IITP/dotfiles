@@ -50,5 +50,17 @@ Scope {
     function screenshot(): void {
       ScreenshotState.capture(ScreenshotState.mode);
     }
+
+    function screenshotArea(): void {
+      ScreenshotState.capture("area");
+    }
+
+    function screenshotWindow(): void {
+      ScreenshotState.capture("window");
+    }
+
+    function screenshotDisplay(): void {
+      ScreenshotState.capture("display");
+    }
   }
 }

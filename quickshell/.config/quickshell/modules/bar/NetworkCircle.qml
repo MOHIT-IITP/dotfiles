@@ -3,6 +3,7 @@ import Quickshell.Bluetooth
 import Quickshell.Networking
 import Quickshell.Io
 import QtQuick
+import QtQuick.Effects
 import "../services"
 
 // Right circle: collapsed wifi/ethernet icon with dark amber ring.

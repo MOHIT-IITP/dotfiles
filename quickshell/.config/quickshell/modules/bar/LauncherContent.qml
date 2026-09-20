@@ -1,30 +1,33 @@
 import Quickshell
 import QtQuick
-import QtQuick.Effects
 import "../services"
 
-// Minimalist, fast Spotlight/Raycast-style App Launcher.
-// Features keyboard navigation (Up/Down/Enter/Esc), search filtering, and sleek theming.
-Rectangle {
+// Embedded App Launcher subview directly inside ClockPill.
+// Provides instant search, keyboard navigation (Up/Down/Enter/Esc), and fast app execution.
+Item {
   id: root
-  readonly property bool open: LauncherState.open
-  focus: true
 
   property string query: ""
   property int sel: 0
+
+  implicitWidth: 440
+  implicitHeight: contentCol.implicitHeight
 
   function forceFocus() {
     search.focus = true;
     search.forceActiveFocus();
   }
 
-  onOpenChanged: {
-    if (open) {
-      query = "";
-      sel = 0;
-      search.text = "";
-      forceFocus();
-      focusRetryTimer.restart();
+  Connections {
+    target: LauncherState
+    function onOpenChanged() {
+      if (LauncherState.open) {
+        root.query = "";
+        root.sel = 0;
+        search.text = "";
+        forceFocus();
+        focusRetryTimer.restart();
+      }
     }
   }
 
@@ -80,29 +83,6 @@ Rectangle {
       launch(filtered[sel]);
   }
 
-  implicitWidth: 420
-  implicitHeight: open ? contentCol.implicitHeight + 28 : 0
-  radius: 26
-  clip: true
-
-  color: SettingsState.bgSurface
-  border.color: SettingsState.borderBase
-  border.width: 1
-  opacity: open ? 1 : 0
-  visible: open || opacity > 0
-
-  Behavior on implicitHeight {
-    NumberAnimation {
-      duration: 220
-      easing.type: Easing.OutCubic
-    }
-  }
-  Behavior on opacity {
-    NumberAnimation {
-      duration: 160
-    }
-  }
-
   Column {
     id: contentCol
     anchors.top: parent.top
@@ -111,7 +91,7 @@ Rectangle {
     anchors.margins: 14
     spacing: 10
 
-    // Minimal Search Input Bar
+    // Search Input Bar
     Row {
       width: parent.width
       height: 32
@@ -298,14 +278,14 @@ Rectangle {
             elide: Text.ElideRight
           }
 
-          // Return / Launch Hint Badge
+          // Enter key badge
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            visible: isSelected
-            width: 18
-            height: 18
-            radius: 4
+            width: 20
+            height: 20
+            radius: 6
             color: SettingsState.accent
+            visible: isSelected
 
             Text {
               anchors.centerIn: parent
@@ -322,9 +302,6 @@ Rectangle {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
-          onEntered: {
-            root.sel = index;
-          }
           onClicked: {
             root.launch(modelData);
           }

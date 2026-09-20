@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick
+import QtQuick.Effects
 import "../services"
 
 // Top bar: centered clock pill with media player on the left
@@ -49,11 +50,11 @@ Scope {
           if (needsFocus) {
             openGuard.restart();
             Qt.callLater(function() {
-              if (LauncherState.open && launcher) launcher.forceFocus();
-              else if (WallpaperState.open && wallpaperSelector) wallpaperSelector.forceFocus();
-              else if (PowerState.open && powerMenu) powerMenu.forceFocus();
-              else if (ClipboardState.open && clipboardHistory) clipboardHistory.forceFocus();
-              else if (MixerState.open && hardwareMixer) hardwareMixer.forceFocus();
+              if (LauncherState.open && clockPill) clockPill.forceFocusLauncher();
+              else if (WallpaperState.open && clockPill) clockPill.forceFocusWallpaper();
+              else if (PowerState.open && clockPill) clockPill.forceFocusPower();
+              else if (ClipboardState.open && clockPill) clockPill.forceFocusClipboard();
+              else if (MixerState.open && clockPill) clockPill.forceFocusMixer();
             });
           }
         }
@@ -87,21 +88,6 @@ Scope {
           Region {
             item: mediaPlayer
           }
-          Region {
-            item: launcher
-          }
-          Region {
-            item: wallpaperSelector
-          }
-          Region {
-            item: powerMenu
-          }
-          Region {
-            item: clipboardHistory
-          }
-          Region {
-            item: hardwareMixer
-          }
         }
 
         SystemClock {
@@ -125,6 +111,60 @@ Scope {
             }
           }
 
+          // ==========================================
+          // DEDICATED DROP SHADOWS (Rendered behind components)
+          // ==========================================
+          Rectangle {
+            anchors.fill: clockPill
+            radius: clockPill.radius
+            color: SettingsState.bgSurface
+            visible: clockPill.visible
+            layer.enabled: true
+            layer.effect: MultiEffect {
+              shadowEnabled: true
+              shadowColor: SettingsState.shadowColor
+              shadowBlur: 0.55
+              shadowVerticalOffset: 3
+              shadowHorizontalOffset: 0
+            }
+          }
+
+          Rectangle {
+            anchors.fill: mediaPlayer
+            radius: mediaPlayer.radius
+            color: SettingsState.bgSurface
+            visible: mediaPlayer.visible
+            layer.enabled: true
+            layer.effect: MultiEffect {
+              shadowEnabled: true
+              shadowColor: SettingsState.shadowColor
+              shadowBlur: 0.55
+              shadowVerticalOffset: 3
+              shadowHorizontalOffset: 0
+            }
+          }
+
+          Rectangle {
+            anchors.fill: netCircle
+            radius: netCircle.radius
+            color: SettingsState.bgSurface
+            visible: netCircle.visible
+            layer.enabled: true
+            layer.effect: MultiEffect {
+              shadowEnabled: true
+              shadowColor: SettingsState.shadowColor
+              shadowBlur: 0.55
+              shadowVerticalOffset: 3
+              shadowHorizontalOffset: 0
+            }
+          }
+
+
+
+
+          // ==========================================
+          // FOREGROUND COMPONENTS (Direct rendering with full subpixel font sharpness)
+          // ==========================================
           ClockPill {
             id: clockPill
             anchors.horizontalCenter: parent.horizontalCenter
@@ -146,40 +186,9 @@ Scope {
             anchors.leftMargin: 10
           }
 
-          Launcher {
-            id: launcher
-            anchors.top: clockPill.bottom
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-          }
 
-          WallpaperSelector {
-            id: wallpaperSelector
-            anchors.top: clockPill.bottom
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-          }
 
-          PowerMenu {
-            id: powerMenu
-            anchors.top: clockPill.bottom
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-          }
 
-          ClipboardHistory {
-            id: clipboardHistory
-            anchors.top: clockPill.bottom
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-          }
-
-          HardwareMixer {
-            id: hardwareMixer
-            anchors.top: clockPill.bottom
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-          }
         }
       }
 

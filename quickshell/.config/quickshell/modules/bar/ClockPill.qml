@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Hyprland
 import QtQuick
+import QtQuick.Effects
 import "../services"
 
 // Center Date & Time pill.
@@ -58,17 +59,52 @@ Rectangle {
     return false;
   }
 
-  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open
-  readonly property bool showWeather: isWeatherView || CalendarState.open
+  readonly property bool showLauncher: LauncherState.open
+  readonly property bool showWallpaper: WallpaperState.open && !showLauncher
+  readonly property bool showPower: PowerState.open && !showLauncher && !showWallpaper
+  readonly property bool showClipboard: ClipboardState.open && !showLauncher && !showWallpaper && !showPower
+  readonly property bool showMixer: MixerState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
+  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open
 
-  implicitHeight: isExpanded ? (showWeather ? 265 : 168) : 34
-  implicitWidth: isExpanded ? (showWeather ? 520 : 300) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showWeather ? 265 : 168)))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showWeather ? 520 : 300)))))) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
 
-  radius: isExpanded ? (showWeather ? 20 : 28) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 26 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showWeather ? 20 : 28)))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
   clip: true
+
+  function forceFocusLauncher() {
+    if (launcherContent) {
+      launcherContent.forceFocus();
+    }
+  }
+
+  function forceFocusWallpaper() {
+    if (wallpaperContent) {
+      wallpaperContent.forceFocus();
+    }
+  }
+
+  function forceFocusPower() {
+    if (powerMenuContent) {
+      powerMenuContent.forceFocus();
+    }
+  }
+
+  function forceFocusClipboard() {
+    if (clipboardContent) {
+      clipboardContent.forceFocus();
+    }
+  }
+
+  function forceFocusMixer() {
+    if (hardwareMixerContent) {
+      hardwareMixerContent.forceFocus();
+    }
+  }
 
   Behavior on implicitWidth {
     NumberAnimation {
@@ -101,7 +137,67 @@ Rectangle {
       if (CalendarState.open) {
         root.isWeatherView = true;
         CalendarState.refreshWeather();
-      } else if (!mouse.containsMouse) {
+      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: LauncherState
+    function onOpenChanged() {
+      if (LauncherState.open) {
+        root.isWeatherView = false;
+        forceFocusLauncher();
+      } else if (!mouse.containsMouse && !CalendarState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: WallpaperState
+    function onOpenChanged() {
+      if (WallpaperState.open) {
+        root.isWeatherView = false;
+        forceFocusWallpaper();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: PowerState
+    function onOpenChanged() {
+      if (PowerState.open) {
+        root.isWeatherView = false;
+        forceFocusPower();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: ClipboardState
+    function onOpenChanged() {
+      if (ClipboardState.open) {
+        root.isWeatherView = false;
+        forceFocusClipboard();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: MixerState
+    function onOpenChanged() {
+      if (MixerState.open) {
+        root.isWeatherView = false;
+        forceFocusMixer();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open) {
         root.isWeatherView = false;
       }
     }
@@ -111,7 +207,7 @@ Rectangle {
   Connections {
     target: mouse
     function onContainsMouseChanged() {
-      if (!mouse.containsMouse && !CalendarState.open) {
+      if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
         root.isWeatherView = false;
       }
     }
@@ -123,7 +219,7 @@ Rectangle {
 
   Timer {
     id: vizTimer
-    interval: 60
+    interval: 65
     running: SettingsState.musicVisualizer && MediaState.isPlaying
     repeat: true
     onTriggered: {
@@ -154,7 +250,7 @@ Rectangle {
     id: collapsedRow
     anchors.centerIn: parent
     spacing: 7
-    opacity: (!mouse.containsMouse && !root.showWorkspaces) ? 1 : 0
+    opacity: (!root.isExpanded && !root.showWorkspaces) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -214,7 +310,7 @@ Rectangle {
     id: wsRow
     anchors.centerIn: parent
     spacing: 8
-    opacity: (!mouse.containsMouse && root.showWorkspaces) ? 1 : 0
+    opacity: (!root.isExpanded && root.showWorkspaces) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -270,7 +366,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -342,36 +438,6 @@ Rectangle {
         }
       }
     }
-
-    // Right Swipe Navigation Hint Button
-    Rectangle {
-      anchors.right: parent.right
-      anchors.rightMargin: 8
-      anchors.verticalCenter: parent.verticalCenter
-      width: 24
-      height: 36
-      radius: 12
-      color: rightArrowMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
-
-      Text {
-        anchors.centerIn: parent
-        text: "›"
-        color: rightArrowMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted
-        font.pixelSize: 18
-        font.bold: true
-      }
-
-      MouseArea {
-        id: rightArrowMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          root.isWeatherView = true;
-          CalendarState.refreshWeather();
-        }
-      }
-    }
   }
 
   // ========================================================
@@ -379,11 +445,81 @@ Rectangle {
   // ========================================================
   WeatherCalendarView {
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather) ? 1 : 0
+    opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
       NumberAnimation { duration: 220 }
+    }
+  }
+
+  // ========================================================
+  // 5. EMBEDDED APP LAUNCHER VIEW (Directly inside Center Bar)
+  // ========================================================
+  LauncherContent {
+    id: launcherContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showLauncher) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
+  // ========================================================
+  // 6. EMBEDDED WALLPAPER SELECTOR VIEW (Directly inside Center Bar)
+  // ========================================================
+  WallpaperContent {
+    id: wallpaperContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showWallpaper) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
+  // ========================================================
+  // 7. EMBEDDED POWER MENU VIEW (Directly inside Center Bar)
+  // ========================================================
+  PowerMenuContent {
+    id: powerMenuContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showPower) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
+  // ========================================================
+  // 8. EMBEDDED CLIPBOARD HISTORY VIEW (Directly inside Center Bar)
+  // ========================================================
+  ClipboardContent {
+    id: clipboardContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showClipboard) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
+  // ========================================================
+  // 9. EMBEDDED HARDWARE MIXER VIEW (Directly inside Center Bar)
+  // ========================================================
+  HardwareMixerContent {
+    id: hardwareMixerContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showMixer) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
     }
   }
 
@@ -397,6 +533,7 @@ Rectangle {
   MouseArea {
     id: mouse
     anchors.fill: parent
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -412,14 +549,14 @@ Rectangle {
         var dx = ev.x - root._pressX;
         var dy = Math.abs(ev.y - root._pressY);
 
-        // Right swipe while hovered -> Open Weather & Calendar inside center bar
-        if (dx > 18 && dy < 45) {
+        // Left swipe while hovered -> Open Weather & Calendar inside center bar
+        if (dx < -18 && dy < 45) {
           root._swiped = true;
           root.isWeatherView = true;
           CalendarState.refreshWeather();
         }
-        // Left swipe while hovered -> Return to clock view
-        else if (dx < -18 && dy < 45) {
+        // Right swipe while hovered -> Return to clock view
+        else if (dx > 18 && dy < 45) {
           root._swiped = true;
           root.isWeatherView = false;
         }
@@ -427,13 +564,13 @@ Rectangle {
     }
 
     onWheel: wheel => {
-      // Touchpad horizontal swipe right -> Open Weather & Calendar inside center bar
-      if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
+      // Touchpad horizontal swipe left -> Open Weather & Calendar inside center bar
+      if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
         root.isWeatherView = true;
         CalendarState.refreshWeather();
       }
-      // Touchpad horizontal swipe left -> Return to clock view
-      else if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
+      // Touchpad horizontal swipe right -> Return to clock view
+      else if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
         root.isWeatherView = false;
       }
       // Vertical scroll -> Workspace switch

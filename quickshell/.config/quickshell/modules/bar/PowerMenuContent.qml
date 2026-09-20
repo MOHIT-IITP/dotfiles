@@ -1,63 +1,53 @@
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import QtQuick.Effects
 import "../services"
 
-// Power menu modal dropping down below the clock pill.
-// Supports mouse click and keyboard navigation (Left/Right/Enter/Esc).
-Rectangle {
+// Embedded Power Menu subview directly inside ClockPill.
+// Supports keyboard navigation (Left/Right/Enter/Space/Esc) and mouse interaction for system actions.
+Item {
   id: root
 
-  readonly property bool open: PowerState.open
   property int sel: -1 // 0: lock, 1: logout, 2: sleep, 3: reboot, 4: poweroff
+  property int hoveredIndex: -1
 
-  implicitWidth: 330
-  implicitHeight: open ? 116 : 0
-  radius: 22
-  clip: true
+  implicitWidth: 340
+  implicitHeight: 116
 
-  color: "#101210"
-  border.color: "#2e362e"
-  border.width: 1
-
-  opacity: open ? 1 : 0
-  visible: open || opacity > 0
-
-  Behavior on implicitHeight {
-    NumberAnimation {
-      duration: 250
-      easing.type: Easing.OutCubic
-    }
+  function forceFocus() {
+    keyArea.focus = true;
+    keyArea.forceActiveFocus();
   }
 
-  Behavior on opacity {
-    NumberAnimation {
-      duration: 180
-    }
-  }
-
-  onOpenChanged: {
-    if (open) {
-      sel = 4; // Default selection on shutdown or none
-      keyArea.focus = true;
-      powerFocusTimer.restart();
-    } else {
-      sel = -1;
+  Connections {
+    target: PowerState
+    function onOpenChanged() {
+      if (PowerState.open) {
+        root.sel = 4; // Default selection on power off
+        forceFocus();
+        powerFocusTimer.restart();
+      } else {
+        root.sel = -1;
+        root.hoveredIndex = -1;
+      }
     }
   }
 
   Timer {
     id: powerFocusTimer
     interval: 30
-    repeat: false
-    onTriggered: {
-      keyArea.forceActiveFocus();
+    repeat: true
+    property int count: 0
+    onRunningChanged: {
+      if (running) count = 0;
     }
-  }
-
-  function forceFocus() {
-    keyArea.forceActiveFocus();
+    onTriggered: {
+      count++;
+      forceFocus();
+      if (keyArea.activeFocus || count > 8) {
+        running = false;
+      }
+    }
   }
 
   Process {
@@ -93,8 +83,6 @@ Rectangle {
     if (s === 4) return "Power Off";
     return "";
   }
-
-  property int hoveredIndex: -1
 
   Item {
     id: keyArea
@@ -157,7 +145,7 @@ Rectangle {
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "電"
-            color: "#f2f2f2"
+            color: SettingsState.accent
             font.pixelSize: 15
             font.bold: true
           }
@@ -165,7 +153,7 @@ Rectangle {
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "POWER"
-            color: "#f2f2f2"
+            color: SettingsState.textMain
             font.pixelSize: 13
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -189,13 +177,13 @@ Rectangle {
             width: 6
             height: 6
             radius: 3
-            color: root.activeActionName === "Power Off" ? "#ef5350" : (root.activeActionName === "Restart" ? "#ffd23f" : "#7ee2a8")
+            color: root.activeActionName === "Power Off" ? "#ef5350" : (root.activeActionName === "Restart" ? "#ffd23f" : SettingsState.accent)
           }
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: root.activeActionName
-            color: root.activeActionName === "Power Off" ? "#ef5350" : (root.activeActionName === "Restart" ? "#ffd23f" : "#7ee2a8")
+            color: root.activeActionName === "Power Off" ? "#ef5350" : (root.activeActionName === "Restart" ? "#ffd23f" : SettingsState.accent)
             font.pixelSize: 12
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -207,7 +195,7 @@ Rectangle {
       Rectangle {
         width: parent.width
         height: 1
-        color: "#252b25"
+        color: SettingsState.borderBase
       }
 
       // 5 Action buttons row
@@ -220,16 +208,20 @@ Rectangle {
           width: 48
           height: 48
           radius: 13
-          color: (root.sel === 0 || lockMouse.containsMouse) ? "#252d25" : "#181c18"
-          border.color: (root.sel === 0 || lockMouse.containsMouse) ? "#7ee2a8" : "#283028"
-          border.width: (root.sel === 0 || lockMouse.containsMouse) ? 1.5 : 1
+          color: (root.sel === 0 || lockMouse.containsMouse) ? SettingsState.bgActivePill : SettingsState.bgCard
+          border.color: (root.sel === 0 || lockMouse.containsMouse) ? SettingsState.borderActive : SettingsState.borderBase
+          border.width: 1
+
+          Behavior on color {
+            ColorAnimation { duration: 100 }
+          }
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: "lock"
-            glyph: (root.sel === 0 || lockMouse.containsMouse) ? "#f2f2f2" : "#a8b3a8"
+            glyph: (root.sel === 0 || lockMouse.containsMouse) ? SettingsState.textActive : SettingsState.textSecondary
           }
 
           MouseArea {
@@ -250,16 +242,20 @@ Rectangle {
           width: 48
           height: 48
           radius: 13
-          color: (root.sel === 1 || logoutMouse.containsMouse) ? "#252d25" : "#181c18"
-          border.color: (root.sel === 1 || logoutMouse.containsMouse) ? "#7ee2a8" : "#283028"
-          border.width: (root.sel === 1 || logoutMouse.containsMouse) ? 1.5 : 1
+          color: (root.sel === 1 || logoutMouse.containsMouse) ? SettingsState.bgActivePill : SettingsState.bgCard
+          border.color: (root.sel === 1 || logoutMouse.containsMouse) ? SettingsState.borderActive : SettingsState.borderBase
+          border.width: 1
+
+          Behavior on color {
+            ColorAnimation { duration: 100 }
+          }
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: "logout"
-            glyph: (root.sel === 1 || logoutMouse.containsMouse) ? "#f2f2f2" : "#a8b3a8"
+            glyph: (root.sel === 1 || logoutMouse.containsMouse) ? SettingsState.textActive : SettingsState.textSecondary
           }
 
           MouseArea {
@@ -280,7 +276,7 @@ Rectangle {
           width: 1
           height: 32
           anchors.verticalCenter: parent.verticalCenter
-          color: "#252b25"
+          color: SettingsState.borderBase
         }
 
         // 3. Sleep / Suspend
@@ -288,16 +284,20 @@ Rectangle {
           width: 48
           height: 48
           radius: 13
-          color: (root.sel === 2 || sleepMouse.containsMouse) ? "#252d25" : "#181c18"
-          border.color: (root.sel === 2 || sleepMouse.containsMouse) ? "#7ee2a8" : "#283028"
-          border.width: (root.sel === 2 || sleepMouse.containsMouse) ? 1.5 : 1
+          color: (root.sel === 2 || sleepMouse.containsMouse) ? SettingsState.bgActivePill : SettingsState.bgCard
+          border.color: (root.sel === 2 || sleepMouse.containsMouse) ? SettingsState.borderActive : SettingsState.borderBase
+          border.width: 1
+
+          Behavior on color {
+            ColorAnimation { duration: 100 }
+          }
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: "moon"
-            glyph: (root.sel === 2 || sleepMouse.containsMouse) ? "#f2f2f2" : "#a8b3a8"
+            glyph: (root.sel === 2 || sleepMouse.containsMouse) ? SettingsState.textActive : SettingsState.textSecondary
           }
 
           MouseArea {
@@ -318,16 +318,20 @@ Rectangle {
           width: 48
           height: 48
           radius: 13
-          color: (root.sel === 3 || rebootMouse.containsMouse) ? "#2c2a1c" : "#181c18"
-          border.color: (root.sel === 3 || rebootMouse.containsMouse) ? "#ffd23f" : "#283028"
-          border.width: (root.sel === 3 || rebootMouse.containsMouse) ? 1.5 : 1
+          color: (root.sel === 3 || rebootMouse.containsMouse) ? (SettingsState.isDark ? "#2c2a1c" : "#fff8e1") : SettingsState.bgCard
+          border.color: (root.sel === 3 || rebootMouse.containsMouse) ? "#ffd23f" : SettingsState.borderBase
+          border.width: 1
+
+          Behavior on color {
+            ColorAnimation { duration: 100 }
+          }
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: "reboot"
-            glyph: (root.sel === 3 || rebootMouse.containsMouse) ? "#ffd23f" : "#a8b3a8"
+            glyph: (root.sel === 3 || rebootMouse.containsMouse) ? "#ffd23f" : SettingsState.textSecondary
           }
 
           MouseArea {
@@ -348,16 +352,20 @@ Rectangle {
           width: 48
           height: 48
           radius: 13
-          color: (root.sel === 4 || powerOffMouse.containsMouse) ? "#3a1e1e" : "#181c18"
-          border.color: (root.sel === 4 || powerOffMouse.containsMouse) ? "#ef5350" : "#283028"
-          border.width: (root.sel === 4 || powerOffMouse.containsMouse) ? 1.5 : 1
+          color: (root.sel === 4 || powerOffMouse.containsMouse) ? (SettingsState.isDark ? "#3a1e1e" : "#ffebee") : SettingsState.bgCard
+          border.color: (root.sel === 4 || powerOffMouse.containsMouse) ? "#ef5350" : SettingsState.borderBase
+          border.width: 1
+
+          Behavior on color {
+            ColorAnimation { duration: 100 }
+          }
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
             kind: "power"
-            glyph: (root.sel === 4 || powerOffMouse.containsMouse) ? "#ef5350" : "#a8b3a8"
+            glyph: (root.sel === 4 || powerOffMouse.containsMouse) ? "#ef5350" : SettingsState.textSecondary
           }
 
           MouseArea {

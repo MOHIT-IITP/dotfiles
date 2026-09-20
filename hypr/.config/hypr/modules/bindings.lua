@@ -19,8 +19,17 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call mohiitp launcher"))
 hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder"))
 hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer "))
 hl.bind(mainMod .. " + CTRL + C ", hl.dsp.exec_cmd("qs ipc call mohiitp clipboard  "))
--- hl.bind(mainMod .. " + CTRL + S ", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | tee ~/pix/ss/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga && notify-send 'Screenshot' 'Saved & Copied to Clipboard'"))
-hl.bind(mainMod .. " + CTRL + S ", hl.dsp.exec_cmd("qs ipc call mohiitp screenshot"))
+
+-- Screenshot keybindings:
+-- Print / Super+Shift+S: Area capture (drag to select)
+hl.bind("Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
+-- Super+Alt+S / Alt+Print: Window capture (click window)
+hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
+hl.bind("ALT + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
+-- Super+Ctrl+S / Ctrl+Print: Full Display capture
+hl.bind(mainMod .. " + CTRL + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
+hl.bind("CTRL + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys
@@ -44,8 +53,8 @@ for i = 1, 10 do
 end
 
 -- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+-- hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
+-- hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))

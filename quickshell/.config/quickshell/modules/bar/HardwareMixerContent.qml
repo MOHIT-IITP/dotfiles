@@ -4,60 +4,49 @@ import QtQuick
 import QtQuick.Effects
 import "../services"
 
-// Standalone centered Hardware Mixer card matching reference UI
-// Toggled via Super+Ctrl+M or `qs ipc call mohiitp mixer`.
-Rectangle {
+// Embedded Hardware Mixer subview directly inside ClockPill.
+// Provides volume/mic/brightness/display vertical faders and quick toggle pill cluster.
+Item {
   id: root
 
-  readonly property bool open: MixerState.open
   readonly property real outVol: AudioState.outVol
   readonly property bool outMuted: AudioState.outMuted
   readonly property real inVol: AudioState.inVol
   readonly property bool inMuted: AudioState.inMuted
 
   implicitWidth: 440
-  implicitHeight: open ? 360 : 0
-  radius: 28
-  clip: true
+  implicitHeight: 360
 
-  color: SettingsState.bgSurface
-  border.color: SettingsState.borderBase
-  border.width: 1
-
-  opacity: open ? 1 : 0
-  visible: open || opacity > 0
-
-  Behavior on implicitHeight {
-    NumberAnimation {
-      duration: 250
-      easing.type: Easing.OutCubic
-    }
+  function forceFocus() {
+    keyArea.focus = true;
+    keyArea.forceActiveFocus();
   }
 
-  Behavior on opacity {
-    NumberAnimation {
-      duration: 180
-    }
-  }
-
-  onOpenChanged: {
-    if (open) {
-      keyArea.focus = true;
-      focusTimer.restart();
+  Connections {
+    target: MixerState
+    function onOpenChanged() {
+      if (MixerState.open) {
+        forceFocus();
+        focusTimer.restart();
+      }
     }
   }
 
   Timer {
     id: focusTimer
     interval: 30
-    repeat: false
-    onTriggered: {
-      keyArea.forceActiveFocus();
+    repeat: true
+    property int count: 0
+    onRunningChanged: {
+      if (running) count = 0;
     }
-  }
-
-  function forceFocus() {
-    keyArea.forceActiveFocus();
+    onTriggered: {
+      count++;
+      forceFocus();
+      if (keyArea.activeFocus || count > 8) {
+        running = false;
+      }
+    }
   }
 
   Item {
@@ -92,7 +81,7 @@ Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           visible: SettingsState.japaneseGlyphs
           text: "調"
-          color: SettingsState.textMain
+          color: SettingsState.accent
           font.pixelSize: 20
           font.bold: true
         }

@@ -78,6 +78,10 @@ Singleton {
     ? Qt.hsva(accentHue, 0.28, 0.92, 1.0)
     : Qt.hsva(accentHue, 0.85, 0.25, 1.0)
 
+  // 4b. Drop Shadow Properties
+  readonly property color shadowColor: isDark ? "#70000000" : "#30000000"
+  readonly property color shadowColorDeep: isDark ? "#99000000" : "#45000000"
+
   // 5. System & nerd fonts
   readonly property var availableFonts: {
     var sys = [];
