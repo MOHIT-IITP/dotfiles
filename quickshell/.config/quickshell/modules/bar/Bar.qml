@@ -25,16 +25,15 @@ Scope {
         }
 
         margins {
-          top: Math.round(8 * SettingsState.uiScale)
+          top: Math.round(6 * SettingsState.uiScale)
         }
 
         // Tall enough for the expanded control center, launcher, and wallpaper coverflow;
         // transparent + masked so empty area is click-through.
         implicitHeight: Math.round(960 * SettingsState.uiScale)
         color: "transparent"
-        // Reserve a strip so maximized/tiled windows sit below
-        // the bar instead of underneath it.
-        exclusiveZone: Math.round(44 * SettingsState.uiScale)
+        // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap
+        exclusiveZone: Math.round((34 + SettingsState.barGap) * SettingsState.uiScale)
 
         readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || (netCircle && netCircle.fontDropdownOpen)
 
@@ -192,11 +191,6 @@ Scope {
 
 
         }
-      }
-
-      // Pop-up notification toasts, top-right of the same screen
-      Toasts {
-        screen: modelData
       }
     }
   }

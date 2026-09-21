@@ -17,8 +17,9 @@ Singleton {
   property bool musicVisualizer: true
   property string wallpaperFolder: "~/Pictures/Wallpapers"
 
-  // 3. UI scale: 0.9 | 1.0 | 1.1 | 1.25
+  // 3. UI scale & Bar Gap
   property real uiScale: 1.0
+  property int barGap: 2 // Extra gap below bar in pixels (0 - 24px)
 
   // 4. Theme & Accent Colors
   property string themeMode: "manual" // "light" | "dark" | "dynamic" | "manual"
@@ -193,6 +194,11 @@ Singleton {
     saveSettings();
   }
 
+  function setBarGap(g) {
+    barGap = Math.max(0, Math.min(24, Math.round(g)));
+    saveSettings();
+  }
+
   function setFont(f) {
     if (!f) return;
     fontFamily = f;
@@ -218,6 +224,7 @@ Singleton {
       accentHue: root.accentHue,
       isDark: root.isDark,
       uiScale: root.uiScale,
+      barGap: root.barGap,
       fontFamily: root.fontFamily
     };
     var jsonStr = JSON.stringify(data);
@@ -249,6 +256,7 @@ Singleton {
           if (parsed.accentHue !== undefined) root.accentHue = parsed.accentHue;
           if (parsed.isDark !== undefined) root.isDark = parsed.isDark;
           if (parsed.uiScale !== undefined) root.uiScale = parsed.uiScale;
+          if (parsed.barGap !== undefined) root.barGap = parsed.barGap;
           if (parsed.fontFamily !== undefined && parsed.fontFamily !== "") {
             root.fontFamily = parsed.fontFamily;
             var idx = root.availableFonts.indexOf(parsed.fontFamily);

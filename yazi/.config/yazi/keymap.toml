@@ -13,9 +13,6 @@ prepend_keymap = [
     # Show hidden files
     { on = [ "." ], run = "hidden", desc = "Toggle hidden files" },
 
-    # Create file
-    { on = [ "n" ], run = "create", desc = "Create file" },
-
     # Rename
     { on = [ "r" ], run = "rename --cursor=before_ext", desc = "Rename" },
 

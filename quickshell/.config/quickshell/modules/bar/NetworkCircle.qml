@@ -1106,7 +1106,7 @@ Rectangle {
               cursorShape: Qt.PointingHandCursor
               onClicked: {
                 if (modelData)
-                  modelData.dismiss();
+                  NotifCenter.dismissNotification(modelData);
               }
             }
           }
@@ -2627,6 +2627,116 @@ Rectangle {
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
                   onClicked: SettingsState.setUiScale(modelData.val)
+                }
+              }
+            }
+          }
+        }
+
+        // 7b. Gap Slider (Bar window gap below)
+        Column {
+          width: parent.width
+          spacing: 6
+
+          Item {
+            width: parent.width
+            height: 24
+
+            Row {
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+              spacing: 10
+
+              CCIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 16
+                height: 16
+                kind: "area"
+                glyph: SettingsState.textSecondary
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Bar gap"
+                color: SettingsState.textMain
+                font.pixelSize: 13
+                font.family: SettingsState.fontFamily
+              }
+            }
+
+            Rectangle {
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+              height: 20
+              width: gapValText.implicitWidth + 12
+              radius: 6
+              color: SettingsState.bgCard
+              border.color: SettingsState.borderBase
+              border.width: 1
+
+              Text {
+                id: gapValText
+                anchors.centerIn: parent
+                text: SettingsState.barGap + "px"
+                color: SettingsState.accent
+                font.pixelSize: 11
+                font.bold: true
+                font.family: SettingsState.fontFamily
+              }
+            }
+          }
+
+          // Slider Track
+          Rectangle {
+            id: gapTrack
+            width: parent.width
+            height: 10
+            radius: 5
+            color: SettingsState.bgCard
+            border.color: SettingsState.borderBase
+            border.width: 1
+
+            // Filled portion
+            Rectangle {
+              anchors.left: parent.left
+              anchors.top: parent.top
+              anchors.bottom: parent.bottom
+              width: Math.max(8, Math.min(parent.width, (SettingsState.barGap / 24.0) * parent.width))
+              radius: 5
+              color: SettingsState.accent
+            }
+
+            // Draggable Thumb
+            Rectangle {
+              id: gapThumb
+              width: 16
+              height: 16
+              radius: 8
+              anchors.verticalCenter: parent.verticalCenter
+              x: Math.max(0, Math.min(gapTrack.width - width, (SettingsState.barGap / 24.0) * (gapTrack.width - width)))
+              color: SettingsState.accent
+              border.color: "#ffffff"
+              border.width: 2
+
+              Behavior on x {
+                enabled: !gapMouse.pressed
+                NumberAnimation { duration: 80 }
+              }
+            }
+
+            MouseArea {
+              id: gapMouse
+              anchors.fill: parent
+              anchors.margins: -6
+              cursorShape: Qt.PointingHandCursor
+              onPressed: function(ev) {
+                var r = Math.min(1.0, Math.max(0.0, ev.x / gapTrack.width));
+                SettingsState.setBarGap(Math.round(r * 24));
+              }
+              onPositionChanged: function(ev) {
+                if (pressed) {
+                  var r = Math.min(1.0, Math.max(0.0, ev.x / gapTrack.width));
+                  SettingsState.setBarGap(Math.round(r * 24));
                 }
               }
             }

@@ -65,13 +65,14 @@ Rectangle {
   readonly property bool showClipboard: ClipboardState.open && !showLauncher && !showWallpaper && !showPower
   readonly property bool showMixer: MixerState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard
   readonly property bool showAuth: AuthState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
-  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open
+  readonly property bool showNotif: NotifCenter.showNotificationPill && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
+  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showWeather ? 265 : 168))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showWeather ? 520 : 300))))))) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showWeather ? 265 : 168)))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showWeather ? 520 : 300)))))))) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
 
-  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showWeather ? 20 : 28))))))) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showWeather ? 20 : 28)))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
@@ -385,7 +386,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -464,7 +465,7 @@ Rectangle {
   // ========================================================
   WeatherCalendarView {
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth) ? 1 : 0
+    opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -557,6 +558,20 @@ Rectangle {
   }
 
   // ========================================================
+  // 11. EMBEDDED NOTIFICATION VIEW (Directly inside Center Bar)
+  // ========================================================
+  NotificationContent {
+    id: notificationContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showNotif) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
+  // ========================================================
   // GESTURE & INTERACTION HANDLER
   // ========================================================
   property real _pressX: 0
@@ -566,7 +581,7 @@ Rectangle {
   MouseArea {
     id: mouse
     anchors.fill: parent
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
