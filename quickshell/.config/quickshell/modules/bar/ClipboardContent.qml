@@ -4,7 +4,7 @@ import QtQuick.Effects
 import "../services"
 
 // Embedded Clipboard History subview directly inside ClockPill.
-// Supports search filtering, mouse selection, and full keyboard navigation (Up/Down/Enter/Delete/Esc).
+// Supports search filtering, thumbnail image previews, mouse selection, and full keyboard navigation (Up/Down/Enter/Delete/Esc).
 Item {
   id: root
 
@@ -14,12 +14,14 @@ Item {
   readonly property var allItems: ClipboardState.history
   readonly property var filtered: {
     var q = query.trim().toLowerCase();
-    var list = allItems || [];
+    var list = ClipboardState.history || [];
     if (q === "") return list;
     var out = [];
     for (var i = 0; i < list.length; ++i) {
       var item = list[i];
-      if (item && item.text && item.text.toLowerCase().indexOf(q) !== -1) {
+      if (!item) continue;
+      var matchText = item.isImage ? ((item.label || "") + " " + (item.sizeLabel || "")) : (item.text || "");
+      if (matchText.toLowerCase().indexOf(q) !== -1) {
         out.push(item);
       }
     }
@@ -229,7 +231,7 @@ Item {
       width: parent.width
       height: parent.height - 52
       clip: true
-      spacing: 3
+      spacing: 4
       visible: filtered.length > 0
       model: filtered
       currentIndex: sel
@@ -237,7 +239,7 @@ Item {
       delegate: Rectangle {
         id: rowRect
         width: ListView.view.width
-        height: 34
+        height: modelData.isImage ? 44 : 34
         radius: 8
         color: isSelected ? SettingsState.bgActivePill : (itemMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
         border.color: isSelected ? SettingsState.borderActive : (itemMouse.containsMouse ? SettingsState.borderBase : "transparent")
@@ -251,16 +253,68 @@ Item {
           anchors.rightMargin: 8
           spacing: 8
 
+          // Thumbnail for images
+          Rectangle {
+            id: thumbBox
+            width: 48
+            height: 32
+            radius: 5
+            anchors.verticalCenter: parent.verticalCenter
+            visible: modelData.isImage
+            color: SettingsState.bgCard
+            border.color: SettingsState.borderBase
+            border.width: 1
+            clip: true
+
+            Image {
+              id: thumbImg
+              anchors.fill: parent
+              anchors.margins: 1
+              source: modelData.isImage && modelData.thumb ? "file://" + modelData.thumb : ""
+              sourceSize.width: 96
+              sourceSize.height: 96
+              fillMode: Image.PreserveAspectCrop
+              asynchronous: true
+              cache: false
+              smooth: true
+              onStatusChanged: {
+                if (thumbImg.status === Image.Error) {
+                  thumbImg.source = "";
+                }
+              }
+            }
+
+            // Fallback icon if thumbnail fails or is loading
+            Text {
+              anchors.centerIn: parent
+              visible: thumbImg.status !== Image.Ready
+              text: "🖼"
+              font.pixelSize: 14
+            }
+          }
+
+          // Main text / image label
           Text {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - (delBtn.visible ? 30 : 10)
-            text: modelData.text || ""
+            width: parent.width - (thumbBox.visible ? 56 : 0) - (sizeTag.visible ? sizeTag.implicitWidth + 8 : 0) - (delBtn.visible ? 30 : 10)
+            text: modelData.isImage ? (modelData.label || "Image") : (modelData.text || "")
             color: isSelected ? SettingsState.textActive : (itemMouse.containsMouse ? SettingsState.textMain : SettingsState.textSecondary)
             font.pixelSize: 13
             font.family: SettingsState.fontFamily
             font.bold: isSelected
             elide: Text.ElideRight
             maximumLineCount: 1
+          }
+
+          // Size tag for images
+          Text {
+            id: sizeTag
+            anchors.verticalCenter: parent.verticalCenter
+            visible: modelData.isImage && modelData.sizeLabel !== ""
+            text: modelData.sizeLabel || ""
+            color: SettingsState.textMuted
+            font.pixelSize: 11
+            font.family: "monospace"
           }
 
           // Delete button (✕)

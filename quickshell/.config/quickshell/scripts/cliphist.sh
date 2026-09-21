@@ -5,15 +5,17 @@ CMD="$1"
 shift
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/quickshell"
-mkdir -p "$CACHE_DIR"
+THUMB_DIR="$CACHE_DIR/cliphist-thumbs"
+mkdir -p "$CACHE_DIR" "$THUMB_DIR"
 FALLBACK_FILE="$CACHE_DIR/clipboard_history.txt"
+MAGICK_DIR="$(dirname "$0")/magick-policy"
+export MAGICK_CONFIGURE_PATH="$MAGICK_DIR"
 
 case "$CMD" in
-  watch)
+  watch-text)
     if command -v cliphist >/dev/null 2>&1 && command -v wl-paste >/dev/null 2>&1; then
       exec wl-paste --type text --watch cliphist store
     elif command -v wl-paste >/dev/null 2>&1; then
-      # Fallback watcher when cliphist binary is not installed
       touch "$FALLBACK_FILE"
       exec wl-paste --type text --watch bash -c '
         txt="$(cat)"
@@ -28,9 +30,48 @@ case "$CMD" in
     fi
     ;;
 
+  watch-image)
+    if command -v cliphist >/dev/null 2>&1 && command -v wl-paste >/dev/null 2>&1; then
+      exec wl-paste --type image --watch cliphist store
+    fi
+    ;;
+
+  thumbs)
+    if command -v cliphist >/dev/null 2>&1 && command -v magick >/dev/null 2>&1; then
+      list="$(cliphist list 2>/dev/null | tr -d '\0')"
+      ids="$(mktemp)"
+      have="$(mktemp)"
+      trap 'rm -f "$ids" "$have"' EXIT
+
+      printf '%s\n' "$list" | cut -f1 | sort -n > "$ids"
+
+      if [ -s "$ids" ]; then
+        find "$THUMB_DIR" -maxdepth 1 -type f -name '*.png' -printf '%f\n' 2>/dev/null \
+          | sed 's/\.png$//' | sort -n > "$have"
+        comm -23 "$have" "$ids" 2>/dev/null | while IFS= read -r id; do
+          rm -f "$THUMB_DIR/$id.png"
+        done
+      fi
+
+      printf '%s\n' "$list" | awk -F '\t' '/\[\[ binary data / && /(png|jpg|jpeg|gif|bmp|webp)/ {print $1}' | while IFS= read -r id; do
+        thumb="$THUMB_DIR/$id.png"
+        [ -s "$thumb" ] && continue
+        if cliphist decode "$id" 2>/dev/null | magick - -strip -resize 128x128 "png:$thumb.tmp" 2>/dev/null; then
+          if [ -s "$thumb.tmp" ]; then
+            mv "$thumb.tmp" "$thumb"
+          else
+            rm -f "$thumb.tmp"
+          fi
+        else
+          rm -f "$thumb.tmp"
+        fi
+      done
+    fi
+    ;;
+
   list)
     if command -v cliphist >/dev/null 2>&1; then
-      cliphist list
+      cliphist list | tr -d '\0'
     elif [ -f "$FALLBACK_FILE" ]; then
       cat "$FALLBACK_FILE"
     fi
@@ -39,7 +80,6 @@ case "$CMD" in
   copy)
     RAW="$*"
     if command -v cliphist >/dev/null 2>&1; then
-      # If raw contains an ID tab prefix from cliphist list
       printf "%s\n" "$RAW" | cliphist decode | wl-copy
     elif command -v wl-copy >/dev/null 2>&1; then
       printf "%s" "$RAW" | wl-copy
@@ -61,6 +101,7 @@ case "$CMD" in
     if command -v cliphist >/dev/null 2>&1; then
       cliphist wipe
     fi
+    rm -rf "$THUMB_DIR"/* 2>/dev/null || true
     if [ -f "$FALLBACK_FILE" ]; then
       > "$FALLBACK_FILE"
     fi
