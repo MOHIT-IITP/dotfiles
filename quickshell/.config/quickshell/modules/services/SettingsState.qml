@@ -26,7 +26,8 @@ Singleton {
   property real accentHue: 0.52       // 0.0 - 1.0 (0.52 = #40AABF teal/cyan from reference)
   property real accentSat: 0.65
   property real accentVal: 0.85
-  property bool isDark: true
+  property real themeBlend: 1.0 // 0.0 = light, 1.0 = dark (slider)
+  property bool isDark: true // mirrored from themeBlend (>= 0.5), kept for icon logic compat
 
   // Reactive primary accent color
   readonly property color accent: {
@@ -47,41 +48,35 @@ Singleton {
     return ("#" + r + g + b).toUpperCase();
   }
 
-  // Reactive Theme Palettes
-  readonly property color bgSurface: isDark
-    ? Qt.hsva(accentHue, 0.12, 0.07, 0.96)
-    : Qt.hsva(accentHue, 0.06, 0.95, 0.96)
+  // Interpolate two colors by t (0 = a/light, 1 = b/dark)
+  function mixc(a, b, t) {
+    var tt = Math.min(1.0, Math.max(0.0, t));
+    var ca = Qt.color(a);
+    var cb = Qt.color(b);
+    return Qt.rgba(ca.r + (cb.r - ca.r) * tt, ca.g + (cb.g - ca.g) * tt, ca.b + (cb.b - ca.b) * tt, ca.a + (cb.a - ca.a) * tt);
+  }
 
-  readonly property color bgCard: isDark
-    ? Qt.hsva(accentHue, 0.15, 0.11, 1.0)
-    : Qt.hsva(accentHue, 0.08, 0.89, 1.0)
+  // Reactive Theme Palettes (blend light -> dark via themeBlend)
+  readonly property color bgSurface: mixc(Qt.hsva(accentHue, 0.06, 0.95, 0.96), Qt.hsva(accentHue, 0.12, 0.07, 0.96), themeBlend)
 
-  readonly property color bgCardHover: isDark
-    ? Qt.hsva(accentHue, 0.20, 0.15, 1.0)
-    : Qt.hsva(accentHue, 0.10, 0.84, 1.0)
+  readonly property color bgCard: mixc(Qt.hsva(accentHue, 0.08, 0.89, 1.0), Qt.hsva(accentHue, 0.15, 0.11, 1.0), themeBlend)
 
-  readonly property color bgActivePill: isDark
-    ? Qt.hsva(accentHue, 0.40, 0.18, 1.0)
-    : Qt.hsva(accentHue, 0.30, 0.82, 1.0)
+  readonly property color bgCardHover: mixc(Qt.hsva(accentHue, 0.10, 0.84, 1.0), Qt.hsva(accentHue, 0.20, 0.15, 1.0), themeBlend)
 
-  readonly property color borderBase: isDark
-    ? Qt.hsva(accentHue, 0.22, 0.18, 1.0)
-    : Qt.hsva(accentHue, 0.15, 0.78, 1.0)
+  readonly property color bgActivePill: mixc(Qt.hsva(accentHue, 0.30, 0.82, 1.0), Qt.hsva(accentHue, 0.40, 0.18, 1.0), themeBlend)
 
-  readonly property color borderActive: isDark
-    ? Qt.hsva(accentHue, 0.45, 0.35, 1.0)
-    : Qt.hsva(accentHue, 0.45, 0.60, 1.0)
+  readonly property color borderBase: mixc(Qt.hsva(accentHue, 0.15, 0.78, 1.0), Qt.hsva(accentHue, 0.22, 0.18, 1.0), themeBlend)
 
-  readonly property color textMain: isDark ? "#f2f2f2" : "#121612"
-  readonly property color textSecondary: isDark ? "#9aa39a" : "#4c574c"
-  readonly property color textMuted: isDark ? "#6e756e" : "#788478"
-  readonly property color textActive: isDark
-    ? Qt.hsva(accentHue, 0.28, 0.92, 1.0)
-    : Qt.hsva(accentHue, 0.85, 0.25, 1.0)
+  readonly property color borderActive: mixc(Qt.hsva(accentHue, 0.45, 0.60, 1.0), Qt.hsva(accentHue, 0.45, 0.35, 1.0), themeBlend)
+
+  readonly property color textMain: mixc("#121612", "#f2f2f2", themeBlend)
+  readonly property color textSecondary: mixc("#4c574c", "#9aa39a", themeBlend)
+  readonly property color textMuted: mixc("#788478", "#6e756e", themeBlend)
+  readonly property color textActive: mixc(Qt.hsva(accentHue, 0.85, 0.25, 1.0), Qt.hsva(accentHue, 0.28, 0.92, 1.0), themeBlend)
 
   // 4b. Drop Shadow Properties
-  readonly property color shadowColor: isDark ? "#70000000" : "#30000000"
-  readonly property color shadowColorDeep: isDark ? "#99000000" : "#45000000"
+  readonly property color shadowColor: mixc("#30000000", "#70000000", themeBlend)
+  readonly property color shadowColorDeep: mixc("#45000000", "#99000000", themeBlend)
 
   // 5. System & nerd fonts
   readonly property var availableFonts: {
@@ -147,8 +142,10 @@ Singleton {
   function setThemeMode(mode) {
     themeMode = mode;
     if (mode === "light") {
+      themeBlend = 0.0;
       isDark = false;
     } else if (mode === "dark") {
+      themeBlend = 1.0;
       isDark = true;
     }
     saveSettings();
@@ -161,7 +158,14 @@ Singleton {
   }
 
   function setIsDark(d) {
-    isDark = d;
+    setThemeBlend(d ? 1.0 : 0.0);
+  }
+
+  function setThemeBlend(v) {
+    themeBlend = Math.min(1.0, Math.max(0.0, v));
+    var dark = themeBlend >= 0.5;
+    if (isDark !== dark) isDark = dark;
+    themeMode = "manual";
     saveSettings();
   }
 
@@ -222,6 +226,7 @@ Singleton {
       wallpaperFolder: root.wallpaperFolder,
       themeMode: root.themeMode,
       accentHue: root.accentHue,
+      themeBlend: root.themeBlend,
       isDark: root.isDark,
       uiScale: root.uiScale,
       barGap: root.barGap,
@@ -254,7 +259,13 @@ Singleton {
           if (parsed.wallpaperFolder !== undefined && parsed.wallpaperFolder !== "") root.wallpaperFolder = parsed.wallpaperFolder;
           if (parsed.themeMode !== undefined) root.themeMode = parsed.themeMode;
           if (parsed.accentHue !== undefined) root.accentHue = parsed.accentHue;
-          if (parsed.isDark !== undefined) root.isDark = parsed.isDark;
+          if (parsed.themeBlend !== undefined) {
+            root.themeBlend = Math.min(1.0, Math.max(0.0, parsed.themeBlend));
+            root.isDark = root.themeBlend >= 0.5;
+          } else if (parsed.isDark !== undefined) {
+            root.isDark = parsed.isDark;
+            root.themeBlend = parsed.isDark ? 1.0 : 0.0;
+          }
           if (parsed.uiScale !== undefined) root.uiScale = parsed.uiScale;
           if (parsed.barGap !== undefined) root.barGap = parsed.barGap;
           if (parsed.fontFamily !== undefined && parsed.fontFamily !== "") {

@@ -60,6 +60,8 @@ Rectangle {
     if (root.activePage === "sound" || root.activePage === "mic") return 520;
     if (root.activePage === "mixer") return 380;
     if (root.activePage === "screenshot") return 254;
+    if (root.activePage === "bluetooth") return btPage.implicitHeight + 36;
+    if (root.activePage === "wifi") return wifiPage.implicitHeight + 36;
     if (root.activePage === "recorder") {
       var extraMic = root.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0;
       var extraList = (RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(180, RecorderState.recentRecordings.length * 60) : 30;
@@ -1120,7 +1122,9 @@ Rectangle {
   // =========================================================================
   Column {
     id: btPage
-    anchors.fill: parent
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.margins: 18
     spacing: 12
     opacity: (netMouse.containsMouse && root.activePage === "bluetooth") ? 1 : 0
@@ -1256,12 +1260,20 @@ Rectangle {
 
     // Devices List
     ListView {
+      id: btList
       width: parent.width
-      height: parent.height - 56
+      height: !visible ? 0 : Math.min(320, root.btDevicesList.length * 64 - 8)
       spacing: 8
       clip: true
       visible: BluetoothState.btOn && root.btDevicesList.length > 0
       model: root.btDevicesList
+
+      Behavior on height {
+        NumberAnimation {
+          duration: 250
+          easing.type: Easing.OutCubic
+        }
+      }
 
       delegate: Rectangle {
         id: btRow
@@ -1390,7 +1402,9 @@ Rectangle {
   // =========================================================================
   Column {
     id: wifiPage
-    anchors.fill: parent
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.margins: 18
     spacing: 12
     opacity: (netMouse.containsMouse && root.activePage === "wifi") ? 1 : 0
@@ -1526,12 +1540,20 @@ Rectangle {
 
     // Networks List
     ListView {
+      id: wifiList
       width: parent.width
-      height: parent.height - 56
+      height: !visible ? 0 : Math.min(320, root.wifiNetworksList.length * 64 - 8)
       spacing: 8
       clip: true
       visible: NetworkState.wifiEnabled && root.wifiNetworksList.length > 0
       model: root.wifiNetworksList
+
+      Behavior on height {
+        NumberAnimation {
+          duration: 250
+          easing.type: Easing.OutCubic
+        }
+      }
 
       delegate: Rectangle {
         id: wifiRow
@@ -2412,57 +2434,87 @@ Rectangle {
             }
           }
 
-          // Dark / Light Pill Switcher
+          // Light <-> Dark slider
           Row {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 4
+            spacing: 6
 
-            Rectangle {
-              width: 46
-              height: 24
-              radius: 6
-              color: SettingsState.isDark ? SettingsState.bgActivePill : "transparent"
-              border.color: SettingsState.isDark ? SettingsState.borderActive : "transparent"
-              border.width: 1
-
-              Text {
-                anchors.centerIn: parent
-                text: "Dark"
-                color: SettingsState.isDark ? SettingsState.textActive : SettingsState.textMuted
-                font.pixelSize: 11
-                font.bold: SettingsState.isDark
-                font.family: SettingsState.fontFamily
-              }
-
+            CCIcon {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 16
+              height: 16
+              kind: "sun"
+              glyph: SettingsState.textSecondary
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: SettingsState.setIsDark(true)
+                onClicked: SettingsState.setThemeBlend(0.0)
               }
             }
 
             Rectangle {
-              width: 46
-              height: 24
-              radius: 6
-              color: !SettingsState.isDark ? SettingsState.bgActivePill : "transparent"
-              border.color: !SettingsState.isDark ? SettingsState.borderActive : "transparent"
+              id: themeTrack
+              anchors.verticalCenter: parent.verticalCenter
+              width: 110
+              height: 10
+              radius: 5
+              color: SettingsState.bgCard
+              border.color: SettingsState.borderBase
               border.width: 1
 
-              Text {
-                anchors.centerIn: parent
-                text: "Light"
-                color: !SettingsState.isDark ? SettingsState.textActive : SettingsState.textMuted
-                font.pixelSize: 11
-                font.bold: !SettingsState.isDark
-                font.family: SettingsState.fontFamily
+              Rectangle {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.max(8, Math.min(parent.width, SettingsState.themeBlend * parent.width))
+                radius: 5
+                color: SettingsState.accent
+              }
+
+              Rectangle {
+                id: themeThumb
+                width: 16
+                height: 16
+                radius: 8
+                anchors.verticalCenter: parent.verticalCenter
+                x: Math.max(0, Math.min(parent.width - width, SettingsState.themeBlend * (parent.width - width)))
+                color: SettingsState.accent
+                border.color: "#ffffff"
+                border.width: 2
+
+                Behavior on x {
+                  enabled: !themeMouse.pressed
+                  NumberAnimation { duration: 80 }
+                }
               }
 
               MouseArea {
+                id: themeMouse
+                anchors.fill: parent
+                anchors.margins: -6
+                cursorShape: Qt.PointingHandCursor
+                onPressed: function(ev) {
+                  SettingsState.setThemeBlend(Math.min(1.0, Math.max(0.0, ev.x / themeTrack.width)));
+                }
+                onPositionChanged: function(ev) {
+                  if (pressed) {
+                    SettingsState.setThemeBlend(Math.min(1.0, Math.max(0.0, ev.x / themeTrack.width)));
+                  }
+                }
+              }
+            }
+
+            CCIcon {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 16
+              height: 16
+              kind: "moon"
+              glyph: SettingsState.textSecondary
+              MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: SettingsState.setIsDark(false)
+                onClicked: SettingsState.setThemeBlend(1.0)
               }
             }
           }

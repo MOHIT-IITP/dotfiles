@@ -63,3 +63,46 @@ hl.layer_rule({
     match = { namespace = "swaync-control-center"},
     animation = "slide top"
 })
+
+--------------------------
+--- FLOATING DIALOGS -----
+--------------------------
+-- Main Chrome / Spotify stay tiled, only dialogs / login / PiP float
+
+hl.window_rule({
+    name = "chrome-dialogs-float",
+    match = { class = "google-chrome", title = ".*(Open File|Save File|Save As|File Chooser|Dialog|Popup|Authentication|Login|Sign [Ii]n|OAuth|Print|Pay|Payment|Choose|Upload|Download|Save|Open).*" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "chrome-pip-float",
+    match = { class = "google-chrome", title = ".*(Picture.?in.?Picture|Picture in picture|PiP).*" },
+    float = true,
+    center = true,
+    size = "480 270",
+    pin = true,
+})
+
+hl.window_rule({
+    name = "spotify-dialogs-float",
+    match = { class = "[Ss]potify.*", title = ".*(Login|Sign [Ii]n|Authentication|OAuth|Dialog|Popup|Open File|Save File|Choose|Settings|Preferences).*" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "spotify-pip-float",
+    match = { class = "[Ss]potify.*", title = ".*(Picture.?in.?Picture|Mini player|Now Playing).*" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
+    name = "portal-filechooser-float",
+    match = { class = "xdg-desktop-portal-.*", title = ".*(Open File|Save File|.*File Chooser.*|Dialog|Authentication|Login).*" },
+    float = true,
+    center = true,
+    size = "900 600",
+})

@@ -20,6 +20,31 @@ hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder
 hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer "))
 hl.bind(mainMod .. " + CTRL + C ", hl.dsp.exec_cmd("qs ipc call mohiitp clipboard  "))
 
+-- Super+C / Super+V as Copy / Paste (terminal-aware)
+-- Sends CTRL+C/V normally, CTRL+SHIFT+C/V in terminals where CTRL+C = interrupt
+local function super_copy()
+    local w = hl.get_active_window()
+    local cls = (w and w.class or ""):lower()
+    if cls:match("kitty") or cls:match("ghostty") or cls:match("alacritty") or cls:match("foot") or cls:match("wezterm") or cls:match("terminal") or cls:match("konsole") then
+        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C" }))
+    else
+        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL", key = "C" }))
+    end
+end
+
+local function super_paste()
+    local w = hl.get_active_window()
+    local cls = (w and w.class or ""):lower()
+    if cls:match("kitty") or cls:match("ghostty") or cls:match("alacritty") or cls:match("foot") or cls:match("wezterm") or cls:match("terminal") or cls:match("konsole") then
+        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V" }))
+    else
+        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL", key = "V" }))
+    end
+end
+
+hl.bind(mainMod .. " + C", super_copy, { description = "Copy (Super+C)" })
+hl.bind(mainMod .. " + V", super_paste, { description = "Paste (Super+V)" })
+
 -- Screenshot keybindings:
 -- Print / Super+Shift+S: Area capture (drag to select)
 hl.bind("Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))

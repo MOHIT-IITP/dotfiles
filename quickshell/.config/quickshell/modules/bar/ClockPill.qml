@@ -233,34 +233,17 @@ Rectangle {
     }
   }
 
-  // Cava style dynamic visualizer heights
-  property var barHeights: [3, 3, 3, 3, 3]
-  property real vizPhase: 0
-
-  Timer {
-    id: vizTimer
-    interval: 65
-    running: SettingsState.musicVisualizer && MediaState.isPlaying
-    repeat: true
-    onTriggered: {
-      root.vizPhase += 0.35;
-      var p = root.vizPhase;
-      var b0 = 3 + Math.abs(Math.sin(p * 1.3)) * 11;
-      var b1 = 4 + Math.abs(Math.sin(p * 2.1 + 0.8)) * 12;
-      var b2 = 5 + Math.abs(Math.cos(p * 1.7 + 1.2)) * 14;
-      var b3 = 4 + Math.abs(Math.sin(p * 2.4 + 2.0)) * 12;
-      var b4 = 3 + Math.abs(Math.cos(p * 1.5 + 0.5)) * 10;
-      root.barHeights = [b0, b1, b2, b3, b4];
+  // Live cava levels (0..100) mapped to bar pixel heights.
+  // CavaState captures the default-sink monitor, so music and videos
+  // drive this accurately; silence rests flat at 3px.
+  readonly property var barHeights: {
+    var vals = CavaState.values;
+    var out = [];
+    for (var i = 0; i < 5; ++i) {
+      var v = (vals && vals.length > i) ? vals[i] : 0;
+      out.push(3 + (Math.max(0, Math.min(100, v)) / 100) * 14);
     }
-  }
-
-  Connections {
-    target: MediaState
-    function onIsPlayingChanged() {
-      if (!MediaState.isPlaying) {
-        root.barHeights = [3, 3, 3, 3, 3];
-      }
-    }
+    return out;
   }
 
   // ========================================================
@@ -296,7 +279,7 @@ Rectangle {
 
           Behavior on height {
             NumberAnimation {
-              duration: 70
+              duration: 50
               easing.type: Easing.OutQuad
             }
           }
