@@ -9,6 +9,7 @@ Singleton {
   id: root
 
   property string mode: "window" // "display" | "window" | "area"
+  property string activeMode: ""
   property string lastPath: "~/Pictures/Screenshots"
   property bool capturing: false
 
@@ -16,6 +17,7 @@ Singleton {
 
   function capture(targetMode): void {
     var m = targetMode || mode;
+    activeMode = m;
     capturing = true;
     _rawOut = "";
 

@@ -16,6 +16,7 @@ Singleton {
   // 2. Visuals
   property bool musicVisualizer: true
   property string wallpaperFolder: "~/Pictures/Wallpapers"
+  property string wallpaperResizeMode: "crop" // "crop" (Fill) | "fit" | "stretch" | "no" (Center)
 
   // 3. UI scale & Bar Gap
   property real uiScale: 1.0
@@ -217,6 +218,12 @@ Singleton {
     saveSettings();
   }
 
+  function setWallpaperResizeMode(mode) {
+    if (mode !== "crop" && mode !== "fit" && mode !== "stretch" && mode !== "no") return;
+    wallpaperResizeMode = mode;
+    saveSettings();
+  }
+
   function saveSettings() {
     var data = {
       timeFormat: root.timeFormat,
@@ -224,6 +231,7 @@ Singleton {
       japaneseGlyphs: root.japaneseGlyphs,
       musicVisualizer: root.musicVisualizer,
       wallpaperFolder: root.wallpaperFolder,
+      wallpaperResizeMode: root.wallpaperResizeMode,
       themeMode: root.themeMode,
       accentHue: root.accentHue,
       themeBlend: root.themeBlend,
@@ -257,6 +265,7 @@ Singleton {
           if (parsed.japaneseGlyphs !== undefined) root.japaneseGlyphs = parsed.japaneseGlyphs;
           if (parsed.musicVisualizer !== undefined) root.musicVisualizer = parsed.musicVisualizer;
           if (parsed.wallpaperFolder !== undefined && parsed.wallpaperFolder !== "") root.wallpaperFolder = parsed.wallpaperFolder;
+          if (parsed.wallpaperResizeMode !== undefined && parsed.wallpaperResizeMode !== "") root.wallpaperResizeMode = parsed.wallpaperResizeMode;
           if (parsed.themeMode !== undefined) root.themeMode = parsed.themeMode;
           if (parsed.accentHue !== undefined) root.accentHue = parsed.accentHue;
           if (parsed.themeBlend !== undefined) {

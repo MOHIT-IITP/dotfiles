@@ -68,9 +68,11 @@ Rectangle {
   readonly property bool showNotif: NotifCenter.showNotificationPill && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
   readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
   readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif
+  // Screenshot area/window capture indicator takes over the collapsed center bar
+  readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
 
   implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showWeather ? 265 : 168)))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showWeather ? 520 : 300)))))))) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)
+  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showWeather ? 520 : 300)))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
 
   radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showWeather ? 20 : 28)))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
@@ -253,7 +255,7 @@ Rectangle {
     id: collapsedRow
     anchors.centerIn: parent
     spacing: 7
-    opacity: (!root.isExpanded && !root.showWorkspaces) ? 1 : 0
+    opacity: (!root.isExpanded && !root.showWorkspaces && !root.showCapture) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -261,6 +263,34 @@ Rectangle {
     }
 
     // Cava visualizer bars on the left of time
+    // Recording indicator: red dot that smoothly blinks while screen recording
+    Rectangle {
+      id: recDot
+      anchors.verticalCenter: parent.verticalCenter
+      width: 8
+      height: 8
+      radius: 4
+      color: "#ff453a"
+      visible: RecorderState.isRecording
+
+      SequentialAnimation on opacity {
+        running: RecorderState.isRecording
+        loops: Animation.Infinite
+        NumberAnimation {
+          from: 1.0
+          to: 0.2
+          duration: 900
+          easing.type: Easing.InOutSine
+        }
+        NumberAnimation {
+          from: 0.2
+          to: 1.0
+          duration: 900
+          easing.type: Easing.InOutSine
+        }
+      }
+    }
+
     Row {
       id: visualizerRow
       anchors.verticalCenter: parent.verticalCenter
@@ -304,6 +334,28 @@ Rectangle {
       font.bold: true
       font.family: SettingsState.fontFamily
     }
+
+    // Mic mute indicator: right side inside center bar, only when mic is muted
+    CCIcon {
+      id: micMuteIcon
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "mic-mute"
+      glyph: "#ff8a8a"
+      visible: AudioState.inMuted
+    }
+
+    // Sound mute indicator: right side inside center bar, only when output is muted
+    CCIcon {
+      id: soundMuteIcon
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "sound-mute"
+      glyph: "#ff8a8a"
+      visible: AudioState.outMuted
+    }
   }
 
   // ========================================================
@@ -313,11 +365,37 @@ Rectangle {
     id: wsRow
     anchors.centerIn: parent
     spacing: 8
-    opacity: (!root.isExpanded && root.showWorkspaces) ? 1 : 0
+    opacity: (!root.isExpanded && root.showWorkspaces && !root.showCapture) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
       NumberAnimation { duration: 160 }
+    }
+
+    Rectangle {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 8
+      height: 8
+      radius: 4
+      color: "#ff453a"
+      visible: RecorderState.isRecording
+
+      SequentialAnimation on opacity {
+        running: RecorderState.isRecording && !root.isExpanded && root.showWorkspaces
+        loops: Animation.Infinite
+        NumberAnimation {
+          from: 1.0
+          to: 0.2
+          duration: 900
+          easing.type: Easing.InOutSine
+        }
+        NumberAnimation {
+          from: 0.2
+          to: 1.0
+          duration: 900
+          easing.type: Easing.InOutSine
+        }
+      }
     }
 
     Repeater {
@@ -362,6 +440,73 @@ Rectangle {
         }
       }
     }
+
+    CCIcon {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "mic-mute"
+      glyph: "#ff8a8a"
+      visible: AudioState.inMuted
+    }
+
+    CCIcon {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "sound-mute"
+      glyph: "#ff8a8a"
+      visible: AudioState.outMuted
+    }
+  }
+
+  // ========================================================
+  // 2b. SCREENSHOT CAPTURE INDICATOR (area / window mode)
+  // ========================================================
+  Row {
+    id: captureRow
+    anchors.centerIn: parent
+    spacing: 7
+    opacity: root.showCapture ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 160 }
+    }
+
+    CCIcon {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "camera"
+      glyph: SettingsState.accent
+    }
+
+    Text {
+      anchors.verticalCenter: parent.verticalCenter
+      text: "Capture"
+      color: SettingsState.accent
+      font.pixelSize: 17
+      font.bold: true
+      font.family: SettingsState.fontFamily
+
+      SequentialAnimation on opacity {
+        running: root.showCapture
+        loops: Animation.Infinite
+        NumberAnimation {
+          from: 1.0
+          to: 0.45
+          duration: 700
+          easing.type: Easing.InOutSine
+        }
+        NumberAnimation {
+          from: 0.45
+          to: 1.0
+          duration: 700
+          easing.type: Easing.InOutSine
+        }
+      }
+    }
   }
 
   // ========================================================
@@ -383,7 +528,33 @@ Rectangle {
       // Big 12hr time
       Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 6
+        spacing: 8
+
+        Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 10
+          height: 10
+          radius: 5
+          color: "#ff453a"
+          visible: RecorderState.isRecording
+
+          SequentialAnimation on opacity {
+            running: RecorderState.isRecording
+            loops: Animation.Infinite
+            NumberAnimation {
+              from: 1.0
+              to: 0.2
+              duration: 900
+              easing.type: Easing.InOutSine
+            }
+            NumberAnimation {
+              from: 0.2
+              to: 1.0
+              duration: 900
+              easing.type: Easing.InOutSine
+            }
+          }
+        }
 
         Text {
           text: Qt.formatDateTime(root.date, "hh:mm")

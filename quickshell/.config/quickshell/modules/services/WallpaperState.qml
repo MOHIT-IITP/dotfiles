@@ -113,7 +113,8 @@ Singleton {
     if (!path) return;
     lastApplied = path;
     isApplying = true;
-    applyProcess.command = ["/home/mohiitp/.config/quickshell/scripts/apply_wallpaper.sh", path];
+    var mode = SettingsState.wallpaperResizeMode || "crop";
+    applyProcess.command = ["/home/mohiitp/.config/quickshell/scripts/apply_wallpaper.sh", path, mode];
     applyProcess.running = true;
   }
 

@@ -11,6 +11,15 @@ Item {
   readonly property var list: WallpaperState.filteredWallpapers
   readonly property int count: list ? list.length : 0
 
+  property bool resizeOpen: false
+  readonly property string resizeLabel: {
+    var m = SettingsState.wallpaperResizeMode;
+    if (m === "fit") return "Fit";
+    if (m === "stretch") return "Stretch";
+    if (m === "no") return "Center";
+    return "Fill";
+  }
+
   implicitWidth: 720
   implicitHeight: 260
 
@@ -72,7 +81,11 @@ Item {
       ev.accepted = true;
     }
     Keys.onEscapePressed: function (ev) {
-      WallpaperState.close();
+      if (root.resizeOpen) {
+        root.resizeOpen = false;
+      } else {
+        WallpaperState.close();
+      }
       ev.accepted = true;
     }
 
@@ -115,6 +128,45 @@ Item {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         spacing: 12
+
+        // Resize mode dropdown pill (Fill / Fit / Stretch / Center)
+        Rectangle {
+          id: resizePill
+          height: 28
+          width: resizeRow.implicitWidth + 12
+          radius: 14
+          color: root.resizeOpen ? SettingsState.bgActivePill : SettingsState.bgCard
+          border.color: root.resizeOpen ? SettingsState.borderActive : SettingsState.borderBase
+          border.width: 1
+
+          Row {
+            id: resizeRow
+            anchors.centerIn: parent
+            spacing: 6
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: root.resizeLabel
+              color: root.resizeOpen ? SettingsState.textActive : SettingsState.textSecondary
+              font.pixelSize: 12
+              font.bold: root.resizeOpen
+              font.family: SettingsState.fontFamily
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: root.resizeOpen ? "▲" : "▼"
+              color: SettingsState.textMuted
+              font.pixelSize: 9
+            }
+          }
+
+          MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.resizeOpen = !root.resizeOpen
+          }
+        }
 
         // Filter pill
         Rectangle {
@@ -205,6 +257,79 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: WallpaperState.close()
+          }
+        }
+      }
+    }
+
+    // Resize mode dropdown menu (overlays carousel)
+    Rectangle {
+      id: resizeMenu
+      visible: root.resizeOpen
+      anchors.top: header.bottom
+      anchors.right: parent.right
+      anchors.rightMargin: 18
+      anchors.topMargin: 2
+      width: 130
+      height: resizeCol.implicitHeight + 10
+      radius: 12
+      color: SettingsState.bgCard
+      border.color: SettingsState.borderBase
+      border.width: 1
+      z: 300
+
+      Column {
+        id: resizeCol
+        anchors.centerIn: parent
+        spacing: 2
+
+        Repeater {
+          model: [
+            { label: "Fill", value: "crop", desc: "crop to fill" },
+            { label: "Fit", value: "fit", desc: "fit inside" },
+            { label: "Stretch", value: "stretch", desc: "stretch" },
+            { label: "Center", value: "no", desc: "center, no resize" }
+          ]
+
+          delegate: Rectangle {
+            width: 118
+            height: 28
+            radius: 8
+            color: SettingsState.wallpaperResizeMode === modelData.value ? SettingsState.accent : (optMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
+
+            Row {
+              anchors.left: parent.left
+              anchors.leftMargin: 10
+              anchors.verticalCenter: parent.verticalCenter
+              spacing: 6
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: SettingsState.wallpaperResizeMode === modelData.value ? "●" : "○"
+                color: SettingsState.wallpaperResizeMode === modelData.value ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textMuted
+                font.pixelSize: 8
+              }
+
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: modelData.label
+                color: SettingsState.wallpaperResizeMode === modelData.value ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textMain
+                font.pixelSize: 12
+                font.bold: SettingsState.wallpaperResizeMode === modelData.value
+                font.family: SettingsState.fontFamily
+              }
+            }
+
+            MouseArea {
+              id: optMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: {
+                SettingsState.setWallpaperResizeMode(modelData.value);
+                root.resizeOpen = false;
+              }
+            }
           }
         }
       }
