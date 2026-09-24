@@ -12,6 +12,16 @@ Item {
   signal swipeLeft
   signal swipeRight
 
+  // Tracks pointer hover anywhere over this view (including over day /
+  // chevron MouseAreas which sit above ClockPill's gesture layer).
+  // ClockPill keeps the pill expanded while this is true.
+  property bool calHover: false
+
+  HoverHandler {
+    id: viewHover
+    onHoveredChanged: root.calHover = hovered
+  }
+
   Row {
     anchors.fill: parent
     anchors.margins: 14
@@ -46,16 +56,10 @@ Item {
 
               Text {
                 anchors.centerIn: parent
-                text: {
-                  var k = CalendarState.weatherKind;
-                  if (k === "thunder") return "⛈";
-                  if (k === "rain") return "🌧";
-                  if (k === "snow") return "❄";
-                  if (k === "cloud") return "☁";
-                  return "☀";
-                }
+                text: SettingsState.nerdWeatherIcon(CalendarState.weatherKind)
                 color: "#e89988"
-                font.pixelSize: 32
+                font.family: SettingsState.nerdIconFont
+                font.pixelSize: 30
               }
             }
 
@@ -109,8 +113,10 @@ Item {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: "💧"
-              font.pixelSize: 9
+              text: "\uf043"
+              color: SettingsState.textSecondary
+              font.family: SettingsState.nerdIconFont
+              font.pixelSize: 10
             }
 
             Text {
@@ -160,16 +166,10 @@ Item {
                 // Weather Icon
                 Text {
                   anchors.horizontalCenter: parent.horizontalCenter
-                  text: {
-                    var k = modelData.kind;
-                    if (k === "thunder") return "⛈";
-                    if (k === "rain") return "🌧";
-                    if (k === "snow") return "❄";
-                    if (k === "cloud") return "☁";
-                    return "☀";
-                  }
+                  text: SettingsState.nerdWeatherIcon(modelData.kind)
                   color: "#d4a49c"
-                  font.pixelSize: 15
+                  font.family: SettingsState.nerdIconFont
+                  font.pixelSize: 16
                 }
 
                 // Temp
@@ -189,8 +189,10 @@ Item {
 
                   Text {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "💧"
-                    font.pixelSize: 8
+                    text: "\uf043"
+                    color: SettingsState.textMuted
+                    font.family: SettingsState.nerdIconFont
+                    font.pixelSize: 9
                   }
 
                   Text {
@@ -228,7 +230,7 @@ Item {
         anchors.fill: parent
         spacing: 6
 
-        // Header: Kanji 曆 + Month Year + Nav Chevrons
+        // Header: Calendar icon + Month Year + Nav Chevrons
         Item {
           width: parent.width
           height: 24
@@ -240,10 +242,10 @@ Item {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: "曆"
+              text: "\uf073"
               color: SettingsState.textMain
-              font.pixelSize: 14
-              font.bold: true
+              font.family: SettingsState.nerdIconFont
+              font.pixelSize: 15
             }
 
             Text {
@@ -268,19 +270,22 @@ Item {
               width: 20
               height: 20
               radius: 10
+              z: 5
               color: prevMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
               Text {
                 anchors.centerIn: parent
-                text: "‹"
+                text: "\uf053"
                 color: prevMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-                font.pixelSize: 15
-                font.bold: true
+                font.family: SettingsState.nerdIconFont
+                font.pixelSize: 14
               }
 
               MouseArea {
                 id: prevMouse
                 anchors.fill: parent
+                anchors.margins: -6
+                z: 5
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: CalendarState.prevMonth()
@@ -292,19 +297,22 @@ Item {
               width: 20
               height: 20
               radius: 10
+              z: 5
               color: nextMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
               Text {
                 anchors.centerIn: parent
-                text: "›"
+                text: "\uf054"
                 color: nextMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-                font.pixelSize: 15
-                font.bold: true
+                font.family: SettingsState.nerdIconFont
+                font.pixelSize: 14
               }
 
               MouseArea {
                 id: nextMouse
                 anchors.fill: parent
+                anchors.margins: -6
+                z: 5
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: CalendarState.nextMonth()
@@ -313,7 +321,7 @@ Item {
           }
         }
 
-        // Weekday Headers (M T W T F S S)
+        // Weekday Headers (M T W T F S S, Sunday red)
         Row {
           width: parent.width
           height: 15
@@ -328,7 +336,7 @@ Item {
               Text {
                 anchors.centerIn: parent
                 text: modelData
-                color: SettingsState.textMuted
+                color: index === 6 ? "#e86a65" : SettingsState.textMuted
                 font.pixelSize: 10
                 font.bold: true
                 font.family: SettingsState.fontFamily
@@ -352,6 +360,7 @@ Item {
             delegate: Item {
               width: 270 / 7
               height: 27
+              property bool isSunday: modelData.isSunday !== undefined ? modelData.isSunday : (new Date(modelData.year, modelData.month, modelData.day).getDay() === 0)
 
               // Circular Accent Ring for Today
               Rectangle {
@@ -390,29 +399,24 @@ Item {
                 text: "" + modelData.day
                 color: modelData.isToday
                   ? "#ffffff"
-                  : (modelData.isCurrentMonth
-                      ? (dayMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain)
-                      : SettingsState.textMuted)
+                  : (isSunday && modelData.isCurrentMonth
+                      ? "#e86a65"
+                      : (modelData.isCurrentMonth
+                          ? (dayMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain)
+                          : SettingsState.textMuted))
                 opacity: modelData.isCurrentMonth ? 1.0 : 0.35
                 font.pixelSize: 11
-                font.bold: modelData.isToday || (modelData.isCurrentMonth && dayMouse.containsMouse)
+                font.bold: modelData.isToday || isSunday || (modelData.isCurrentMonth && dayMouse.containsMouse)
                 font.family: SettingsState.fontFamily
               }
 
+              // Day cells are display-only: only the chevron buttons change month.
+              // This MouseArea just absorbs clicks (hover highlight only).
               MouseArea {
                 id: dayMouse
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                  if (!modelData.isCurrentMonth) {
-                    if (modelData.day > 15) {
-                      CalendarState.prevMonth();
-                    } else {
-                      CalendarState.nextMonth();
-                    }
-                  }
-                }
               }
             }
           }

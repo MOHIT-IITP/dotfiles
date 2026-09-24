@@ -4,70 +4,92 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-// Nightlight state managing hyprsunset process and temperature
+// Nightlight state controlling hyprsunset via hyprctl.
+// The hyprsunset daemon stays running persistently; we only switch
+// between `temperature <K>` (on) and `identity` (off).
+// The old pkill/spawn + pgrep approach raced (pgrep ran before the
+// respawned daemon appeared) and couldn't tell "daemon running idle"
+// apart from "filter enabled", so the button flicked back / showed
+// the wrong state.
 Singleton {
   id: root
 
   property bool active: false
   property int temperature: 4000 // Kelvin (warm 3000K .. cooler 6000K)
 
-  function checkStatus() {
-    statusProc.running = true;
-  }
-
   function toggle() {
     if (active) {
       active = false;
-      stopProc.running = true;
+      offProc.running = true;
     } else {
       active = true;
-      startProc.command = ["bash", "-c", "pkill -x hyprsunset; hyprsunset -t " + temperature + " > /dev/null 2>&1 &"];
-      startProc.running = true;
+      applyTemp();
     }
   }
 
   function setTemperature(temp) {
     temperature = Math.max(2500, Math.min(6500, temp));
     if (active) {
-      startProc.command = ["bash", "-c", "pkill -x hyprsunset; hyprsunset -t " + temperature + " > /dev/null 2>&1 &"];
-      startProc.running = true;
+      applyTemp();
     }
   }
 
-  // Check if hyprsunset is running
-  Process {
-    id: statusProc
-    command: ["pgrep", "-x", "hyprsunset"]
-    running: true
-    onExited: function(code, status) {
-      root.active = (code === 0);
+  function applyTemp() {
+    // Make sure the daemon exists, then set the temperature.
+    // ensureProc chains into onProc on exit.
+    if (ensureProc.running) {
+      return;
     }
+    if (onProc.running) {
+      onProc.running = false;
+    }
+    onProc.command = ["hyprctl", "hyprsunset", "temperature", String(temperature)];
+    ensureProc.running = true;
   }
 
-  // Start hyprsunset process
+  // Ensure daemon is alive, then apply temperature
   Process {
-    id: startProc
+    id: ensureProc
+    command: ["bash", "-c", "pgrep -x hyprsunset >/dev/null 2>&1 || (hyprsunset >/dev/null 2>&1 &)"]
     running: false
     onExited: function() {
-      root.checkStatus();
+      // Small delay so a freshly spawned daemon is ready for hyprctl
+      applyTimer.restart();
     }
   }
 
-  // Stop hyprsunset process
-  Process {
-    id: stopProc
-    command: ["pkill", "-x", "hyprsunset"]
-    running: false
-    onExited: function() {
-      root.checkStatus();
-    }
-  }
-
-  // Periodic poll every 5s to keep sync if toggled externally
   Timer {
-    interval: 5000
-    running: true
-    repeat: true
-    onTriggered: root.checkStatus()
+    id: applyTimer
+    interval: 400
+    repeat: false
+    onTriggered: {
+      if (root.active && !onProc.running) {
+        onProc.running = true;
+      }
+    }
+  }
+
+  // Enable filter to current temperature
+  Process {
+    id: onProc
+    running: false
+  }
+
+  // Disable filter, leave daemon running
+  Process {
+    id: offProc
+    command: ["hyprctl", "hyprsunset", "identity"]
+    running: false
+  }
+
+  // Make sure the daemon exists at shell startup (without changing the screen)
+  Component.onCompleted: {
+    bootEnsure.running = true;
+  }
+
+  Process {
+    id: bootEnsure
+    command: ["bash", "-c", "pgrep -x hyprsunset >/dev/null 2>&1 || (hyprsunset >/dev/null 2>&1 &)"]
+    running: false
   }
 }

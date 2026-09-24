@@ -288,7 +288,8 @@ Item {
             Text {
               anchors.centerIn: parent
               visible: thumbImg.status !== Image.Ready
-              text: "🖼"
+              text: "\uf03e"
+                font.family: SettingsState.nerdIconFont
               font.pixelSize: 14
             }
           }
@@ -330,6 +331,7 @@ Item {
             Text {
               anchors.centerIn: parent
               text: "✕"
+                font.family: SettingsState.nerdIconFont
               color: delMouse.containsMouse ? "#ef5350" : SettingsState.textSecondary
               font.pixelSize: 11
             }

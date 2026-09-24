@@ -111,6 +111,7 @@ Item {
           anchors.centerIn: parent
           visible: !imgView.visible || imgView.status === Image.Error
           text: "󰂚"
+            font.family: SettingsState.nerdIconFont
           color: SettingsState.textSecondary
           font.pixelSize: 13
         }
@@ -174,6 +175,7 @@ Item {
         Text {
           anchors.centerIn: parent
           text: "✕"
+            font.family: SettingsState.nerdIconFont
           color: SettingsState.accent
           font.pixelSize: 11
           font.bold: true
@@ -216,7 +218,8 @@ Item {
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "›"
+            text: "\uf054"
+              font.family: SettingsState.nerdIconFont
             color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textSecondary
             font.pixelSize: 13
             font.bold: true

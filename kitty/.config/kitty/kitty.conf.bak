@@ -3,8 +3,8 @@ font_size 17.0
 
 ##### WINDOW #####
 background_opacity 0.85 
-window_padding_width 0  
-window_padding_height 0  
+window_padding_width 10  
+window_padding_height 10  
 
 ##### CURSOR #####
 cursor_shape block
@@ -65,7 +65,7 @@ cursor_trail_decay 0.05 0.10
 hide_window_decorations titlebar-only 
  
 # BEGIN_KITTY_FONTS
-font_family      family="Mononoki Nerd Font Mono"
+font_family      family="Noto Sans SignWriting"
 bold_font        auto
 italic_font      auto
 bold_italic_font auto

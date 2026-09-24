@@ -4,16 +4,16 @@ import "../services"
 import "../utils"
 
 // Left media player. Collapsed: art thumbnail circle.
-// Hovered: full player card (art, metadata, progress, controls).
+// Hovered: compact player card (rounded art, metadata, progress, controls).
 Rectangle {
   id: root
   readonly property var player: MediaState.activePlayer
   readonly property bool hasPlayer: MediaState.hasPlayer
   readonly property bool isPlaying: MediaState.isPlaying
 
-  implicitWidth: playerMouse.containsMouse ? 370 : 34
-  implicitHeight: playerMouse.containsMouse ? 168 : 34
-  radius: playerMouse.containsMouse ? 24 : 17
+  implicitWidth: playerMouse.containsMouse ? 328 : 34
+  implicitHeight: playerMouse.containsMouse ? 148 : 34
+  radius: playerMouse.containsMouse ? 22 : 17
   clip: true
 
   color: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
@@ -60,9 +60,33 @@ Rectangle {
 
     Rectangle {
       anchors.fill: parent
-      radius: 6
+      radius: width / 2
       color: "#1c1c1c"
-      clip: true
+    }
+
+    // Artwork masked to a true circle (Item.clip is rectangular,
+    // so a rounded Rectangle alone would leave the image square).
+    Item {
+      id: thumbClip
+      anchors.fill: parent
+      visible: (player?.trackArtUrl ?? "") !== ""
+
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        maskEnabled: true
+        maskSource: thumbMask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+      }
+
+      Rectangle {
+        id: thumbMask
+        anchors.fill: parent
+        radius: width / 2
+        visible: false
+        layer.enabled: true
+      }
+
       Image {
         anchors.fill: parent
         source: player?.trackArtUrl ?? ""
@@ -70,25 +94,26 @@ Rectangle {
         smooth: true
         asynchronous: true
       }
-      Text {
-        anchors.centerIn: parent
-        visible: !player?.trackArtUrl
-        text: "♪"
-        color: "#8f8f8f"
-        font.pixelSize: 11
-      }
+    }
+    Text {
+      anchors.centerIn: parent
+      visible: !player?.trackArtUrl
+      text: "\uf001"
+        font.family: SettingsState.nerdIconFont
+      color: "#8f8f8f"
+      font.pixelSize: 11
     }
   }
 
-  // ---- Expanded: player card ----
+  // ---- Expanded: compact player card ----
   Item {
     id: expandedView
     anchors.top: parent.top
     anchors.right: parent.right
-    anchors.topMargin: 16
-    anchors.rightMargin: 16
-    width: 338
-    height: 136
+    anchors.topMargin: 14
+    anchors.rightMargin: 14
+    width: 300
+    height: 120
     opacity: playerMouse.containsMouse ? 1 : 0
     visible: opacity > 0
 
@@ -107,63 +132,141 @@ Rectangle {
       font.family: SettingsState.fontFamily
     }
 
-    Row {
+    Column {
       anchors.fill: parent
-      spacing: 14
+      spacing: 8
       visible: hasPlayer
 
-      // Album art
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 110
-        height: 110
-        radius: 12
-        color: "#1c1c1c"
-        clip: true
-        Image {
-          anchors.fill: parent
-          source: player?.trackArtUrl ?? ""
-          fillMode: Image.PreserveAspectCrop
-          smooth: true
-          asynchronous: true
+      // Top row: rounded art + title/artist + live EQ
+      Row {
+        width: parent.width
+        height: 48
+        spacing: 10
+
+        // Album art with rounded corners
+        Item {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 48
+          height: 48
+
+          Rectangle {
+            anchors.fill: parent
+            radius: 9
+            color: "#1c1c1c"
+          }
+
+          Item {
+            anchors.fill: parent
+            visible: (player?.trackArtUrl ?? "") !== ""
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+              maskEnabled: true
+              maskSource: expArtMask
+              maskThresholdMin: 0.5
+              maskSpreadAtMin: 1.0
+            }
+
+            Rectangle {
+              id: expArtMask
+              anchors.fill: parent
+              radius: 9
+              visible: false
+              layer.enabled: true
+            }
+
+            Image {
+              anchors.fill: parent
+              source: player?.trackArtUrl ?? ""
+              fillMode: Image.PreserveAspectCrop
+              smooth: true
+              asynchronous: true
+            }
+          }
+
+          Text {
+            anchors.centerIn: parent
+            visible: (player?.trackArtUrl ?? "") === ""
+            text: "\uf001"
+              font.family: SettingsState.nerdIconFont
+            color: "#8f8f8f"
+            font.pixelSize: 16
+          }
+        }
+
+        Column {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 48 - 14 - 20
+          spacing: 3
+
+          Text {
+            width: parent.width
+            text: player?.trackTitle || "Unknown Title"
+            color: "#f2f2f2"
+            font.pixelSize: 14
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+            maximumLineCount: 1
+          }
+          Text {
+            width: parent.width
+            text: player?.trackArtist || "Unknown Artist"
+            color: "#b9b9b9"
+            font.pixelSize: 12
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+            maximumLineCount: 1
+          }
+        }
+
+        // Live equalizer bars
+        Row {
+          id: eqRow
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 2.5
+          property real phase: 0
+
+          NumberAnimation on phase {
+            from: 0
+            to: 6.2832
+            duration: 1200
+            loops: Animation.Infinite
+            running: isPlaying
+          }
+
+          Repeater {
+            model: 3
+            Rectangle {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 3
+              height: isPlaying ? (5 + 9 * (0.5 + 0.5 * Math.sin(eqRow.phase + index * 2.1))) : 4
+              radius: 1.5
+              color: isPlaying ? "#7ee2a8" : "#5a5f5a"
+            }
+          }
         }
       }
 
-      Column {
-        width: 214
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 6
+      // Progress: elapsed | bar | -remaining (click to seek)
+      Row {
+        width: parent.width
+        height: 12
+        spacing: 8
 
         Text {
-          width: parent.width
-          text: player?.trackTitle || (hasPlayer ? "Unknown Title" : "")
-          color: "#f2f2f2"
-          font.pixelSize: 17
-          font.bold: true
-          elide: Text.ElideRight
-          maximumLineCount: 1
-        }
-        Text {
-          width: parent.width
-          text: player?.trackArtist || (hasPlayer ? "Unknown Artist" : "")
-          color: "#d4d4d4"
-          font.pixelSize: 14
-          elide: Text.ElideRight
-          maximumLineCount: 1
-        }
-        Text {
-          width: parent.width
-          text: player ? ((player.trackAlbum || "") + (player.identity ? ((player.trackAlbum ? "  •  " : "") + player.identity) : "")) : ""
+          anchors.verticalCenter: parent.verticalCenter
+          width: 32
+          text: player ? Format.fmtTime(player.position || 0) : "0:00"
           color: "#8f8f8f"
-          font.pixelSize: 12
-          elide: Text.ElideRight
-          maximumLineCount: 1
+          font.pixelSize: 11
+          font.family: SettingsState.fontFamily
         }
 
-        // Progress bar (click to seek)
         Rectangle {
           id: progTrack
-          width: parent.width
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 32 - 38 - 16
           height: 3
           radius: 1.5
           color: "#3a3f3a"
@@ -197,43 +300,38 @@ Rectangle {
           }
         }
 
-        Item {
-          width: parent.width
-          height: 14
-          Text {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            text: player ? Format.fmtTime(player.position || 0) : "0:00"
-            color: "#8f8f8f"
-            font.pixelSize: 12
-            font.family: SettingsState.fontFamily
-          }
-          Text {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            text: player ? Format.fmtTime(player.length || 0) : "0:00"
-            color: "#8f8f8f"
-            font.pixelSize: 12
-            font.family: SettingsState.fontFamily
-          }
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 38
+          horizontalAlignment: Text.AlignRight
+          text: (player && player.length > 0) ? ("-" + Format.fmtTime(Math.max(0, (player.length || 0) - (player.position || 0)))) : "-0:00"
+          color: "#8f8f8f"
+          font.pixelSize: 11
+          font.family: SettingsState.fontFamily
         }
+      }
 
-        // Controls
+      // Controls: prev / play-pause / next + source app
+      Item {
+        width: parent.width
+        height: 34
+
         Row {
-          spacing: 18
-          anchors.horizontalCenter: parent.horizontalCenter
+          anchors.centerIn: parent
+          spacing: 16
 
           // Previous
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 30
-            height: 30
-            radius: 15
+            width: 28
+            height: 28
+            radius: 14
             color: prevArea.containsMouse ? "#2e332e" : "transparent"
+            opacity: player?.canGoPrevious ? 1 : 0.3
             Canvas {
               anchors.centerIn: parent
-              width: 14
-              height: 14
+              width: 12
+              height: 12
               onPaint: {
                 var ctx = getContext("2d");
                 ctx.fillStyle = "#e8e8e8";
@@ -252,7 +350,6 @@ Rectangle {
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               enabled: Boolean(player?.canGoPrevious)
-              opacity: enabled ? 1 : 0.3
               onClicked: {
                 if (player)
                   player.previous();
@@ -263,14 +360,14 @@ Rectangle {
           // Play / pause
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 42
-            height: 42
-            radius: 21
-            color: playArea.containsMouse ? "#3a403a" : "#2b302b"
+            width: 34
+            height: 34
+            radius: 17
+            color: playArea.containsMouse ? "#3a403a" : "transparent"
             Canvas {
               anchors.centerIn: parent
-              width: 16
-              height: 16
+              width: 14
+              height: 14
               visible: !isPlaying
               onPaint: {
                 var ctx = getContext("2d");
@@ -285,8 +382,8 @@ Rectangle {
             }
             Canvas {
               anchors.centerIn: parent
-              width: 16
-              height: 16
+              width: 14
+              height: 14
               visible: isPlaying
               onPaint: {
                 var ctx = getContext("2d");
@@ -311,14 +408,15 @@ Rectangle {
           // Next
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 30
-            height: 30
-            radius: 15
+            width: 28
+            height: 28
+            radius: 14
             color: nextArea.containsMouse ? "#2e332e" : "transparent"
+            opacity: player?.canGoNext ? 1 : 0.3
             Canvas {
               anchors.centerIn: parent
-              width: 14
-              height: 14
+              width: 12
+              height: 12
               onPaint: {
                 var ctx = getContext("2d");
                 ctx.fillStyle = "#e8e8e8";
@@ -337,13 +435,25 @@ Rectangle {
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               enabled: Boolean(player?.canGoNext)
-              opacity: enabled ? 1 : 0.3
               onClicked: {
                 if (player)
                   player.next();
               }
             }
           }
+        }
+
+        Text {
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          width: 60
+          horizontalAlignment: Text.AlignRight
+          text: player?.identity ?? ""
+          color: "#5a5f5a"
+          font.pixelSize: 11
+          font.family: SettingsState.fontFamily
+          elide: Text.ElideRight
+          maximumLineCount: 1
         }
       }
     }

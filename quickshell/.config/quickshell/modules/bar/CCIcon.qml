@@ -48,7 +48,7 @@ Item {
     if (k === "time" || k === "clock") return "";
     if (k === "stopwatch") return "";
     if (k === "music" || k === "note") return "";
-    if (k === "palette" || k === "theme") return "";
+    if (k === "palette" || k === "theme") return "󰍻";
     if (k === "folder") return "";
     if (k === "scale") return "";
     if (k === "wave" || k === "motion") return "󰐊";
@@ -62,9 +62,9 @@ Item {
     anchors.fill: parent
     text: root.iconSymbol
     color: root.glyph
-    font.family: (SettingsState.fontFamily && SettingsState.fontFamily.indexOf("Nerd Font") !== -1)
-      ? SettingsState.fontFamily
-      : (SettingsState.fontFamily + ", JetBrainsMono Nerd Font, Symbols Nerd Font, Cascadia Code Nerd Font, monospace")
+    // Icons always use CommitMono Nerd Font Propo, independent of the
+    // Appearance font picker (SettingsState.fontFamily is text-only).
+    font.family: SettingsState.nerdIconFont
     font.pixelSize: root.iconSize
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter

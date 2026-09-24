@@ -287,6 +287,7 @@ Rectangle {
             Text {
               anchors.centerIn: parent
               text: "✕"
+                font.family: SettingsState.nerdIconFont
               color: delMouse.containsMouse ? "#ef5350" : "#6e7a6e"
               font.pixelSize: 11
             }

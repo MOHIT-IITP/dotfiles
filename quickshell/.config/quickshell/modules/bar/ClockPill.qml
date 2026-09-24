@@ -67,7 +67,10 @@ Rectangle {
   readonly property bool showAuth: AuthState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
   readonly property bool showNotif: NotifCenter.showNotificationPill && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
   readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
-  readonly property bool isExpanded: mouse.containsMouse || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif
+  // Hover inside the calendar view (over day/chevron buttons which sit above
+  // the gesture MouseArea) must also keep the pill expanded.
+  readonly property bool calHovering: wxView.visible && wxView.calHover
+  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
 
@@ -225,13 +228,11 @@ Rectangle {
     }
   }
 
-  // Reset to default clock view when mouse leaves
+  // Reset to default clock view shortly after the mouse leaves
   Connections {
     target: mouse
     function onContainsMouseChanged() {
-      if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
-      }
+      root.pokeLeaveTimer();
     }
   }
 
@@ -254,7 +255,7 @@ Rectangle {
   Row {
     id: collapsedRow
     anchors.centerIn: parent
-    spacing: 7
+    spacing: RecorderState.isRecording ? 14 : 7
     opacity: (!root.isExpanded && !root.showWorkspaces && !root.showCapture) ? 1 : 0
     visible: opacity > 0
 
@@ -320,6 +321,7 @@ Rectangle {
     Text {
       id: timeText
       anchors.verticalCenter: parent.verticalCenter
+      visible: !RecorderState.isRecording
       text: {
         var fmt = "";
         if (SettingsState.timeFormat === "24h") {
@@ -355,6 +357,18 @@ Rectangle {
       kind: "sound-mute"
       glyph: "#ff8a8a"
       visible: AudioState.outMuted
+    }
+
+    // Recording elapsed time: right side, only while screen recording
+    Text {
+      id: recTimeText
+      anchors.verticalCenter: parent.verticalCenter
+      visible: RecorderState.isRecording
+      text: RecorderState.formattedTime
+      color: "#ff8a8a"
+      font.pixelSize: 14
+      font.bold: true
+      font.family: SettingsState.fontFamily
     }
   }
 
@@ -591,19 +605,20 @@ Rectangle {
               return d;
             }
             property bool isToday: index === 3
+            property bool isSunday: dayDate.getDay() === 0
 
             Text {
               anchors.horizontalCenter: parent.horizontalCenter
               text: isToday ? Qt.formatDateTime(dayDate, "ddd").toUpperCase() : Qt.formatDateTime(dayDate, "ddd").substring(0, 1).toUpperCase()
-              color: isToday ? SettingsState.accent : SettingsState.textMuted
+              color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textMuted)
               font.pixelSize: isToday ? 13 : 12
-              font.bold: isToday
+              font.bold: isToday || isSunday
               font.family: SettingsState.fontFamily
             }
             Text {
               anchors.horizontalCenter: parent.horizontalCenter
               text: Qt.formatDateTime(dayDate, "d")
-              color: isToday ? SettingsState.accent : SettingsState.textSecondary
+              color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textSecondary)
               font.pixelSize: isToday ? 18 : 15
               font.bold: isToday
               font.family: SettingsState.fontFamily
@@ -618,6 +633,7 @@ Rectangle {
   // 4. WEATHER & CALENDAR VIEW (Directly inside Center Bar)
   // ========================================================
   WeatherCalendarView {
+    id: wxView
     anchors.fill: parent
     opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
     visible: opacity > 0
@@ -725,7 +741,31 @@ Rectangle {
     }
   }
 
-  // ========================================================
+  // Close the calendar shortly after the pointer fully leaves the pill
+  // (both the gesture layer and the calendar buttons). The delay avoids
+  // flicker when moving between the background and the day/chevron buttons.
+  Timer {
+    id: leaveTimer
+    interval: 350
+    repeat: false
+    onTriggered: {
+      if (!mouse.containsMouse && !root.calHovering) {
+        root.isWeatherView = false;
+        CalendarState.close();
+      }
+    }
+  }
+
+  function pokeLeaveTimer(): void {
+    if (mouse.containsMouse || root.calHovering) {
+      leaveTimer.stop();
+    } else {
+      leaveTimer.restart();
+    }
+  }
+
+  onCalHoveringChanged: pokeLeaveTimer()
+
   // GESTURE & INTERACTION HANDLER
   // ========================================================
   property real _pressX: 0
@@ -735,6 +775,7 @@ Rectangle {
   MouseArea {
     id: mouse
     anchors.fill: parent
+    z: -1
     enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
@@ -747,21 +788,24 @@ Rectangle {
     }
 
     onPositionChanged: function(ev) {
-      if (!root._swiped) {
-        var dx = ev.x - root._pressX;
-        var dy = Math.abs(ev.y - root._pressY);
+      // Swipe = press + drag. Ignore pure hover moves, otherwise merely
+      // moving the mouse across the pill would open/close the calendar.
+      if (!mouse.pressed || root._swiped) {
+        return;
+      }
+      var dx = ev.x - root._pressX;
+      var dy = Math.abs(ev.y - root._pressY);
 
-        // Left swipe while hovered -> Open Weather & Calendar inside center bar
-        if (dx < -18 && dy < 45) {
-          root._swiped = true;
-          root.isWeatherView = true;
-          CalendarState.refreshWeather();
-        }
-        // Right swipe while hovered -> Return to clock view
-        else if (dx > 18 && dy < 45) {
-          root._swiped = true;
-          root.isWeatherView = false;
-        }
+      // Left swipe -> open Weather & Calendar inside center bar
+      if (dx < -18 && dy < 45) {
+        root._swiped = true;
+        root.isWeatherView = true;
+        CalendarState.refreshWeather();
+      }
+      // Right swipe -> return to clock view
+      else if (dx > 18 && dy < 45) {
+        root._swiped = true;
+        root.isWeatherView = false;
       }
     }
 

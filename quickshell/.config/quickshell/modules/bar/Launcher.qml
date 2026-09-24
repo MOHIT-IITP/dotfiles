@@ -202,6 +202,7 @@ Rectangle {
           Text {
             anchors.centerIn: parent
             text: "✕"
+              font.family: SettingsState.nerdIconFont
             color: clearBtnMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
             font.pixelSize: 11
           }
@@ -310,6 +311,7 @@ Rectangle {
             Text {
               anchors.centerIn: parent
               text: "⏎"
+                font.family: SettingsState.nerdIconFont
               color: SettingsState.isDark ? "#121612" : "#ffffff"
               font.pixelSize: 10
               font.bold: true

@@ -35,14 +35,9 @@ Rectangle {
     }
   }
 
-  // Weather Icon symbol helper
+  // Weather Icon symbol helper (delegates to the shared Nerd mapping)
   function getWeatherIcon(kind): string {
-    var k = (kind || "").toLowerCase();
-    if (k === "thunder") return ""; // Or cloud thunder 󰖓
-    if (k === "rain") return "";
-    if (k === "snow") return "";
-    if (k === "cloud") return "";
-    return ""; // Sun
+    return SettingsState.nerdWeatherIcon(kind);
   }
 
   property real _modalPressX: 0
@@ -100,16 +95,10 @@ Rectangle {
               // Weather Cloud Glyph / Symbol
               Text {
                 anchors.centerIn: parent
-                text: {
-                  var k = CalendarState.weatherKind;
-                  if (k === "thunder") return "⛈";
-                  if (k === "rain") return "🌧";
-                  if (k === "snow") return "❄";
-                  if (k === "cloud") return "☁";
-                  return "☀";
-                }
+                text: SettingsState.nerdWeatherIcon(CalendarState.weatherKind)
                 color: "#e89988"
-                font.pixelSize: 34
+                font.family: SettingsState.nerdIconFont
+                font.pixelSize: 30
               }
             }
 
@@ -163,8 +152,10 @@ Rectangle {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: "💧"
-              font.pixelSize: 9
+              text: "\uf043"
+              color: SettingsState.textSecondary
+              font.family: SettingsState.nerdIconFont
+              font.pixelSize: 10
             }
 
             Text {
@@ -214,15 +205,9 @@ Rectangle {
                 // Weather Icon
                 Text {
                   anchors.horizontalCenter: parent.horizontalCenter
-                  text: {
-                    var k = modelData.kind;
-                    if (k === "thunder") return "⛈";
-                    if (k === "rain") return "🌧";
-                    if (k === "snow") return "❄";
-                    if (k === "cloud") return "☁";
-                    return "☀";
-                  }
+                  text: SettingsState.nerdWeatherIcon(modelData.kind)
                   color: "#d4a49c"
+                  font.family: SettingsState.nerdIconFont
                   font.pixelSize: 16
                 }
 
@@ -243,8 +228,10 @@ Rectangle {
 
                   Text {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "💧"
-                    font.pixelSize: 8
+                    text: "\uf043"
+                    color: SettingsState.textMuted
+                    font.family: SettingsState.nerdIconFont
+                    font.pixelSize: 9
                   }
 
                   Text {
@@ -282,7 +269,7 @@ Rectangle {
         anchors.fill: parent
         spacing: 8
 
-        // Header: Kanji 曆 + Month Year + Nav Chevrons
+        // Header: Calendar icon + Month Year + Nav Chevrons
         Item {
           width: parent.width
           height: 26
@@ -294,10 +281,10 @@ Rectangle {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: "曆"
+              text: "\uf073"
               color: SettingsState.textMain
-              font.pixelSize: 15
-              font.bold: true
+              font.family: SettingsState.nerdIconFont
+              font.pixelSize: 16
             }
 
             Text {
@@ -322,19 +309,22 @@ Rectangle {
               width: 22
               height: 22
               radius: 11
+              z: 5
               color: prevMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
               Text {
                 anchors.centerIn: parent
-                text: "‹"
+                text: "\uf053"
                 color: prevMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-                font.pixelSize: 16
-                font.bold: true
+                font.family: SettingsState.nerdIconFont
+                font.pixelSize: 15
               }
 
               MouseArea {
                 id: prevMouse
                 anchors.fill: parent
+                anchors.margins: -6
+                z: 5
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: CalendarState.prevMonth()
@@ -346,19 +336,22 @@ Rectangle {
               width: 22
               height: 22
               radius: 11
+              z: 5
               color: nextMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
               Text {
                 anchors.centerIn: parent
-                text: "›"
+                text: "\uf054"
                 color: nextMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-                font.pixelSize: 16
-                font.bold: true
+                font.family: SettingsState.nerdIconFont
+                font.pixelSize: 15
               }
 
               MouseArea {
                 id: nextMouse
                 anchors.fill: parent
+                anchors.margins: -6
+                z: 5
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: CalendarState.nextMonth()
@@ -367,7 +360,7 @@ Rectangle {
           }
         }
 
-        // Weekday Headers (M T W T F S S)
+        // Weekday Headers (M T W T F S S, Sunday red)
         Row {
           width: parent.width
           height: 16
@@ -382,7 +375,7 @@ Rectangle {
               Text {
                 anchors.centerIn: parent
                 text: modelData
-                color: SettingsState.textMuted
+                color: index === 6 ? "#e86a65" : SettingsState.textMuted
                 font.pixelSize: 11
                 font.bold: true
                 font.family: SettingsState.fontFamily
@@ -406,6 +399,7 @@ Rectangle {
             delegate: Item {
               width: 275 / 7
               height: 28
+              property bool isSunday: modelData.isSunday !== undefined ? modelData.isSunday : (new Date(modelData.year, modelData.month, modelData.day).getDay() === 0)
 
               // Circular Accent Ring for Today
               Rectangle {
@@ -444,12 +438,14 @@ Rectangle {
                 text: "" + modelData.day
                 color: modelData.isToday
                   ? "#ffffff"
-                  : (modelData.isCurrentMonth
-                      ? (dayMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain)
-                      : SettingsState.textMuted)
+                  : (isSunday && modelData.isCurrentMonth
+                      ? "#e86a65"
+                      : (modelData.isCurrentMonth
+                          ? (dayMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain)
+                          : SettingsState.textMuted))
                 opacity: modelData.isCurrentMonth ? 1.0 : 0.35
                 font.pixelSize: 12
-                font.bold: modelData.isToday || (modelData.isCurrentMonth && dayMouse.containsMouse)
+                font.bold: modelData.isToday || isSunday || (modelData.isCurrentMonth && dayMouse.containsMouse)
                 font.family: SettingsState.fontFamily
               }
 

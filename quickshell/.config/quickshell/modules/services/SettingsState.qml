@@ -87,6 +87,8 @@ Singleton {
     } catch(e) {}
 
     var preferred = [
+      "SF Pro Display",
+      "SF Pro Text",
       "JetBrainsMono Nerd Font",
       "FiraCode Nerd Font",
       "Hack Nerd Font",
@@ -119,6 +121,59 @@ Singleton {
 
   property int fontIndex: 0
   property string fontFamily: availableFonts[fontIndex] || "JetBrainsMono Nerd Font"
+
+  // Dedicated icon font: Nerd Font glyphs are missing from regular UI fonts,
+  // so icons must never use fontFamily directly.
+  // CommitMono Nerd Font Propo is the single icon/symbol font everywhere.
+  readonly property string iconFontFamily: {
+    var sys = [];
+    try {
+      sys = Qt.fontFamilies();
+    } catch (e) {}
+    var prefs = [
+      "CommitMono Nerd Font Propo",
+      "JetBrainsMono Nerd Font",
+      "CaskaydiaCove Nerd Font",
+      "FiraCode Nerd Font",
+      "Hack Nerd Font",
+      "CommitMono Nerd Font",
+      "Iosevka Nerd Font",
+      "Symbols Nerd Font"
+    ];
+    for (var i = 0; i < prefs.length; ++i) {
+      if (sys.indexOf(prefs[i]) !== -1) return prefs[i];
+    }
+    for (var j = 0; j < sys.length; ++j) {
+      var f = sys[j];
+      if (f && f.indexOf("Nerd Font") !== -1) return f;
+    }
+    return "Symbols Nerd Font";
+  }
+
+  // CommitMono Nerd Font Propo for all icons & symbols.
+  // Pictographic glyphs must never use fontFamily directly.
+  readonly property string nerdIconFont: {
+    var sys = [];
+    try {
+      sys = Qt.fontFamilies();
+    } catch (e) {}
+    if (sys.indexOf("CommitMono Nerd Font Propo") !== -1) {
+      return "CommitMono Nerd Font Propo";
+    }
+    return iconFontFamily;
+  }
+
+  // Map weather kind ("thunder"|"rain"|"snow"|"cloud"|"sun") to a
+  // Nerd Fonts weather glyph. Codepoints verified against the
+  // CommitMono Nerd Font Propo charset on this system.
+  function nerdWeatherIcon(kind): string {
+    var k = (kind || "").toLowerCase();
+    if (k === "thunder") return "\ue31d"; // nf-weather-thunderstorm
+    if (k === "rain") return "\ue318"; // nf-weather-rain
+    if (k === "snow") return "\ue31a"; // nf-weather-snow
+    if (k === "cloud") return "\ue312"; // nf-weather-cloudy
+    return "\ue30d"; // nf-weather-day_sunny
+  }
 
   function setTimeFormat(fmt) {
     timeFormat = fmt;

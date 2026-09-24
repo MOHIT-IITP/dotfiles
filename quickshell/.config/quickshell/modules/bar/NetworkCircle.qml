@@ -1156,7 +1156,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 20
             font.bold: true
@@ -1436,7 +1437,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 20
             font.bold: true
@@ -1713,7 +1715,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 18
             font.bold: true
@@ -1983,7 +1986,8 @@ Rectangle {
 
         Text {
           anchors.centerIn: parent
-          text: "‹"
+          text: "\uf053"
+            font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: 20
           font.bold: true
@@ -2848,8 +2852,9 @@ Rectangle {
               }
 
               Text {
-                text: root.fontDropdownOpen ? "▲" : "›"
+                text: root.fontDropdownOpen ? "\uf077" : "\uf054"
                 color: SettingsState.textSecondary
+                font.family: SettingsState.nerdIconFont
                 font.pixelSize: 11
                 font.bold: true
               }
@@ -2901,7 +2906,7 @@ Rectangle {
                 text: ""
                 color: SettingsState.textMuted
                 font.pixelSize: 12
-                font.family: SettingsState.fontFamily
+                font.family: SettingsState.nerdIconFont
               }
 
               Item {
@@ -2944,6 +2949,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: fSearchInput.text.length > 0
                 text: "✕"
+                  font.family: SettingsState.nerdIconFont
                 color: SettingsState.textMuted
                 font.pixelSize: 11
                 MouseArea {
@@ -3051,7 +3057,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 20
             font.bold: true
@@ -3266,6 +3273,7 @@ Rectangle {
               anchors.centerIn: parent
               visible: modelData.isDefault
               text: "✓"
+                font.family: SettingsState.nerdIconFont
               color: SettingsState.isDark ? "#121612" : "#ffffff"
               font.pixelSize: 12
               font.bold: true
@@ -3321,7 +3329,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 20
             font.bold: true
@@ -3536,6 +3545,7 @@ Rectangle {
               anchors.centerIn: parent
               visible: modelData.isDefault
               text: "✓"
+                font.family: SettingsState.nerdIconFont
               color: SettingsState.isDark ? "#121612" : "#ffffff"
               font.pixelSize: 12
               font.bold: true
@@ -3592,7 +3602,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 20
             font.bold: true
@@ -3866,7 +3877,8 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "‹"
+            text: "\uf053"
+              font.family: SettingsState.nerdIconFont
             color: "#f2f2f2"
             font.pixelSize: 20
             font.bold: true
@@ -4210,8 +4222,9 @@ Rectangle {
               }
 
               Text {
-                text: root.recMicDropdownOpen ? "▲" : "▼"
+                text: root.recMicDropdownOpen ? "\uf077" : "\uf078"
                 color: SettingsState.textSecondary
+                font.family: SettingsState.nerdIconFont
                 font.pixelSize: 8
               }
             }
@@ -4312,6 +4325,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: modelData.isDefault
                 text: "✓"
+                  font.family: SettingsState.nerdIconFont
                 color: SettingsState.isDark ? "#121612" : "#ffffff"
                 font.pixelSize: 12
                 font.bold: true
@@ -4619,6 +4633,7 @@ Rectangle {
               }
               Text {
                 text: "•"
+                  font.family: SettingsState.nerdIconFont
                 color: SettingsState.textMuted
                 font.pixelSize: 11
               }
@@ -4684,7 +4699,8 @@ Rectangle {
 
             Text {
               anchors.centerIn: parent
-              text: "‹"
+              text: "\uf053"
+                font.family: SettingsState.nerdIconFont
               color: SettingsState.textMain
               font.pixelSize: 20
               font.bold: true

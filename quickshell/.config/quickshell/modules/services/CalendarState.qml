@@ -69,6 +69,10 @@ Singleton {
     viewMonth = d.getMonth();
   }
 
+  function isSundayDay(y, m, d): bool {
+    return new Date(y, m, d).getDay() === 0;
+  }
+
   // Generate 42 cells (6 rows x 7 cols starting from Monday)
   readonly property var calendarGrid: {
     var cells = [];
@@ -81,12 +85,16 @@ Singleton {
 
     // 1. Previous month trailing days
     for (var p = startDay - 1; p >= 0; --p) {
+      var pm = viewMonth === 0 ? 11 : viewMonth - 1;
+      var py = viewMonth === 0 ? viewYear - 1 : viewYear;
+      var pd = daysInPrevMonth - p;
       cells.push({
-        day: daysInPrevMonth - p,
+        day: pd,
         isCurrentMonth: false,
         isToday: false,
-        month: viewMonth === 0 ? 11 : viewMonth - 1,
-        year: viewMonth === 0 ? viewYear - 1 : viewYear
+        isSunday: isSundayDay(py, pm, pd),
+        month: pm,
+        year: py
       });
     }
 
@@ -97,6 +105,7 @@ Singleton {
         day: d,
         isCurrentMonth: true,
         isToday: isT,
+        isSunday: isSundayDay(viewYear, viewMonth, d),
         month: viewMonth,
         year: viewYear
       });
@@ -105,12 +114,15 @@ Singleton {
     // 3. Next month leading days to complete 42 cells (6 weeks)
     var remaining = 42 - cells.length;
     for (var n = 1; n <= remaining; ++n) {
+      var nm = viewMonth === 11 ? 0 : viewMonth + 1;
+      var ny = viewMonth === 11 ? viewYear + 1 : viewYear;
       cells.push({
         day: n,
         isCurrentMonth: false,
         isToday: false,
-        month: viewMonth === 11 ? 0 : viewMonth + 1,
-        year: viewMonth === 11 ? viewYear + 1 : viewYear
+        isSunday: isSundayDay(ny, nm, n),
+        month: nm,
+        year: ny
       });
     }
 

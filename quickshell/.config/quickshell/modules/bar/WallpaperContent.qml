@@ -155,8 +155,9 @@ Item {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: root.resizeOpen ? "▲" : "▼"
+              text: root.resizeOpen ? "\uf077" : "\uf078"
               color: SettingsState.textMuted
+              font.family: SettingsState.nerdIconFont
               font.pixelSize: 9
             }
           }
@@ -223,7 +224,8 @@ Item {
 
           Text {
             anchors.centerIn: parent
-            text: "↻"
+            text: "\uf021"
+              font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
             font.pixelSize: 16
           }
@@ -247,6 +249,7 @@ Item {
           Text {
             anchors.centerIn: parent
             text: "✕"
+              font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
             font.pixelSize: 12
           }
@@ -371,7 +374,8 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "‹"
+          text: "\uf053"
+            font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: 18
         }
@@ -401,7 +405,8 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "›"
+          text: "\uf054"
+            font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: 18
         }
