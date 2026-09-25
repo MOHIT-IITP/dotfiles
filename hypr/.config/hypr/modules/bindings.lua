@@ -2,11 +2,10 @@
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 local terminal    = "kitty"
 local fileManager = "thunar"
-local menu = "~/.config/rofi/type-2/launcher.sh"
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + RETURN  ", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. "+ CTRL + Q", hl.dsp.window.close())
+hl.bind(mainMod .. "+ SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. "+ SHIFT + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + SHIFT + CTRL + ALT + V", hl.dsp.window.float({ action = "toggle" }))
@@ -47,14 +46,14 @@ hl.bind(mainMod .. " + V", super_paste, { description = "Paste (Super+V)" })
 
 -- Screenshot keybindings:
 -- Print / Super+Shift+S: Area capture (drag to select)
-hl.bind("Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
+-- hl.bind("Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
 -- Super+Alt+S / Alt+Print: Window capture (click window)
 hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
-hl.bind("ALT + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
+-- hl.bind("ALT + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
 -- Super+Ctrl+S / Ctrl+Print: Full Display capture
 hl.bind(mainMod .. " + CTRL + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
-hl.bind("CTRL + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
+-- hl.bind("CTRL + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
 -- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Move focus with mainMod + arrow keys
