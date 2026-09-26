@@ -337,6 +337,45 @@ Rectangle {
       font.family: SettingsState.fontFamily
     }
 
+    // Spacer between time and mute indicators so the mic icon never hugs the text
+    // Privacy indicators: solid yellow = camera in use, solid green = mic in use (never blink)
+    // Spacer so the dots never hug the time text
+    Item {
+      width: 6
+      height: 1
+      visible: PrivacyState.cameraActive || PrivacyState.micActive
+    }
+
+    Row {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 5
+      visible: PrivacyState.cameraActive || PrivacyState.micActive
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#ffd60a"
+        visible: PrivacyState.cameraActive
+      }
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#30d158"
+        visible: PrivacyState.micActive
+      }
+    }
+
+    Item {
+      width: 6
+      height: 1
+      visible: AudioState.inMuted || AudioState.outMuted
+    }
+
     // Mic mute indicator: right side inside center bar, only when mic is muted
     CCIcon {
       id: micMuteIcon
@@ -357,6 +396,16 @@ Rectangle {
       kind: "sound-mute"
       glyph: "#ff8a8a"
       visible: AudioState.outMuted
+    }
+
+    // DND indicator: yellow bell-slash, only when Do Not Disturb is on
+    CCIcon {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "dnd"
+      glyph: "#ffd60a"
+      visible: NotifCenter.dnd
     }
 
     // Recording elapsed time: right side, only while screen recording
@@ -455,6 +504,44 @@ Rectangle {
       }
     }
 
+    // Privacy indicators: solid yellow = camera in use, solid green = mic in use (never blink)
+    // Spacer so the dots never hug the time text
+    Item {
+      width: 6
+      height: 1
+      visible: PrivacyState.cameraActive || PrivacyState.micActive
+    }
+
+    Row {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 5
+      visible: PrivacyState.cameraActive || PrivacyState.micActive
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#ffd60a"
+        visible: PrivacyState.cameraActive
+      }
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#30d158"
+        visible: PrivacyState.micActive
+      }
+    }
+
+    Item {
+      width: 6
+      height: 1
+      visible: AudioState.inMuted || AudioState.outMuted
+    }
+
     CCIcon {
       anchors.verticalCenter: parent.verticalCenter
       width: 16
@@ -471,6 +558,16 @@ Rectangle {
       kind: "sound-mute"
       glyph: "#ff8a8a"
       visible: AudioState.outMuted
+    }
+
+    // DND indicator: yellow bell-slash, only when Do Not Disturb is on
+    CCIcon {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 16
+      height: 16
+      kind: "dnd"
+      glyph: "#ffd60a"
+      visible: NotifCenter.dnd
     }
   }
 
@@ -571,14 +668,33 @@ Rectangle {
         }
 
         Text {
-          text: Qt.formatDateTime(root.date, "hh:mm")
+          id: bigTimeText
+          text: {
+            var h = root.date.getHours();
+            var m = root.date.getMinutes();
+            var s = root.date.getSeconds();
+            function pad(n) {
+              return (n < 10 ? "0" : "") + n;
+            }
+            if (SettingsState.timeFormat === "24h") {
+              return pad(h) + ":" + pad(m) + (SettingsState.clockSeconds ? ":" + pad(s) : "");
+            }
+            // NOTE: Qt's "hh" only yields 1-12 when the format string also
+            // contains an AP marker, so compute 12-hour digits explicitly.
+            var h12 = h % 12;
+            if (h12 === 0) {
+              h12 = 12;
+            }
+            return pad(h12) + ":" + pad(m) + (SettingsState.clockSeconds ? ":" + pad(s) : "");
+          }
           color: SettingsState.accent
           font.pixelSize: 34
           font.bold: true
           font.family: SettingsState.fontFamily
         }
         Text {
-          anchors.baseline: parent.children[0].baseline
+          anchors.baseline: bigTimeText.baseline
+          visible: SettingsState.timeFormat !== "24h"
           text: Qt.formatDateTime(root.date, "AP")
           color: SettingsState.accent
           opacity: 0.8

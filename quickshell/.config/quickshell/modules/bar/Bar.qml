@@ -93,7 +93,7 @@ Scope {
 
         SystemClock {
           id: clock
-          precision: SystemClock.Minutes
+          precision: SettingsState.clockSeconds ? SystemClock.Seconds : SystemClock.Minutes
         }
 
         Item {
