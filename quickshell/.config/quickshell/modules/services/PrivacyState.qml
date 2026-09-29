@@ -5,7 +5,7 @@ import Quickshell.Io
 import QtQuick
 
 // Privacy usage state: polls privacy.sh for camera / microphone consumers.
-// cameraActive -> solid yellow dot, micActive -> solid green dot in ClockPill.
+// micActive -> solid orange-yellow dot, cameraActive -> solid green dot in ClockPill.
 Singleton {
   id: root
 

@@ -49,7 +49,8 @@ Item {
     if (k === "stopwatch") return "";
     if (k === "music" || k === "note") return "";
     if (k === "palette" || k === "theme") return "󰍻";
-    if (k === "folder") return "";
+    if (k === "folder" || k === "folders" || k === "directory") return "";
+    if (k === "file" || k === "files" || k === "doc" || k === "document") return "";
     if (k === "scale") return "";
     if (k === "wave" || k === "motion") return "󰐊";
     if (k === "font") return "";

@@ -66,18 +66,19 @@ Rectangle {
   readonly property bool showMixer: MixerState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard
   readonly property bool showAuth: AuthState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
   readonly property bool showNotif: NotifCenter.showNotificationPill && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
+  readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showFileTray
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: wxView.visible && wxView.calHover
-  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif
+  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif || FileTrayState.open || FileTrayState.dndHover
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showWeather ? 265 : 168)))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showWeather ? 520 : 300)))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showFileTray ? 190 : (showWeather ? 265 : 168))))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showWeather ? 520 : 300))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
 
-  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showWeather ? 20 : 28)))))))) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showFileTray ? 36 : (showWeather ? 20 : 28))))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
@@ -228,6 +229,15 @@ Rectangle {
     }
   }
 
+  Connections {
+    target: FileTrayState
+    function onOpenChanged() {
+      if (FileTrayState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
   // Reset to default clock view shortly after the mouse leaves
   Connections {
     target: mouse
@@ -337,15 +347,7 @@ Rectangle {
       font.family: SettingsState.fontFamily
     }
 
-    // Spacer between time and mute indicators so the mic icon never hugs the text
-    // Privacy indicators: solid yellow = camera in use, solid green = mic in use (never blink)
-    // Spacer so the dots never hug the time text
-    Item {
-      width: 6
-      height: 1
-      visible: PrivacyState.cameraActive || PrivacyState.micActive
-    }
-
+    // Privacy indicators: solid orange-yellow = mic in use, solid green = camera in use (never blink)
     Row {
       anchors.verticalCenter: parent.verticalCenter
       spacing: 5
@@ -356,7 +358,7 @@ Rectangle {
         width: 8
         height: 8
         radius: 4
-        color: "#ffd60a"
+        color: "#30d158"
         visible: PrivacyState.cameraActive
       }
 
@@ -365,7 +367,7 @@ Rectangle {
         width: 8
         height: 8
         radius: 4
-        color: "#30d158"
+        color: "#ffd60a"
         visible: PrivacyState.micActive
       }
     }
@@ -418,6 +420,73 @@ Rectangle {
       font.pixelSize: 14
       font.bold: true
       font.family: SettingsState.fontFamily
+    }
+
+    // File shelf: inline thumbnail of first stashed file + count, click to open
+    Item {
+      anchors.verticalCenter: parent.verticalCenter
+      width: shelfInline.width
+      height: 18
+      visible: FileTrayState.count > 0
+
+      Row {
+        id: shelfInline
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 4
+
+        Item {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 18
+          height: 18
+
+          Rectangle {
+            anchors.fill: parent
+            radius: 5
+            color: Qt.rgba(SettingsState.accent.r, SettingsState.accent.g, SettingsState.accent.b, 0.12)
+            visible: !(FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage)
+            Text {
+              anchors.centerIn: parent
+              text: "󰈙"
+              font.family: SettingsState.nerdIconFont
+              font.pixelSize: 10
+              color: SettingsState.accent
+            }
+          }
+          Image {
+            anchors.fill: parent
+            visible: FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage
+            source: (FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage) ? FileTrayState.files[0].url : ""
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            asynchronous: true
+            sourceSize.width: 44
+            sourceSize.height: 44
+            onStatusChanged: {
+              if (status === Image.Error) visible = false;
+            }
+          }
+        }
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          text: FileTrayState.count
+          font.pixelSize: 11
+          font.family: SettingsState.fontFamily
+          color: shelfInlineMouse.containsMouse ? SettingsState.accent : SettingsState.textSecondary
+        }
+      }
+
+      MouseArea {
+        id: shelfInlineMouse
+        anchors.fill: parent
+        anchors.margins: -4
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: function(ev) {
+          FileTrayState.openTray();
+          ev.accepted = true;
+        }
+      }
     }
   }
 
@@ -504,14 +573,7 @@ Rectangle {
       }
     }
 
-    // Privacy indicators: solid yellow = camera in use, solid green = mic in use (never blink)
-    // Spacer so the dots never hug the time text
-    Item {
-      width: 6
-      height: 1
-      visible: PrivacyState.cameraActive || PrivacyState.micActive
-    }
-
+    // Privacy indicators: solid orange-yellow = mic in use, solid green = camera in use (never blink)
     Row {
       anchors.verticalCenter: parent.verticalCenter
       spacing: 5
@@ -522,7 +584,7 @@ Rectangle {
         width: 8
         height: 8
         radius: 4
-        color: "#ffd60a"
+        color: "#30d158"
         visible: PrivacyState.cameraActive
       }
 
@@ -531,7 +593,7 @@ Rectangle {
         width: 8
         height: 8
         radius: 4
-        color: "#30d158"
+        color: "#ffd60a"
         visible: PrivacyState.micActive
       }
     }
@@ -568,6 +630,73 @@ Rectangle {
       kind: "dnd"
       glyph: "#ffd60a"
       visible: NotifCenter.dnd
+    }
+
+    // File shelf: inline thumbnail + count (mirrors collapsed row)
+    Item {
+      anchors.verticalCenter: parent.verticalCenter
+      width: wsShelfInline.width
+      height: 18
+      visible: FileTrayState.count > 0
+
+      Row {
+        id: wsShelfInline
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 4
+
+        Item {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 18
+          height: 18
+
+          Rectangle {
+            anchors.fill: parent
+            radius: 5
+            color: Qt.rgba(SettingsState.accent.r, SettingsState.accent.g, SettingsState.accent.b, 0.12)
+            visible: !(FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage)
+            Text {
+              anchors.centerIn: parent
+              text: "󰈙"
+              font.family: SettingsState.nerdIconFont
+              font.pixelSize: 10
+              color: SettingsState.accent
+            }
+          }
+          Image {
+            anchors.fill: parent
+            visible: FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage
+            source: (FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage) ? FileTrayState.files[0].url : ""
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            asynchronous: true
+            sourceSize.width: 44
+            sourceSize.height: 44
+            onStatusChanged: {
+              if (status === Image.Error) visible = false;
+            }
+          }
+        }
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          text: FileTrayState.count
+          font.pixelSize: 11
+          font.family: SettingsState.fontFamily
+          color: wsShelfInlineMouse.containsMouse ? SettingsState.accent : SettingsState.textSecondary
+        }
+      }
+
+      MouseArea {
+        id: wsShelfInlineMouse
+        anchors.fill: parent
+        anchors.margins: -4
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: function(ev) {
+          FileTrayState.openTray();
+          ev.accepted = true;
+        }
+      }
     }
   }
 
@@ -625,7 +754,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -751,7 +880,7 @@ Rectangle {
   WeatherCalendarView {
     id: wxView
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
+    opacity: (root.isExpanded && root.showWeather && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -857,6 +986,20 @@ Rectangle {
     }
   }
 
+  // ========================================================
+  // 12. EMBEDDED FILE SHELF VIEW (Directly inside Center Bar)
+  // ========================================================
+  FileTrayContent {
+    id: fileTrayContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showFileTray) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
   // Close the calendar shortly after the pointer fully leaves the pill
   // (both the gesture layer and the calendar buttons). The delay avoids
   // flicker when moving between the background and the day/chevron buttons.
@@ -892,7 +1035,7 @@ Rectangle {
     id: mouse
     anchors.fill: parent
     z: -1
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showFileTray
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -940,6 +1083,29 @@ Rectangle {
         Hyprland.dispatch("workspace e-1");
       } else if (wheel.angleDelta.y < 0) {
         Hyprland.dispatch("workspace e+1");
+      }
+    }
+  }
+
+  // FILE SHELF DROP ZONE — covers the whole pill so files can be
+  // dropped anywhere on the clock bar. Expands the bar on hover.
+  DropArea {
+    anchors.fill: parent
+    z: 100
+    onEntered: function(drag) {
+      if (drag.hasUrls) {
+        FileTrayState.dndHover = true;
+      }
+    }
+    onExited: {
+      FileTrayState.dndHover = false;
+    }
+    onDropped: function(drop) {
+      FileTrayState.dndHover = false;
+      if (drop.hasUrls && drop.urls.length > 0) {
+        FileTrayState.addUrls(drop.urls);
+        FileTrayState.openTray();
+        drop.accept();
       }
     }
   }

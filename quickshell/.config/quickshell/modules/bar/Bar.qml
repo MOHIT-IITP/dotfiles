@@ -35,7 +35,7 @@ Scope {
         // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap
         exclusiveZone: Math.round((34 + SettingsState.barGap) * SettingsState.uiScale)
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || (netCircle && netCircle.fontDropdownOpen)
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || (netCircle && netCircle.fontDropdownOpen)
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -78,6 +78,7 @@ Scope {
             if (ClipboardState.open) ClipboardState.close();
             if (MixerState.open) MixerState.close();
             if (AuthState.open) AuthState.close();
+            if (FileTrayState.open) FileTrayState.close();
           }
         }
 

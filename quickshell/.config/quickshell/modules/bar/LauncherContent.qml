@@ -1,19 +1,114 @@
 import Quickshell
+import Quickshell.Io
 import QtQuick
 import "../services"
 
-// Embedded App Launcher subview styled exactly as reference:
-// - Top search header with 探 glyph, underlined search input, and app counter (e.g. 52 / 52)
-// - Clean vertical app list with 2-line title & category layout and sleek selected pill highlight
-// - Bottom subtle hint footer "↓ Drag an AppImage onto the pill"
+// Embedded App + File Search launcher subview styled exactly as reference:
+// - Mode tabs (Apps / Files) at the top; Files mode is a fast fd-based file search
+// - Top search header with 探 glyph, underlined search input, and result counter
+// - Clean vertical results list with 2-line title & subtitle layout and selected pill highlight
+// - Bottom subtle hint footer
 Item {
   id: root
 
   property string query: ""
   property int sel: 0
+  readonly property bool isFiles: LauncherState.mode === "files"
+
+  // ---- File search state (fd backend + folder browsing) ----
+  property var fileResults: []
+  property bool fileSearching: false
+  property string browsePath: "/home/mohiitp"
+
+  function normalizeDir(path) {
+    if (!path) return "/home/mohiitp";
+    var p = path.toString();
+    if (p.length > 1 && p.charAt(p.length - 1) === "/") p = p.substring(0, p.length - 1);
+    return p === "" ? "/" : p;
+  }
+
+  function isPhoto(path) {
+    if (!path) return false;
+    var p = path.toString().toLowerCase();
+    return (p.endsWith(".jpg") || p.endsWith(".jpeg") || p.endsWith(".png")
+      || p.endsWith(".webp") || p.endsWith(".gif") || p.endsWith(".bmp")
+      || p.endsWith(".tif") || p.endsWith(".tiff") || p.endsWith(".svg")
+      || p.endsWith(".heic") || p.endsWith(".heif") || p.endsWith(".avif"));
+  }
+
+  function fileName(path) {
+    if (!path) return "";
+    var p = path.toString();
+    if (p.length > 1 && p.charAt(p.length - 1) === "/") p = p.substring(0, p.length - 1);
+    var i = p.lastIndexOf("/");
+    return i >= 0 ? p.substring(i + 1) : p;
+  }
+
+  function fileParent(path) {
+    if (!path) return "";
+    var p = path.toString();
+    if (p.length > 1 && p.charAt(p.length - 1) === "/") p = p.substring(0, p.length - 1);
+    var i = p.lastIndexOf("/");
+    return i > 0 ? p.substring(0, i) : "/";
+  }
+
+  function runFileSearch() {
+    fileResults = [];
+    fileSearching = true;
+    if (searchProc.running) searchProc.running = false;
+    // Empty query lists current folder; typed query searches recursively inside it.
+    searchProc.command = ["/home/mohiitp/.config/quickshell/scripts/search_files.sh", query, browsePath, "60"];
+    searchProc.running = true;
+  }
+
+  function enterFolder(path) {
+    browsePath = normalizeDir(path);
+    query = "";
+    if (search) search.text = "";
+    sel = 0;
+    runFileSearch();
+    forceFocus();
+  }
+
+  function goUp() {
+    if (browsePath === "/" || browsePath === "") return;
+    enterFolder(fileParent(browsePath));
+  }
+
+  Timer {
+    id: fileDebounce
+    interval: 220
+    repeat: false
+    onTriggered: {
+      if (root.isFiles && LauncherState.open) root.runFileSearch();
+    }
+  }
+
+  Process {
+    id: searchProc
+    running: false
+    stdout: SplitParser {
+      onRead: data => {
+        var line = (data || "").toString().trim();
+        if (line === "") return;
+        var tab = line.indexOf("\t");
+        var type = "f";
+        var p = line;
+        if (tab !== -1) {
+          type = line.substring(0, tab);
+          p = line.substring(tab + 1);
+        }
+        if (p === "") return;
+        root.fileResults = root.fileResults.concat([{ "path": p, "isDir": type === "d" }]);
+      }
+    }
+    onExited: function(code, status) {
+      root.fileSearching = false;
+    }
+  }
 
   implicitWidth: 380
-  implicitHeight: 370
+  implicitHeight: 436
 
   function forceFocus() {
     search.focus = true;
@@ -26,9 +121,21 @@ Item {
       if (LauncherState.open) {
         root.query = "";
         root.sel = 0;
+        root.browsePath = "/home/mohiitp";
         search.text = "";
+        if (root.isFiles) root.runFileSearch();
         forceFocus();
         focusRetryTimer.restart();
+      }
+    }
+    function onModeChanged() {
+      root.sel = 0;
+      if (LauncherState.open) {
+        if (root.isFiles) {
+          root.browsePath = "/home/mohiitp";
+          root.runFileSearch();
+        }
+        forceFocus();
       }
     }
   }
@@ -94,8 +201,43 @@ Item {
   }
 
   function launchSelected() {
+    if (root.isFiles) {
+      launchFileSelected(false);
+      return;
+    }
     if (sel >= 0 && sel < filtered.length)
       launch(filtered[sel]);
+  }
+
+  function openFile(path) {
+    if (!path) return;
+    LauncherState.close();
+    Quickshell.execDetached(["/home/mohiitp/.config/quickshell/scripts/open_file.sh", path.toString(), "open"]);
+  }
+
+  function revealFile(path) {
+    if (!path) return;
+    LauncherState.close();
+    Quickshell.execDetached(["/home/mohiitp/.config/quickshell/scripts/open_file.sh", path.toString(), "reveal"]);
+  }
+
+  // Enter / click behavior: folders drill into the launcher, files open externally
+  // (photos -> gthumb, everything else -> xdg-open via open_file.sh).
+  function activateFile(item) {
+    if (!item || !item.path) return;
+    if (item.isDir) {
+      enterFolder(item.path);
+    } else {
+      openFile(item.path);
+    }
+  }
+
+  function launchFileSelected(reveal) {
+    if (sel < 0 || sel >= fileResults.length) return;
+    var item = fileResults[sel];
+    if (!item || !item.path) return;
+    if (reveal) revealFile(item.path);
+    else activateFile(item);
   }
 
   Column {
@@ -103,6 +245,109 @@ Item {
     anchors.fill: parent
     anchors.margins: 14
     spacing: 8
+
+    // ========================================================
+    // 0. MODE TABS (Apps / Files toggle)
+    // ========================================================
+    Row {
+      width: parent.width
+      spacing: 6
+
+      Repeater {
+        model: [{ "id": "apps", "label": "Apps" }, { "id": "files", "label": "Files" }]
+        delegate: Rectangle {
+          required property var modelData
+          readonly property bool active: LauncherState.mode === modelData.id
+          width: 64
+          height: 24
+          radius: 12
+          color: active ? SettingsState.bgActivePill : (tabMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
+          border.color: active ? SettingsState.borderActive : SettingsState.borderBase
+          border.width: 1
+
+          Text {
+            anchors.centerIn: parent
+            text: modelData.label
+            color: active ? SettingsState.textActive : SettingsState.textSecondary
+            font.pixelSize: 11
+            font.bold: active
+            font.family: SettingsState.fontFamily
+          }
+
+          MouseArea {
+            id: tabMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+              LauncherState.mode = modelData.id;
+            }
+          }
+        }
+      }
+
+      Item {
+        width: parent.width - 140
+        height: 1
+      }
+
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: root.isFiles && root.fileSearching
+        text: "…"
+        color: SettingsState.textMuted
+        font.pixelSize: 12
+        font.family: SettingsState.fontFamily
+      }
+    }
+
+    // ========================================================
+    // 0b. BREADCRUMB (Files mode: current folder + back)
+    // ========================================================
+    Row {
+      width: parent.width
+      spacing: 8
+      visible: root.isFiles
+      height: root.isFiles ? implicitHeight : 0
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 24
+        height: 24
+        radius: 12
+        color: crumbMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
+        border.color: SettingsState.borderBase
+        border.width: 1
+
+        Text {
+          anchors.centerIn: parent
+          text: "‹"
+          color: SettingsState.textSecondary
+          font.pixelSize: 14
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+
+        MouseArea {
+          id: crumbMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: root.goUp()
+        }
+      }
+
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width - 32
+        text: root.browsePath + (root.query !== "" ? "  ·  ⌕ " + root.query : "")
+        color: SettingsState.textMuted
+        font.pixelSize: 11
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideLeft
+        horizontalAlignment: Text.AlignRight
+      }
+    }
 
     // ========================================================
     // 1. TOP SEARCH HEADER (Glyph + Input + Underline + Counter)
@@ -137,7 +382,7 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             visible: search.text === ""
-            text: "Search apps"
+            text: root.isFiles ? "Search files…" : "Search apps"
             color: SettingsState.textMuted
             font.pixelSize: 13
             font.family: SettingsState.fontFamily
@@ -161,19 +406,42 @@ Item {
             onTextChanged: {
               query = text;
               sel = 0;
+              if (root.isFiles) fileDebounce.restart();
             }
 
             Keys.onPressed: function (ev) {
+              var listLen = root.isFiles ? root.fileResults.length : filtered.length;
+              var listView = root.isFiles ? fileListView : appListView;
+              if ((ev.modifiers & Qt.ControlModifier) && (ev.key === Qt.Key_1)) {
+                LauncherState.mode = "apps";
+                ev.accepted = true;
+                return;
+              } else if ((ev.modifiers & Qt.ControlModifier) && (ev.key === Qt.Key_2)) {
+                LauncherState.mode = "files";
+                ev.accepted = true;
+                return;
+              } else if ((ev.modifiers & Qt.ControlModifier) && (ev.key === Qt.Key_Tab)) {
+                LauncherState.toggleMode();
+                ev.accepted = true;
+                return;
+              }
               if (ev.key === Qt.Key_Down) {
-                sel = Math.min(filtered.length - 1, sel + 1);
-                appListView.positionViewAtIndex(sel, ListView.Contain);
+                sel = Math.min(listLen - 1, sel + 1);
+                if (listView) listView.positionViewAtIndex(sel, ListView.Contain);
                 ev.accepted = true;
               } else if (ev.key === Qt.Key_Up) {
                 sel = Math.max(0, sel - 1);
-                appListView.positionViewAtIndex(sel, ListView.Contain);
+                if (listView) listView.positionViewAtIndex(sel, ListView.Contain);
                 ev.accepted = true;
               } else if (ev.key === Qt.Key_Return || ev.key === Qt.Key_Enter) {
-                launchSelected();
+                if (root.isFiles && (ev.modifiers & Qt.ShiftModifier)) {
+                  launchFileSelected(true);
+                } else {
+                  launchSelected();
+                }
+                ev.accepted = true;
+              } else if (ev.key === Qt.Key_Backspace && root.isFiles && root.query === "") {
+                root.goUp();
                 ev.accepted = true;
               } else if (ev.key === Qt.Key_Escape) {
                 LauncherState.close();
@@ -193,11 +461,11 @@ Item {
           }
         }
 
-        // App Counter (e.g. "52 / 52")
+        // Result counter (apps: "52 / 52", files: "12 files")
         Text {
           id: counterText
           anchors.verticalCenter: parent.verticalCenter
-          text: filtered.length + " / " + allApps.length
+          text: root.isFiles ? (root.fileResults.length + " files") : (filtered.length + " / " + allApps.length)
           color: SettingsState.textMuted
           font.pixelSize: 12
           font.family: SettingsState.fontFamily
@@ -212,9 +480,10 @@ Item {
     ListView {
       id: appListView
       width: parent.width
-      height: 278
-      spacing: 3
+      height: 294
+      spacing: 2
       clip: true
+      visible: !root.isFiles
       model: filtered
       currentIndex: sel
 
@@ -224,7 +493,7 @@ Item {
         readonly property bool isSelected: index === root.sel
 
         width: ListView.view.width
-        height: 44
+        height: 40
         radius: 10
         color: isSelected
           ? (SettingsState.isDark ? "#232629" : "#e6eaee")
@@ -310,6 +579,91 @@ Item {
     }
 
     // ========================================================
+    // 2b. FILE RESULTS LIST (fd search: folder/file icon + path)
+    // ========================================================
+    ListView {
+      id: fileListView
+      width: parent.width
+      height: 278
+      spacing: 5
+      clip: true
+      visible: root.isFiles
+      model: root.fileResults
+      currentIndex: sel
+
+      delegate: Rectangle {
+        required property var modelData
+        required property int index
+        readonly property bool isSelected: index === root.sel
+
+        width: ListView.view.width
+        height: 48
+        radius: 10
+        color: isSelected
+          ? (SettingsState.isDark ? "#232629" : "#e6eaee")
+          : (fileMouse.containsMouse ? (SettingsState.isDark ? "#191c1e" : "#f0f3f6") : "transparent")
+        border.color: isSelected ? (SettingsState.isDark ? "#353a3e" : "#d2d8de") : "transparent"
+        border.width: 1
+
+        Behavior on color {
+          ColorAnimation { duration: 70 }
+        }
+
+        Row {
+          anchors.fill: parent
+          anchors.leftMargin: 10
+          anchors.rightMargin: 10
+          spacing: 12
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 22
+            height: 22
+            kind: (modelData && modelData.isDir) ? "folder" : "file"
+            glyph: isSelected ? SettingsState.textActive : SettingsState.textSecondary
+          }
+
+          Column {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 42
+            spacing: 1
+
+            Text {
+              width: parent.width
+              text: root.fileName(modelData ? modelData.path : "")
+              color: SettingsState.textMain
+              font.pixelSize: 13
+              font.family: SettingsState.fontFamily
+              elide: Text.ElideRight
+            }
+
+            Text {
+              width: parent.width
+              text: root.fileParent(modelData ? modelData.path : "")
+              color: isSelected ? SettingsState.textSecondary : SettingsState.textMuted
+              font.pixelSize: 11
+              font.family: SettingsState.fontFamily
+              elide: Text.ElideLeft
+            }
+          }
+        }
+
+        MouseArea {
+          id: fileMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          acceptedButtons: Qt.LeftButton | Qt.RightButton
+          onClicked: function(mouse) {
+            root.sel = index;
+            if (mouse.button === Qt.RightButton) root.revealFile(modelData.path);
+            else root.activateFile(modelData);
+          }
+        }
+      }
+    }
+
+    // ========================================================
     // 3. BOTTOM FOOTER HINT
     // ========================================================
     Item {
@@ -318,7 +672,7 @@ Item {
 
       Text {
         anchors.centerIn: parent
-        text: "↓  Drag an AppImage onto the pill"
+        text: root.isFiles ? "⏎ Folder→Browse · File→Open (photo→gthumb) · ⌫ Up · Shift+⏎ in Thunar" : "↓  Drag an AppImage onto the pill  ·  Ctrl+2 Files"
         color: SettingsState.textMuted
         font.pixelSize: 11
         font.family: SettingsState.fontFamily
@@ -332,8 +686,8 @@ Item {
             var url = drop.urls[0].toString();
             if (url.indexOf("file://") === 0) {
               var path = url.replace("file://", "");
-              Quickshell.execute(["chmod", "+x", path]);
-              Quickshell.execute([path]);
+              Quickshell.execDetached(["chmod", "+x", path]);
+              Quickshell.execDetached([path]);
               LauncherState.close();
             }
           }

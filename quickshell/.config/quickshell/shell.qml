@@ -7,7 +7,8 @@ Scope {
   Bar {}
 
   // Hyprland keybinds IPC:
-  // Super+Space: toggle launcher
+  // Super+Space: toggle launcher (apps)
+  // Super+F: toggle file search launcher
   // Super+W: toggle wallpaper selector
   // Super+Ctrl+V: toggle clipboard history
   // Super+Ctrl+M: toggle hardware mixer
@@ -16,7 +17,18 @@ Scope {
     target: "mohiitp"
 
     function launcher(): void {
-      LauncherState.toggle();
+      if (LauncherState.open && LauncherState.mode === "apps")
+        LauncherState.close();
+      else
+        LauncherState.openApps();
+    }
+
+    function files(): void {
+      LauncherState.toggleFiles();
+    }
+
+    function fileSearch(): void {
+      LauncherState.toggleFiles();
     }
 
     function wallpaper(): void {
@@ -29,6 +41,14 @@ Scope {
 
     function clipboard(): void {
       ClipboardState.toggle();
+    }
+
+    function filetray(): void {
+      FileTrayState.toggle();
+    }
+
+    function shelf(): void {
+      FileTrayState.toggle();
     }
 
     function nightlight(): void {

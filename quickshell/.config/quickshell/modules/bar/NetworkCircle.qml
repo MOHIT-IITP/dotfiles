@@ -385,7 +385,12 @@ Rectangle {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
-          onClicked: LauncherState.toggle()
+          onClicked: {
+            if (LauncherState.open && LauncherState.mode === "apps")
+              LauncherState.close();
+            else
+              LauncherState.openApps();
+          }
         }
       }
 
