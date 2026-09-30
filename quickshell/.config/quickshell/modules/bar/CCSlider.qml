@@ -66,7 +66,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: root.label
         color: SettingsState.textMain
-        font.pixelSize: 15
+        font.pixelSize: SettingsState.px(15)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -111,7 +111,7 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             text: root.currentDeviceName ? root.currentDeviceName : "Select device"
             color: devChipMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -123,7 +123,7 @@ Column {
             text: "\uf054"
               font.family: SettingsState.nerdIconFont
             color: devChipMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
           }
         }
@@ -152,7 +152,7 @@ Column {
           anchors.centerIn: parent
           text: root.muted ? "Muted" : Math.round(root.shown * 100) + "%"
           color: root.muted ? "#ef5350" : SettingsState.textActive
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
         }

@@ -11,6 +11,10 @@ Item {
   opacity: (hovered && circle.activePage === "settings") ? 1 : 0
   visible: opacity > 0
 
+  function forceFocusFontSearch() {
+    if (fontPicker) fontPicker.forceSearchFocus();
+  }
+
   Behavior on opacity {
     NumberAnimation { duration: 220 }
   }
@@ -34,7 +38,7 @@ Item {
         visible: SettingsState.japaneseGlyphs
         text: "相"
         color: SettingsState.textMain
-        font.pixelSize: 20
+        font.pixelSize: SettingsState.px(20)
         font.bold: true
       }
 
@@ -42,7 +46,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: "APPEARANCE"
         color: SettingsState.textMain
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 1.5
@@ -62,7 +66,7 @@ Item {
         text: "\uf053"
           font.family: SettingsState.nerdIconFont
         color: SettingsState.textMain
-        font.pixelSize: 22
+        font.pixelSize: SettingsState.px(22)
         font.bold: true
       }
 
@@ -93,7 +97,7 @@ Item {
     Column {
       id: settingsCol
       width: parent.width
-      spacing: 10
+      spacing: 8
 
       // Divider
       Rectangle {
@@ -124,7 +128,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Time format"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -146,7 +150,7 @@ Item {
               anchors.centerIn: parent
               text: "24H"
               color: SettingsState.timeFormat === "24h" ? SettingsState.textActive : SettingsState.textMuted
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -170,7 +174,7 @@ Item {
               anchors.centerIn: parent
               text: "12H"
               color: SettingsState.timeFormat === "12h" ? SettingsState.textActive : SettingsState.textMuted
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -206,7 +210,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Clock seconds"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -262,7 +266,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Japanese glyphs"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -318,7 +322,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Music visualizer"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -374,7 +378,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Theme"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -399,7 +403,7 @@ Item {
                 anchors.centerIn: parent
                 text: modelData
                 color: SettingsState.themeMode === modelData.toLowerCase() ? SettingsState.textActive : SettingsState.textMuted
-                font.pixelSize: 13
+                font.pixelSize: SettingsState.px(13)
                 font.bold: SettingsState.themeMode === modelData.toLowerCase()
                 font.family: SettingsState.fontFamily
               }
@@ -497,7 +501,7 @@ Item {
             Text {
               text: "Accent hue"
               color: SettingsState.textMain
-              font.pixelSize: 15
+              font.pixelSize: SettingsState.px(15)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -505,7 +509,7 @@ Item {
             Text {
               text: SettingsState.accentHex + " • " + (SettingsState.isDark ? "dark" : "light")
               color: SettingsState.textSecondary
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.family: SettingsState.fontFamily
             }
           }
@@ -616,7 +620,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "#"
             color: SettingsState.textMuted
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -627,7 +631,7 @@ Item {
             width: parent.width - 30
             text: SettingsState.accentHex
             color: SettingsState.textMain
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
             clip: true
@@ -665,7 +669,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Wallpaper folder"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -718,7 +722,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "UI scale"
             color: SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.family: SettingsState.fontFamily
           }
         }
@@ -748,7 +752,7 @@ Item {
                 anchors.centerIn: parent
                 text: modelData.label
                 color: Math.abs(SettingsState.uiScale - modelData.val) < 0.01 ? SettingsState.textActive : SettingsState.textMuted
-                font.pixelSize: 13
+                font.pixelSize: SettingsState.px(13)
                 font.family: SettingsState.fontFamily
               }
 
@@ -788,7 +792,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Bar gap"
               color: SettingsState.textMain
-              font.pixelSize: 15
+              font.pixelSize: SettingsState.px(15)
               font.family: SettingsState.fontFamily
             }
           }
@@ -808,7 +812,7 @@ Item {
               anchors.centerIn: parent
               text: SettingsState.barGap + "px"
               color: SettingsState.accent
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -873,8 +877,9 @@ Item {
       }
 
       CCFontPicker {
+        id: fontPicker
         width: parent.width
-        circle: root
+        circle: settingsPage.circle
       }
     }
   }

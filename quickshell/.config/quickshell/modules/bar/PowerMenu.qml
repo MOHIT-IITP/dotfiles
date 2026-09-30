@@ -158,7 +158,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: "電"
             color: "#f2f2f2"
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
           }
 
@@ -166,7 +166,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: "POWER"
             color: "#f2f2f2"
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
             font.letterSpacing: 1.5
@@ -196,7 +196,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: root.activeActionName
             color: root.activeActionName === "Power Off" ? "#ef5350" : (root.activeActionName === "Restart" ? "#ffd23f" : "#7ee2a8")
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }

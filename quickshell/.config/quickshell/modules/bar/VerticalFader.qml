@@ -142,7 +142,7 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       text: root.muted ? "MUTE" : (Math.round(root.shown * 100) + "%")
       color: root.muted ? "#ff8a8a" : (faderMouse.containsMouse ? root.activeColor : "#8e998e")
-      font.pixelSize: 10
+      font.pixelSize: SettingsState.px(10)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -178,7 +178,7 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       text: root.label
       color: root.muted ? "#777777" : (faderMouse.containsMouse ? "#ffffff" : "#99a299")
-      font.pixelSize: 11
+      font.pixelSize: SettingsState.px(11)
       font.bold: true
       font.family: SettingsState.fontFamily
     }

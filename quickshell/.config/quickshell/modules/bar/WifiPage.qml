@@ -40,7 +40,7 @@ Column {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 22
+          font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
 
@@ -61,7 +61,7 @@ Column {
         visible: SettingsState.japaneseGlyphs
         text: "波"
         color: "#f2f2f2"
-        font.pixelSize: 20
+        font.pixelSize: SettingsState.px(20)
         font.bold: true
       }
 
@@ -70,7 +70,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "WI-FI"
         color: "#f2f2f2"
-        font.pixelSize: 17
+        font.pixelSize: SettingsState.px(17)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -85,7 +85,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: NetworkState.wifiEnabled ? (circle.wifiUp ? "Connected" : "Available") : "Off"
         color: circle.wifiUp ? "#7ee2a8" : "#6e756e"
-        font.pixelSize: 14
+        font.pixelSize: SettingsState.px(14)
         font.family: SettingsState.fontFamily
       }
 
@@ -135,7 +135,7 @@ Column {
     visible: !NetworkState.wifiEnabled || circle.wifiNetworksList.length === 0
     text: !NetworkState.wifiEnabled ? "Wi-Fi is turned off" : "No Wi-Fi networks found"
     color: "#6e756e"
-    font.pixelSize: 15
+    font.pixelSize: SettingsState.px(15)
     font.family: SettingsState.fontFamily
     anchors.horizontalCenter: parent.horizontalCenter
   }
@@ -205,7 +205,7 @@ Column {
           anchors.centerIn: parent
           text: modelData.connected ? "Disconnect" : "Connect"
           color: modelData.connected ? "#ff8a8a" : SettingsState.textMain
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
 
@@ -237,7 +237,7 @@ Column {
           width: parent.width
           text: modelData.name || "Hidden Network"
           color: SettingsState.textMain
-          font.pixelSize: 15
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -247,7 +247,7 @@ Column {
           width: parent.width
           text: (modelData.connected ? "connected" : "available") + " · " + Math.round((modelData.signalStrength || 0) * 100) + "% signal"
           color: modelData.connected ? SettingsState.textActive : SettingsState.textMuted
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }

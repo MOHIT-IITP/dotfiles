@@ -104,7 +104,7 @@ Rectangle {
       text: "壁"
       color: "#f2f2f2"
       opacity: 0.05
-      font.pixelSize: 64
+      font.pixelSize: SettingsState.px(64)
       font.bold: true
       font.family: "serif"
     }
@@ -125,7 +125,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         text: WallpaperState.dirPath
         color: SettingsState.textMuted
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
 
@@ -166,7 +166,7 @@ Rectangle {
                   anchors.centerIn: parent
                   text: modelData
                   color: WallpaperState.filter === modelData ? (SettingsState.isDark ? "#ffffff" : "#111111") : SettingsState.textSecondary
-                  font.pixelSize: 12
+                  font.pixelSize: SettingsState.px(12)
                   font.bold: WallpaperState.filter === modelData
                   font.family: SettingsState.fontFamily
                 }
@@ -193,7 +193,7 @@ Rectangle {
             text: "\uf021"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
-            font.pixelSize: 16
+            font.pixelSize: SettingsState.px(16)
           }
 
           MouseArea {
@@ -217,7 +217,7 @@ Rectangle {
             text: "✕"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
           }
 
           MouseArea {
@@ -247,7 +247,7 @@ Rectangle {
         visible: root.count === 0
         text: "No wallpapers found in " + WallpaperState.dirPath
         color: "#6e756e"
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
 
@@ -268,7 +268,7 @@ Rectangle {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 18
+          font.pixelSize: SettingsState.px(18)
         }
 
         MouseArea {
@@ -297,7 +297,7 @@ Rectangle {
           text: "\uf054"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 18
+          font.pixelSize: SettingsState.px(18)
         }
 
         MouseArea {
@@ -466,7 +466,7 @@ Rectangle {
               anchors.centerIn: parent
               text: isApplying ? "Applying..." : (cardImg.implicitWidth > 0 ? (cardImg.implicitWidth + "×" + cardImg.implicitHeight) : "Click to Set")
               color: isApplying ? "#f2c14e" : "#d0d8d0"
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
               font.family: SettingsState.fontFamily
             }
           }
@@ -522,7 +522,7 @@ Rectangle {
           anchors.centerIn: parent
           text: "tap"
           color: "#8e998e"
-          font.pixelSize: 10
+          font.pixelSize: SettingsState.px(10)
           font.family: SettingsState.fontFamily
         }
       }
@@ -530,7 +530,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         text: "set"
         color: "#5e665e"
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
 
@@ -550,7 +550,7 @@ Rectangle {
           anchors.centerIn: parent
           text: "hold"
           color: "#8e998e"
-          font.pixelSize: 10
+          font.pixelSize: SettingsState.px(10)
           font.family: SettingsState.fontFamily
         }
       }
@@ -558,7 +558,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         text: "delete"
         color: "#5e665e"
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
     }

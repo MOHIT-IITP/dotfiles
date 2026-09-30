@@ -39,7 +39,7 @@ Column {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 22
+          font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
 
@@ -60,7 +60,7 @@ Column {
         visible: SettingsState.japaneseGlyphs
         text: "調"
         color: "#f2f2f2"
-        font.pixelSize: 20
+        font.pixelSize: SettingsState.px(20)
         font.bold: true
       }
 
@@ -69,7 +69,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "MIXER"
         color: "#f2f2f2"
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 2

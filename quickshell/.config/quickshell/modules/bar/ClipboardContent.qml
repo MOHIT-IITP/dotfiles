@@ -106,7 +106,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "控"
           color: SettingsState.accent
-          font.pixelSize: 17
+          font.pixelSize: SettingsState.px(17)
           font.bold: true
         }
 
@@ -122,7 +122,7 @@ Item {
             visible: searchInput.text === ""
             text: "Search clipboard"
             color: SettingsState.textMuted
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
           }
 
@@ -131,7 +131,7 @@ Item {
             anchors.fill: parent
             verticalAlignment: TextInput.AlignVCenter
             color: SettingsState.textMain
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             clip: true
             focus: true
@@ -176,7 +176,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: filtered.length + " / " + (allItems ? allItems.length : 0)
           color: SettingsState.textSecondary
-          font.pixelSize: 12
+          font.pixelSize: SettingsState.px(12)
           font.family: "monospace"
         }
 
@@ -192,7 +192,7 @@ Item {
             anchors.centerIn: parent
             text: "掃"
             color: clearMouse.containsMouse ? "#ef5350" : SettingsState.textSecondary
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
           }
 
@@ -219,7 +219,7 @@ Item {
       visible: filtered.length === 0
       text: ClipboardState.loading ? "Loading clipboard..." : "Clipboard is empty"
       color: SettingsState.textMuted
-      font.pixelSize: 13
+      font.pixelSize: SettingsState.px(13)
       font.family: "monospace"
       anchors.horizontalCenter: parent.horizontalCenter
       topPadding: 20
@@ -292,7 +292,7 @@ Item {
               visible: thumbImg.status !== Image.Ready
               text: "\uf03e"
                 font.family: SettingsState.nerdIconFont
-              font.pixelSize: 14
+              font.pixelSize: SettingsState.px(14)
             }
           }
 
@@ -302,7 +302,7 @@ Item {
             width: parent.width - (thumbBox.visible ? 56 : 0) - (sizeTag.visible ? sizeTag.implicitWidth + 8 : 0) - (delBtn.visible ? 30 : 10)
             text: modelData.isImage ? (modelData.label || "Image") : (modelData.text || "")
             color: isSelected ? SettingsState.textActive : (itemMouse.containsMouse ? SettingsState.textMain : SettingsState.textSecondary)
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.family: SettingsState.fontFamily
             font.bold: isSelected
             elide: Text.ElideRight
@@ -316,7 +316,7 @@ Item {
             visible: modelData.isImage && modelData.sizeLabel !== ""
             text: modelData.sizeLabel || ""
             color: SettingsState.textMuted
-            font.pixelSize: 11
+            font.pixelSize: SettingsState.px(11)
             font.family: "monospace"
           }
 
@@ -335,7 +335,7 @@ Item {
               text: "✕"
                 font.family: SettingsState.nerdIconFont
               color: delMouse.containsMouse ? "#ef5350" : SettingsState.textSecondary
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
             }
 
             MouseArea {

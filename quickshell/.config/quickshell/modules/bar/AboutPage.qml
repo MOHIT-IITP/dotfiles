@@ -72,7 +72,7 @@ Column {
           text: "\uf053"
           font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
-          font.pixelSize: 22
+          font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
 
@@ -100,7 +100,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "ABOUT"
         color: SettingsState.textMain
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 1.2
@@ -112,7 +112,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       text: (AboutState.links ? AboutState.links.length : 0) + " links"
       color: SettingsState.textMuted
-      font.pixelSize: 13
+      font.pixelSize: SettingsState.px(13)
       font.family: SettingsState.fontFamily
     }
   }
@@ -128,7 +128,7 @@ Column {
     visible: !AboutState.links || AboutState.links.length === 0
     text: "No links yet — add your email, GitHub, LinkedIn…"
     color: SettingsState.textMuted
-    font.pixelSize: 14
+    font.pixelSize: SettingsState.px(14)
     font.family: SettingsState.fontFamily
     wrapMode: Text.WordWrap
     width: parent.width
@@ -218,7 +218,7 @@ Column {
             width: parent.width
             text: (modelData && modelData.label) ? modelData.label : ""
             color: SettingsState.textMuted
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
             font.capitalization: Font.AllUppercase
@@ -229,7 +229,7 @@ Column {
             width: parent.width
             text: (modelData && modelData.value) ? modelData.value : ""
             color: aboutRowMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-            font.pixelSize: 17
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -337,7 +337,7 @@ Column {
           visible: labelInput.text.length === 0
           text: "label  ·  e.g. github"
           color: SettingsState.textMuted
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }
@@ -347,7 +347,7 @@ Column {
           anchors.fill: parent
           verticalAlignment: TextInput.AlignVCenter
           color: SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
           clip: true
           selectByMouse: true
@@ -385,7 +385,7 @@ Column {
           visible: valueInput.text.length === 0
           text: "value  ·  e.g. github.com/mohiitp or you@mail.com"
           color: SettingsState.textMuted
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }
@@ -395,7 +395,7 @@ Column {
           anchors.fill: parent
           verticalAlignment: TextInput.AlignVCenter
           color: SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
           clip: true
           selectByMouse: true
@@ -431,7 +431,7 @@ Column {
           anchors.centerIn: parent
           text: "Save"
           color: saveMouse.containsMouse ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textActive
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -463,7 +463,7 @@ Column {
           anchors.centerIn: parent
           text: "Cancel"
           color: SettingsState.textSecondary
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -508,7 +508,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "add"
         color: addMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-        font.pixelSize: 15
+        font.pixelSize: SettingsState.px(15)
         font.bold: true
         font.family: SettingsState.fontFamily
       }

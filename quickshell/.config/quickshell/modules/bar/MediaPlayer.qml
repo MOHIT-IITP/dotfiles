@@ -101,7 +101,7 @@ Rectangle {
       text: "\uf001"
         font.family: SettingsState.nerdIconFont
       color: "#8f8f8f"
-      font.pixelSize: 11
+      font.pixelSize: SettingsState.px(11)
     }
   }
 
@@ -128,7 +128,7 @@ Rectangle {
       visible: !hasPlayer
       text: "Nothing playing"
       color: "#8f8f8f"
-      font.pixelSize: 14
+      font.pixelSize: SettingsState.px(14)
       font.family: SettingsState.fontFamily
     }
 
@@ -190,7 +190,7 @@ Rectangle {
             text: "\uf001"
               font.family: SettingsState.nerdIconFont
             color: "#8f8f8f"
-            font.pixelSize: 16
+            font.pixelSize: SettingsState.px(16)
           }
         }
 
@@ -203,7 +203,7 @@ Rectangle {
             width: parent.width
             text: player?.trackTitle || "Unknown Title"
             color: "#f2f2f2"
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -213,7 +213,7 @@ Rectangle {
             width: parent.width
             text: player?.trackArtist || "Unknown Artist"
             color: "#b9b9b9"
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
             maximumLineCount: 1
@@ -259,7 +259,7 @@ Rectangle {
           width: 32
           text: player ? Format.fmtTime(player.position || 0) : "0:00"
           color: "#8f8f8f"
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
 
@@ -306,7 +306,7 @@ Rectangle {
           horizontalAlignment: Text.AlignRight
           text: (player && player.length > 0) ? ("-" + Format.fmtTime(Math.max(0, (player.length || 0) - (player.position || 0)))) : "-0:00"
           color: "#8f8f8f"
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
       }
@@ -450,7 +450,7 @@ Rectangle {
           horizontalAlignment: Text.AlignRight
           text: player?.identity ?? ""
           color: "#5a5f5a"
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
           maximumLineCount: 1

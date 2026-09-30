@@ -22,6 +22,9 @@ Singleton {
   property real uiScale: 1.0
   property int barGap: 2 // Extra gap below bar in pixels (0 - 24px)
 
+  // 3b. Font size offset applied on top of base pixel sizes (-5..+5 px)
+  property int fontSizeDelta: 0
+
   // 4. Theme & Accent Colors
   property string themeMode: "manual" // "light" | "dark" | "dynamic" | "manual"
   property real accentHue: 0.52       // 0.0 - 1.0 (0.52 = #40AABF teal/cyan from reference)
@@ -259,6 +262,24 @@ Singleton {
     saveSettings();
   }
 
+  function setFontSizeDelta(d) {
+    fontSizeDelta = Math.max(-5, Math.min(5, Math.round(d)));
+    saveSettings();
+  }
+
+  function adjustFontSize(by) {
+    setFontSizeDelta(fontSizeDelta + by);
+  }
+
+  function resetFontSize() {
+    setFontSizeDelta(0);
+  }
+
+  // Central helper: base size + user offset, e.g. `font.pixelSize: SettingsState.px(15)`
+  function px(base) {
+    return Math.max(1, Math.round(base) + fontSizeDelta);
+  }
+
   function setFont(f) {
     if (!f) return;
     fontFamily = f;
@@ -293,6 +314,7 @@ Singleton {
       isDark: root.isDark,
       uiScale: root.uiScale,
       barGap: root.barGap,
+      fontSizeDelta: root.fontSizeDelta,
       fontFamily: root.fontFamily
     };
     var jsonStr = JSON.stringify(data);
@@ -332,6 +354,7 @@ Singleton {
           }
           if (parsed.uiScale !== undefined) root.uiScale = parsed.uiScale;
           if (parsed.barGap !== undefined) root.barGap = parsed.barGap;
+          if (parsed.fontSizeDelta !== undefined) root.fontSizeDelta = Math.max(-5, Math.min(5, Math.round(parsed.fontSizeDelta)));
           if (parsed.fontFamily !== undefined && parsed.fontFamily !== "") {
             root.fontFamily = parsed.fontFamily;
             var idx = root.availableFonts.indexOf(parsed.fontFamily);

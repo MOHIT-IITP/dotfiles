@@ -49,7 +49,7 @@ Column {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 20
+          font.pixelSize: SettingsState.px(20)
           font.bold: true
         }
 
@@ -69,7 +69,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "電"
         color: "#f2f2f2"
-        font.pixelSize: 18
+        font.pixelSize: SettingsState.px(18)
         font.bold: true
       }
 
@@ -78,7 +78,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "POWER"
         color: "#f2f2f2"
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 1.5
@@ -91,7 +91,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       text: powerPage.hoveredAction
       color: powerPage.hoveredAction === "Power Off" ? "#ef5350" : (powerPage.hoveredAction === "Restart" ? "#ffd23f" : "#7ee2a8")
-      font.pixelSize: 14
+      font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
       opacity: powerPage.hoveredAction !== "" ? 1 : 0

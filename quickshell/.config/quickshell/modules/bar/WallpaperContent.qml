@@ -98,7 +98,7 @@ Item {
       text: "壁"
       color: SettingsState.isDark ? "#f2f2f2" : "#111111"
       opacity: 0.05
-      font.pixelSize: 64
+      font.pixelSize: SettingsState.px(64)
       font.bold: true
       font.family: "serif"
     }
@@ -119,7 +119,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: WallpaperState.dirPath
         color: SettingsState.textMuted
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
 
@@ -148,7 +148,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: root.resizeLabel
               color: root.resizeOpen ? SettingsState.textActive : SettingsState.textSecondary
-              font.pixelSize: 12
+              font.pixelSize: SettingsState.px(12)
               font.bold: root.resizeOpen
               font.family: SettingsState.fontFamily
             }
@@ -158,7 +158,7 @@ Item {
               text: root.resizeOpen ? "\uf077" : "\uf078"
               color: SettingsState.textMuted
               font.family: SettingsState.nerdIconFont
-              font.pixelSize: 9
+              font.pixelSize: SettingsState.px(9)
             }
           }
 
@@ -200,7 +200,7 @@ Item {
                   anchors.centerIn: parent
                   text: modelData
                   color: WallpaperState.filter === modelData ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
-                  font.pixelSize: 12
+                  font.pixelSize: SettingsState.px(12)
                   font.bold: WallpaperState.filter === modelData
                   font.family: SettingsState.fontFamily
                 }
@@ -227,7 +227,7 @@ Item {
             text: "\uf021"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
-            font.pixelSize: 16
+            font.pixelSize: SettingsState.px(16)
           }
 
           MouseArea {
@@ -251,7 +251,7 @@ Item {
             text: "✕"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
           }
 
           MouseArea {
@@ -310,14 +310,14 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 text: SettingsState.wallpaperResizeMode === modelData.value ? "●" : "○"
                 color: SettingsState.wallpaperResizeMode === modelData.value ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textMuted
-                font.pixelSize: 8
+                font.pixelSize: SettingsState.px(8)
               }
 
               Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: modelData.label
                 color: SettingsState.wallpaperResizeMode === modelData.value ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textMain
-                font.pixelSize: 12
+                font.pixelSize: SettingsState.px(12)
                 font.bold: SettingsState.wallpaperResizeMode === modelData.value
                 font.family: SettingsState.fontFamily
               }
@@ -354,7 +354,7 @@ Item {
         visible: root.count === 0
         text: "No wallpapers found in " + WallpaperState.dirPath
         color: SettingsState.textMuted
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
 
@@ -377,7 +377,7 @@ Item {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
-          font.pixelSize: 18
+          font.pixelSize: SettingsState.px(18)
         }
 
         MouseArea {
@@ -408,7 +408,7 @@ Item {
           text: "\uf054"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
-          font.pixelSize: 18
+          font.pixelSize: SettingsState.px(18)
         }
 
         MouseArea {
@@ -577,7 +577,7 @@ Item {
               anchors.centerIn: parent
               text: isApplying ? "Applying..." : (cardImg.implicitWidth > 0 ? (cardImg.implicitWidth + "×" + cardImg.implicitHeight) : "Click to Set")
               color: isApplying ? "#f2c14e" : SettingsState.textMain
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
               font.family: SettingsState.fontFamily
             }
           }
@@ -633,7 +633,7 @@ Item {
           anchors.centerIn: parent
           text: "tap"
           color: SettingsState.textSecondary
-          font.pixelSize: 10
+          font.pixelSize: SettingsState.px(10)
           font.family: SettingsState.fontFamily
         }
       }
@@ -641,7 +641,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: "set"
         color: SettingsState.textMuted
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
 
@@ -661,7 +661,7 @@ Item {
           anchors.centerIn: parent
           text: "hold"
           color: SettingsState.textSecondary
-          font.pixelSize: 10
+          font.pixelSize: SettingsState.px(10)
           font.family: SettingsState.fontFamily
         }
       }
@@ -669,7 +669,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: "delete"
         color: SettingsState.textMuted
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
     }

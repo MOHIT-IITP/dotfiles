@@ -115,7 +115,7 @@ Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           text: "控"
           color: SettingsState.accent
-          font.pixelSize: 17
+          font.pixelSize: SettingsState.px(17)
           font.bold: true
         }
 
@@ -131,7 +131,7 @@ Rectangle {
             visible: searchInput.text === ""
             text: "Search clipboard"
             color: "#525e52"
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
           }
 
@@ -140,7 +140,7 @@ Rectangle {
             anchors.fill: parent
             verticalAlignment: TextInput.AlignVCenter
             color: "#f2f2f2"
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             clip: true
             focus: true
@@ -185,7 +185,7 @@ Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           text: filtered.length + " / " + (allItems ? allItems.length : 0)
           color: "#6e7a6e"
-          font.pixelSize: 12
+          font.pixelSize: SettingsState.px(12)
           font.family: "monospace"
         }
 
@@ -201,7 +201,7 @@ Rectangle {
             anchors.centerIn: parent
             text: "掃"
             color: clearMouse.containsMouse ? "#ef5350" : "#6e7a6e"
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
           }
 
@@ -228,7 +228,7 @@ Rectangle {
       visible: filtered.length === 0
       text: ClipboardState.loading ? "Loading clipboard..." : "Clipboard is empty"
       color: "#525e52"
-      font.pixelSize: 13
+      font.pixelSize: SettingsState.px(13)
       font.family: "monospace"
       anchors.horizontalCenter: parent.horizontalCenter
       topPadding: 20
@@ -267,7 +267,7 @@ Rectangle {
             width: parent.width - (delBtn.visible ? 30 : 10)
             text: modelData.text || ""
             color: isSelected ? "#f2f2f2" : (itemMouse.containsMouse ? "#d8ded8" : "#9aa39a")
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.family: SettingsState.fontFamily
             font.bold: isSelected
             elide: Text.ElideRight
@@ -289,7 +289,7 @@ Rectangle {
               text: "✕"
                 font.family: SettingsState.nerdIconFont
               color: delMouse.containsMouse ? "#ef5350" : "#6e7a6e"
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
             }
 
             MouseArea {

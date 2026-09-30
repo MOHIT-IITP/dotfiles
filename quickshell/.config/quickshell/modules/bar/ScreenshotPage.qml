@@ -42,7 +42,7 @@ Item {
             text: "\uf053"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textMain
-            font.pixelSize: 22
+            font.pixelSize: SettingsState.px(22)
             font.bold: true
           }
 
@@ -64,7 +64,7 @@ Item {
           Text {
             text: "Capture"
             color: SettingsState.textMain
-            font.pixelSize: 18
+            font.pixelSize: SettingsState.px(18)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -72,7 +72,7 @@ Item {
           Text {
             text: "Screen capture"
             color: SettingsState.textMuted
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.family: SettingsState.fontFamily
           }
         }
@@ -110,7 +110,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Still"
               color: SettingsState.textActive
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -143,7 +143,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Record"
               color: recTabMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -201,7 +201,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Display"
               color: (ScreenshotState.mode === "display") ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: 14
+              font.pixelSize: SettingsState.px(14)
               font.bold: ScreenshotState.mode === "display"
               font.family: SettingsState.fontFamily
             }
@@ -246,7 +246,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Window"
               color: (ScreenshotState.mode === "window") ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: 14
+              font.pixelSize: SettingsState.px(14)
               font.bold: ScreenshotState.mode === "window"
               font.family: SettingsState.fontFamily
             }
@@ -291,7 +291,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Area"
               color: (ScreenshotState.mode === "area") ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: 14
+              font.pixelSize: SettingsState.px(14)
               font.bold: ScreenshotState.mode === "area"
               font.family: SettingsState.fontFamily
             }
@@ -328,7 +328,7 @@ Item {
           Text {
             text: ScreenshotState.mode === "display" ? "Display" : (ScreenshotState.mode === "window" ? "Window" : "Area")
             color: SettingsState.textActive
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -403,7 +403,7 @@ Item {
           Text {
             text: ScreenshotState.mode === "display" ? "Capture entire screen" : (ScreenshotState.mode === "window" ? "Pick an open window" : "Drag a region to crop")
             color: SettingsState.textSecondary
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.family: SettingsState.fontFamily
           }
         }
@@ -432,7 +432,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: ScreenshotState.lastPath
           color: lastPathMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: "monospace"
           elide: Text.ElideMiddle
         }

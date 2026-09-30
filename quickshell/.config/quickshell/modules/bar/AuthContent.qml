@@ -86,7 +86,7 @@ Item {
           Text {
             text: root.isPolkit ? "System Authentication" : "Wi-Fi Authentication"
             color: SettingsState.textMain
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -108,7 +108,7 @@ Item {
               anchors.centerIn: parent
               text: AuthState.user
               color: SettingsState.accent
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -119,7 +119,7 @@ Item {
           width: parent.width
           text: root.isPolkit ? (AuthState.message || "Authentication is required to perform this action") : ("Password required to access “" + (AuthState.ssid || "Wi-Fi Network") + "”")
           color: SettingsState.textMuted
-          font.pixelSize: 12
+          font.pixelSize: SettingsState.px(12)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
           maximumLineCount: 2
@@ -152,7 +152,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "Password:"
           color: SettingsState.textSecondary
-          font.pixelSize: 12
+          font.pixelSize: SettingsState.px(12)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -164,7 +164,7 @@ Item {
           height: parent.height
           verticalAlignment: TextInput.AlignVCenter
           color: SettingsState.textMain
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           clip: true
           focus: true
@@ -227,7 +227,7 @@ Item {
         visible: AuthState.errorMessage !== ""
         text: AuthState.errorMessage
         color: "#ef5350"
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.bold: true
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
@@ -240,7 +240,7 @@ Item {
         visible: AuthState.isConnecting && AuthState.errorMessage === ""
         text: root.isPolkit ? "Authenticating with system..." : ("Connecting to " + AuthState.ssid + "...")
         color: SettingsState.accent
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -264,7 +264,7 @@ Item {
           anchors.centerIn: parent
           text: "Cancel"
           color: SettingsState.textSecondary
-          font.pixelSize: 12
+          font.pixelSize: SettingsState.px(12)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -294,7 +294,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: AuthState.isConnecting ? "Verifying..." : (root.isPolkit ? "Authenticate" : "Connect")
             color: SettingsState.isDark ? "#121612" : "#ffffff"
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }

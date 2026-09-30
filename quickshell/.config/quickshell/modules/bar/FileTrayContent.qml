@@ -123,14 +123,14 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "󰷏"
             font.family: SettingsState.nerdIconFont
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             color: root.dndActive ? SettingsState.accent : SettingsState.textSecondary
           }
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: root.dndActive ? "Drop to stash" : ("Files Tray · " + FileTrayState.count)
             color: root.dndActive ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -150,7 +150,7 @@ Item {
               anchors.centerIn: parent
               text: "+ Add"
               color: addMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textMain
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -174,7 +174,7 @@ Item {
               anchors.centerIn: parent
               text: "Clear"
               color: clearMouse.containsMouse ? "#ffffff" : SettingsState.textSecondary
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -199,7 +199,7 @@ Item {
         visible: FileTrayState.count === 0 || root.dndActive
         text: root.dndActive ? "Release to stash files here" : "Drag files onto the clock bar to stash them here — then drag them out to any app."
         color: root.dndActive ? SettingsState.accent : SettingsState.textMuted
-        font.pixelSize: 10
+        font.pixelSize: SettingsState.px(10)
         font.family: SettingsState.fontFamily
       }
 
@@ -209,7 +209,7 @@ Item {
         visible: FileTrayState.count > 0 && !root.dndActive
         text: "Drag out to any app · Shift+click multi-select · click opens · right-click removes"
         color: SettingsState.textMuted
-        font.pixelSize: 9
+        font.pixelSize: SettingsState.px(9)
         font.family: SettingsState.fontFamily
       }
 
@@ -290,7 +290,7 @@ Item {
                     anchors.centerIn: parent
                     text: "󰈙"
                     font.family: SettingsState.nerdIconFont
-                    font.pixelSize: 17
+                    font.pixelSize: SettingsState.px(17)
                     color: SettingsState.accent
                   }
                 }
@@ -310,7 +310,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 text: cell.modelData ? cell.modelData.name : ""
                 color: SettingsState.textMain
-                font.pixelSize: 9
+                font.pixelSize: SettingsState.px(9)
                 font.family: SettingsState.fontFamily
                 elide: Text.ElideMiddle
                 maximumLineCount: 1
@@ -332,7 +332,7 @@ Item {
               Text {
                 anchors.centerIn: parent
                 text: "✕"
-                font.pixelSize: 8
+                font.pixelSize: SettingsState.px(8)
                 font.bold: true
                 color: rmMouse.containsMouse ? "#fff" : SettingsState.textMuted
                 font.family: SettingsState.fontFamily

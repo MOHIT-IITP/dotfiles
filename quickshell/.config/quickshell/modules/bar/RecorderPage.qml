@@ -38,7 +38,7 @@ Column {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 22
+          font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
 
@@ -59,7 +59,7 @@ Column {
         visible: SettingsState.japaneseGlyphs
         text: "録"
         color: "#f2f2f2"
-        font.pixelSize: 20
+        font.pixelSize: SettingsState.px(20)
         font.bold: true
       }
 
@@ -68,7 +68,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "RECORD"
         color: "#f2f2f2"
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 2
@@ -106,7 +106,7 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             text: "Still"
             color: stillSwitchMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -157,7 +157,7 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             text: RecorderState.isRecording ? ("REC " + RecorderState.formattedTime) : "IDLE"
             color: RecorderState.isRecording ? "#ff8a8a" : "#7ee2a8"
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
             font.letterSpacing: 1
@@ -190,7 +190,7 @@ Column {
       anchors.margins: 4
       text: "⌜"
       color: "#e05f65"
-      font.pixelSize: 16
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
     // Top-Right bracket: ⌝
@@ -200,7 +200,7 @@ Column {
       anchors.margins: 4
       text: "⌝"
       color: "#e05f65"
-      font.pixelSize: 16
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
     // Bottom-Left bracket: ⌞
@@ -210,7 +210,7 @@ Column {
       anchors.margins: 4
       text: "⌞"
       color: "#e05f65"
-      font.pixelSize: 16
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
     // Bottom-Right bracket: ⌟
@@ -220,7 +220,7 @@ Column {
       anchors.margins: 4
       text: "⌟"
       color: "#e05f65"
-      font.pixelSize: 16
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
 
@@ -240,7 +240,7 @@ Column {
           Text {
             text: "Screen recorder"
             color: "#f2f2f2"
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -249,7 +249,7 @@ Column {
         Text {
           text: "• 60 fps • High quality • Fullscreen"
           color: "#8e998e"
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
       }
@@ -292,7 +292,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: RecorderState.isRecording ? ("Stop recording (" + RecorderState.formattedTime + ")") : "Start recording"
         color: RecorderState.isRecording ? "#ff8a8a" : "#f2f2f2"
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -372,7 +372,7 @@ Column {
             Text {
               text: AudioState.sourceName
               color: circle.recMicDropdownOpen ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
@@ -383,7 +383,7 @@ Column {
               text: circle.recMicDropdownOpen ? "\uf077" : "\uf078"
               color: SettingsState.textSecondary
               font.family: SettingsState.nerdIconFont
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
             }
           }
 
@@ -431,7 +431,7 @@ Column {
           width: 38
           text: AudioState.inMuted ? "Mute" : (Math.round(AudioState.inVol * 100) + "%")
           color: AudioState.inMuted ? "#ff8a8a" : SettingsState.textSecondary
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           horizontalAlignment: Text.AlignRight
         }
@@ -473,7 +473,7 @@ Column {
               width: parent.width - 48
               text: modelData.description || modelData.name || "Microphone"
               color: modelData.isDefault ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: modelData.isDefault
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
@@ -485,7 +485,7 @@ Column {
               text: "✓"
                 font.family: SettingsState.nerdIconFont
               color: SettingsState.isDark ? "#121612" : "#ffffff"
-              font.pixelSize: 14
+              font.pixelSize: SettingsState.px(14)
               font.bold: true
             }
           }
@@ -534,7 +534,7 @@ Column {
           width: 72
           text: "Desktop"
           color: SettingsState.textMain
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -572,7 +572,7 @@ Column {
           width: 38
           text: AudioState.outMuted ? "Mute" : (Math.round(AudioState.outVol * 100) + "%")
           color: AudioState.outMuted ? "#ff8a8a" : SettingsState.textSecondary
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           horizontalAlignment: Text.AlignRight
         }
@@ -607,7 +607,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "SAVE TO"
         color: SettingsState.textMuted
-        font.pixelSize: 12
+        font.pixelSize: SettingsState.px(12)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 1
@@ -617,7 +617,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "~/Videos/Recordings"
         color: SettingsState.textMain
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
     }
@@ -638,7 +638,7 @@ Column {
         anchors.centerIn: parent
         text: "OPEN"
         color: SettingsState.accent
-        font.pixelSize: 12
+        font.pixelSize: SettingsState.px(12)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -667,7 +667,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "録"
         color: SettingsState.textMain
-        font.pixelSize: 15
+        font.pixelSize: SettingsState.px(15)
         font.bold: true
       }
 
@@ -675,7 +675,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "RECENT • " + (RecorderState.recentRecordings ? RecorderState.recentRecordings.length : 0)
         color: SettingsState.textSecondary
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 1
@@ -698,7 +698,7 @@ Column {
         anchors.centerIn: parent
         text: "払 CLEAR"
         color: "#ff8a8a"
-        font.pixelSize: 12
+        font.pixelSize: SettingsState.px(12)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -718,7 +718,7 @@ Column {
     visible: !RecorderState.recentRecordings || RecorderState.recentRecordings.length === 0
     text: "No recent recordings"
     color: SettingsState.textMuted
-    font.pixelSize: 14
+    font.pixelSize: SettingsState.px(14)
     font.family: SettingsState.fontFamily
     anchors.horizontalCenter: parent.horizontalCenter
   }
@@ -775,7 +775,7 @@ Column {
             width: parent.width
             text: modelData.name || "Recording"
             color: SettingsState.textMain
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -786,19 +786,19 @@ Column {
             Text {
               text: modelData.date || ""
               color: SettingsState.textSecondary
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.family: SettingsState.fontFamily
             }
             Text {
               text: "•"
                 font.family: SettingsState.nerdIconFont
               color: SettingsState.textMuted
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
             }
             Text {
               text: modelData.size || ""
               color: SettingsState.accent
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.family: SettingsState.fontFamily
             }
           }

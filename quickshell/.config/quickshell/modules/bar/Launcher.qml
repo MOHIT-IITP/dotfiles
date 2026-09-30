@@ -138,7 +138,7 @@ Rectangle {
           visible: search.text === ""
           text: "Search apps..."
           color: SettingsState.textMuted
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
 
@@ -147,7 +147,7 @@ Rectangle {
           anchors.fill: parent
           verticalAlignment: TextInput.AlignVCenter
           color: SettingsState.textMain
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           clip: true
           focus: true
@@ -188,7 +188,7 @@ Rectangle {
           visible: search.text === ""
           text: "ESC"
           color: SettingsState.textMuted
-          font.pixelSize: 9
+          font.pixelSize: SettingsState.px(9)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -204,7 +204,7 @@ Rectangle {
             text: "✕"
               font.family: SettingsState.nerdIconFont
             color: clearBtnMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 11
+            font.pixelSize: SettingsState.px(11)
           }
 
           MouseArea {
@@ -281,7 +281,7 @@ Rectangle {
               visible: !modelData || modelData.icon === ""
               text: (modelData && modelData.name) ? modelData.name.substring(0, 1).toUpperCase() : "?"
               color: isSelected ? SettingsState.textActive : SettingsState.textSecondary
-              font.pixelSize: 12
+              font.pixelSize: SettingsState.px(12)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -293,7 +293,7 @@ Rectangle {
             width: parent.width - (isSelected ? 62 : 36)
             text: (modelData && modelData.name) ? modelData.name : ""
             color: isSelected ? SettingsState.textActive : SettingsState.textMain
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: isSelected
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -313,7 +313,7 @@ Rectangle {
               text: "⏎"
                 font.family: SettingsState.nerdIconFont
               color: SettingsState.isDark ? "#121612" : "#ffffff"
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               font.bold: true
             }
           }

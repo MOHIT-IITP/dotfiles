@@ -113,7 +113,7 @@ Item {
             text: "\uf053"
             font.family: SettingsState.nerdIconFont
             color: SettingsState.textMain
-            font.pixelSize: 20
+            font.pixelSize: SettingsState.px(20)
             font.bold: true
           }
 
@@ -141,7 +141,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "ABOUT"
           color: SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           font.letterSpacing: 1.2
@@ -153,7 +153,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: (AboutState.links ? AboutState.links.length : 0) + " links"
         color: SettingsState.textMuted
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
     }
@@ -169,7 +169,7 @@ Item {
       visible: !AboutState.links || AboutState.links.length === 0
       text: "No links yet — add your email, GitHub, LinkedIn…"
       color: SettingsState.textMuted
-      font.pixelSize: 12
+      font.pixelSize: SettingsState.px(12)
       font.family: SettingsState.fontFamily
       wrapMode: Text.WordWrap
       width: parent.width
@@ -258,7 +258,7 @@ Item {
               width: parent.width
               text: (modelData && modelData.label) ? modelData.label : ""
               color: SettingsState.textMuted
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               font.family: SettingsState.fontFamily
               font.capitalization: Font.AllUppercase
@@ -269,7 +269,7 @@ Item {
               width: parent.width
               text: (modelData && modelData.value) ? modelData.value : ""
               color: aboutRowMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: 15
+              font.pixelSize: SettingsState.px(15)
               font.bold: true
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
@@ -377,7 +377,7 @@ Item {
             visible: labelInput.text.length === 0
             text: "label  ·  e.g. github"
             color: SettingsState.textMuted
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
           }
@@ -387,7 +387,7 @@ Item {
             anchors.fill: parent
             verticalAlignment: TextInput.AlignVCenter
             color: SettingsState.textMain
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             clip: true
             selectByMouse: true
@@ -425,7 +425,7 @@ Item {
             visible: valueInput.text.length === 0
             text: "value  ·  e.g. github.com/mohiitp or you@mail.com"
             color: SettingsState.textMuted
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
           }
@@ -435,7 +435,7 @@ Item {
             anchors.fill: parent
             verticalAlignment: TextInput.AlignVCenter
             color: SettingsState.textMain
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             clip: true
             selectByMouse: true
@@ -471,7 +471,7 @@ Item {
             anchors.centerIn: parent
             text: "Save"
             color: saveMouse.containsMouse ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textActive
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -503,7 +503,7 @@ Item {
             anchors.centerIn: parent
             text: "Cancel"
             color: SettingsState.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -547,7 +547,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "add"
           color: addMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
         }

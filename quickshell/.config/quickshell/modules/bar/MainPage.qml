@@ -60,7 +60,7 @@ Column {
           Text {
             text: "Wi-Fi"
             color: SettingsState.textMain
-            font.pixelSize: 17
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -68,7 +68,7 @@ Column {
             width: parent.width
             text: circle.wifiUp ? circle.wifiName : (circle.wiredUp ? circle.wiredName : (circle.wifiEnabled ? "Disconnected" : "Off"))
             color: circle.wifiUp ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
             maximumLineCount: 1
@@ -125,7 +125,7 @@ Column {
           Text {
             text: "Bluetooth"
             color: SettingsState.textMain
-            font.pixelSize: 17
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -133,7 +133,7 @@ Column {
             width: parent.width
             text: circle.btName
             color: (circle.btOn && BluetoothState.btDevice) ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
             maximumLineCount: 1
@@ -200,7 +200,7 @@ Column {
           width: parent.width - 46
           text: "Apps"
           color: LauncherState.open ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -261,7 +261,7 @@ Column {
           width: parent.width - 46
           text: "Wall"
           color: WallpaperState.open ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -317,7 +317,7 @@ Column {
           width: parent.width - 46
           text: "Clip"
           color: ClipboardState.open ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -373,7 +373,7 @@ Column {
           width: parent.width - 46
           text: "Night"
           color: NightlightState.active ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -429,7 +429,7 @@ Column {
           width: parent.width - 46
           text: "Mixer"
           color: (circle.activePage === "mixer") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -487,7 +487,7 @@ Column {
           width: parent.width - 46
           text: RecorderState.isRecording ? RecorderState.formattedTime : "Record"
           color: (circle.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.textActive) : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -547,7 +547,7 @@ Column {
           width: parent.width - 46
           text: "Shot"
           color: (circle.activePage === "screenshot") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -606,7 +606,7 @@ Column {
           width: parent.width - 46
           text: "Config"
           color: (circle.activePage === "settings") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -664,7 +664,7 @@ Column {
           width: parent.width - 46
           text: "DND"
           color: NotifCenter.dnd ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -720,7 +720,7 @@ Column {
           width: parent.width - 46
           text: "Power"
           color: (circle.activePage === "power" || powerMouse.containsMouse) ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -778,7 +778,7 @@ Column {
           width: parent.width - 46
           text: "About"
           color: (circle.activePage === "about" || aboutMouse.containsMouse) ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -846,7 +846,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       text: "Notifications"
       color: "#d4dbd4"
-      font.pixelSize: 16
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -867,7 +867,7 @@ Column {
         anchors.centerIn: parent
         text: "Clear all"
         color: NotifCenter.count > 0 ? SettingsState.accent : SettingsState.textMuted
-        font.pixelSize: 14
+        font.pixelSize: SettingsState.px(14)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -888,7 +888,7 @@ Column {
     visible: NotifCenter.count === 0
     text: "No notifications"
     color: "#6e756e"
-    font.pixelSize: 15
+    font.pixelSize: SettingsState.px(15)
     font.family: SettingsState.fontFamily
   }
 

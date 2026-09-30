@@ -64,7 +64,7 @@ Item {
           anchors.centerIn: parent
           text: root.formatAppName(root.n)
           color: SettingsState.isDark ? "#0d140e" : "#ffffff"
-          font.pixelSize: 10
+          font.pixelSize: SettingsState.px(10)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -113,7 +113,7 @@ Item {
           text: "󰂚"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.textSecondary
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
         }
       }
 
@@ -122,7 +122,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: "now"
         color: SettingsState.textMuted
-        font.pixelSize: 10
+        font.pixelSize: SettingsState.px(10)
         font.family: SettingsState.fontFamily
       }
     }
@@ -137,7 +137,7 @@ Item {
         text: (root.n && root.n.summary) ? root.n.summary : ""
         textFormat: Text.StyledText
         color: SettingsState.textMain
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.bold: true
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
@@ -150,7 +150,7 @@ Item {
         text: (root.n && root.n.body) ? root.n.body : ""
         textFormat: Text.StyledText
         color: SettingsState.textSecondary
-        font.pixelSize: 11
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
         maximumLineCount: 1
@@ -177,7 +177,7 @@ Item {
           text: "✕"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.accent
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.bold: true
         }
 
@@ -211,7 +211,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: root.getActionLabel(root.n)
             color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textMain
-            font.pixelSize: 11
+            font.pixelSize: SettingsState.px(11)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -221,7 +221,7 @@ Item {
             text: "\uf054"
               font.family: SettingsState.nerdIconFont
             color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textSecondary
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
           }
         }

@@ -56,6 +56,7 @@ Scope {
               else if (MixerState.open && clockPill) clockPill.forceFocusMixer();
               else if (AuthState.open && clockPill) clockPill.forceFocusAuth();
               else if (AboutState.open && clockPill) clockPill.forceFocusAbout();
+              else if (netCircle && netCircle.fontDropdownOpen) netCircle.forceFocusFontSearch();
             });
           }
         }

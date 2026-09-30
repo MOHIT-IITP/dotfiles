@@ -361,7 +361,7 @@ Rectangle {
         return Qt.formatDateTime(root.date, fmt);
       }
       color: SettingsState.accent
-      font.pixelSize: 17
+      font.pixelSize: SettingsState.px(17)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -436,7 +436,7 @@ Rectangle {
       visible: RecorderState.isRecording
       text: RecorderState.formattedTime
       color: "#ff8a8a"
-      font.pixelSize: 14
+      font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -467,7 +467,7 @@ Rectangle {
               anchors.centerIn: parent
               text: "󰈙"
               font.family: SettingsState.nerdIconFont
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               color: SettingsState.accent
             }
           }
@@ -489,7 +489,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: FileTrayState.count
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
           color: shelfInlineMouse.containsMouse ? SettingsState.accent : SettingsState.textSecondary
         }
@@ -677,7 +677,7 @@ Rectangle {
               anchors.centerIn: parent
               text: "󰈙"
               font.family: SettingsState.nerdIconFont
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               color: SettingsState.accent
             }
           }
@@ -699,7 +699,7 @@ Rectangle {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: FileTrayState.count
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
           color: wsShelfInlineMouse.containsMouse ? SettingsState.accent : SettingsState.textSecondary
         }
@@ -745,7 +745,7 @@ Rectangle {
       anchors.verticalCenter: parent.verticalCenter
       text: "Capture"
       color: SettingsState.accent
-      font.pixelSize: 17
+      font.pixelSize: SettingsState.px(17)
       font.bold: true
       font.family: SettingsState.fontFamily
 
@@ -841,7 +841,7 @@ Rectangle {
             return pad(h12) + ":" + pad(m) + (SettingsState.clockSeconds ? ":" + pad(s) : "");
           }
           color: SettingsState.accent
-          font.pixelSize: 34
+          font.pixelSize: SettingsState.px(34)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -855,7 +855,7 @@ Rectangle {
           text: Qt.formatDateTime(root.date, "AP")
           color: SettingsState.accent
           opacity: 0.7
-          font.pixelSize: 11
+          font.pixelSize: SettingsState.px(11)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -893,7 +893,7 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: isToday ? Qt.formatDateTime(dayDate, "ddd").toUpperCase() : Qt.formatDateTime(dayDate, "ddd").substring(0, 1).toUpperCase()
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textMuted)
-              font.pixelSize: isToday ? 13 : 12
+              font.pixelSize: SettingsState.px(isToday ? 13 : 12)
               font.bold: isToday || isSunday
               font.family: SettingsState.fontFamily
             }
@@ -901,7 +901,7 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: Qt.formatDateTime(dayDate, "d")
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textSecondary)
-              font.pixelSize: isToday ? 18 : 15
+              font.pixelSize: SettingsState.px(isToday ? 18 : 15)
               font.bold: isToday
               font.family: SettingsState.fontFamily
             }

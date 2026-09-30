@@ -40,7 +40,7 @@ Column {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 22
+          font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
 
@@ -61,7 +61,7 @@ Column {
         visible: SettingsState.japaneseGlyphs
         text: "歯"
         color: "#f2f2f2"
-        font.pixelSize: 20
+        font.pixelSize: SettingsState.px(20)
         font.bold: true
       }
 
@@ -70,7 +70,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "BLUETOOTH"
         color: "#f2f2f2"
-        font.pixelSize: 17
+        font.pixelSize: SettingsState.px(17)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -85,7 +85,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: BluetoothState.discovering ? "Scanning..." : (BluetoothState.btOn ? "Ready" : "Off")
         color: BluetoothState.discovering ? SettingsState.accent : (BluetoothState.btOn ? SettingsState.textActive : SettingsState.textMuted)
-        font.pixelSize: 14
+        font.pixelSize: SettingsState.px(14)
         font.family: SettingsState.fontFamily
       }
 
@@ -135,7 +135,7 @@ Column {
     visible: !BluetoothState.btOn || circle.btDevicesList.length === 0
     text: !BluetoothState.btOn ? "Bluetooth is turned off" : "No Bluetooth devices found"
     color: SettingsState.textMuted
-    font.pixelSize: 15
+    font.pixelSize: SettingsState.px(15)
     font.family: SettingsState.fontFamily
     anchors.horizontalCenter: parent.horizontalCenter
   }
@@ -211,7 +211,7 @@ Column {
           anchors.centerIn: parent
           text: modelData.connected ? "Disconnect" : (modelData.paired ? "Connect" : "Pair")
           color: modelData.connected ? "#ff8a8a" : SettingsState.textMain
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
 
@@ -245,7 +245,7 @@ Column {
           width: parent.width
           text: modelData.name || modelData.deviceName || modelData.address || "Unknown Device"
           color: "#f2f2f2"
-          font.pixelSize: 15
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -255,7 +255,7 @@ Column {
           width: parent.width
           text: (modelData.paired ? "paired" : "unpaired") + " · " + (modelData.connected ? "connected" : "disconnected") + (modelData.address ? (" · " + modelData.address) : "")
           color: modelData.connected ? "#7ee2a8" : "#6e756e"
-          font.pixelSize: 13
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }

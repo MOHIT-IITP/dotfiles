@@ -59,7 +59,7 @@ Item {
                 text: SettingsState.nerdWeatherIcon(CalendarState.weatherKind)
                 color: "#e89988"
                 font.family: SettingsState.nerdIconFont
-                font.pixelSize: 30
+                font.pixelSize: SettingsState.px(30)
               }
             }
 
@@ -71,7 +71,7 @@ Item {
               Text {
                 text: CalendarState.temp + "°"
                 color: SettingsState.textMain
-                font.pixelSize: 30
+                font.pixelSize: SettingsState.px(30)
                 font.bold: true
                 font.family: SettingsState.fontFamily
               }
@@ -79,7 +79,7 @@ Item {
               Text {
                 text: CalendarState.condition
                 color: SettingsState.textSecondary
-                font.pixelSize: 11
+                font.pixelSize: SettingsState.px(11)
                 font.family: SettingsState.fontFamily
                 elide: Text.ElideRight
                 width: 115
@@ -98,7 +98,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: CalendarState.city
             color: SettingsState.textSecondary
-            font.pixelSize: 11
+            font.pixelSize: SettingsState.px(11)
             font.bold: true
             font.family: SettingsState.fontFamily
             font.letterSpacing: 1.1
@@ -116,14 +116,14 @@ Item {
               text: "\uf043"
               color: SettingsState.textSecondary
               font.family: SettingsState.nerdIconFont
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
             }
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
               text: CalendarState.humidity + "%"
               color: SettingsState.textSecondary
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
               font.family: SettingsState.fontFamily
             }
           }
@@ -158,7 +158,7 @@ Item {
                   anchors.horizontalCenter: parent.horizontalCenter
                   text: modelData.day
                   color: SettingsState.textMuted
-                  font.pixelSize: 10
+                  font.pixelSize: SettingsState.px(10)
                   font.bold: true
                   font.family: SettingsState.fontFamily
                 }
@@ -169,7 +169,7 @@ Item {
                   text: SettingsState.nerdWeatherIcon(modelData.kind)
                   color: "#d4a49c"
                   font.family: SettingsState.nerdIconFont
-                  font.pixelSize: 16
+                  font.pixelSize: SettingsState.px(16)
                 }
 
                 // Temp
@@ -177,7 +177,7 @@ Item {
                   anchors.horizontalCenter: parent.horizontalCenter
                   text: modelData.temp + "°"
                   color: SettingsState.textMain
-                  font.pixelSize: 11
+                  font.pixelSize: SettingsState.px(11)
                   font.bold: true
                   font.family: SettingsState.fontFamily
                 }
@@ -192,14 +192,14 @@ Item {
                     text: "\uf043"
                     color: SettingsState.textMuted
                     font.family: SettingsState.nerdIconFont
-                    font.pixelSize: 9
+                    font.pixelSize: SettingsState.px(9)
                   }
 
                   Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: modelData.humidity + "%"
                     color: SettingsState.textMuted
-                    font.pixelSize: 9
+                    font.pixelSize: SettingsState.px(9)
                     font.family: SettingsState.fontFamily
                   }
                 }
@@ -245,14 +245,14 @@ Item {
               text: "\uf073"
               color: SettingsState.textMain
               font.family: SettingsState.nerdIconFont
-              font.pixelSize: 15
+              font.pixelSize: SettingsState.px(15)
             }
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
               text: CalendarState.currentMonthYearString
               color: SettingsState.textMain
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
               font.bold: true
               font.letterSpacing: 1.1
               font.family: SettingsState.fontFamily
@@ -278,7 +278,7 @@ Item {
                 text: "\uf053"
                 color: prevMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
                 font.family: SettingsState.nerdIconFont
-                font.pixelSize: 14
+                font.pixelSize: SettingsState.px(14)
               }
 
               MouseArea {
@@ -305,7 +305,7 @@ Item {
                 text: "\uf054"
                 color: nextMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
                 font.family: SettingsState.nerdIconFont
-                font.pixelSize: 14
+                font.pixelSize: SettingsState.px(14)
               }
 
               MouseArea {
@@ -337,7 +337,7 @@ Item {
                 anchors.centerIn: parent
                 text: modelData
                 color: index === 6 ? "#e86a65" : SettingsState.textMuted
-                font.pixelSize: 10
+                font.pixelSize: SettingsState.px(10)
                 font.bold: true
                 font.family: SettingsState.fontFamily
               }
@@ -405,7 +405,7 @@ Item {
                           ? (dayMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain)
                           : SettingsState.textMuted))
                 opacity: modelData.isCurrentMonth ? 1.0 : 0.35
-                font.pixelSize: 11
+                font.pixelSize: SettingsState.px(11)
                 font.bold: modelData.isToday || isSunday || (modelData.isCurrentMonth && dayMouse.containsMouse)
                 font.family: SettingsState.fontFamily
               }

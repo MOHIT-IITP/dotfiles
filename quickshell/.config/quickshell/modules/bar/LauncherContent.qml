@@ -269,7 +269,7 @@ Item {
             anchors.centerIn: parent
             text: modelData.label
             color: active ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: active
             font.family: SettingsState.fontFamily
           }
@@ -296,7 +296,7 @@ Item {
         visible: root.isFiles && root.fileSearching
         text: "…"
         color: SettingsState.textMuted
-        font.pixelSize: 12
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
       }
     }
@@ -323,7 +323,7 @@ Item {
           anchors.centerIn: parent
           text: "‹"
           color: SettingsState.textSecondary
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -342,7 +342,7 @@ Item {
         width: parent.width - 32
         text: root.browsePath + (root.query !== "" ? "  ·  ⌕ " + root.query : "")
         color: SettingsState.textMuted
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
         elide: Text.ElideLeft
         horizontalAlignment: Text.AlignRight
@@ -366,7 +366,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "探"
           color: SettingsState.textMuted
-          font.pixelSize: 18
+          font.pixelSize: SettingsState.px(18)
           font.family: SettingsState.fontFamily
         }
 
@@ -384,7 +384,7 @@ Item {
             visible: search.text === ""
             text: root.isFiles ? "Search files…" : "Search apps"
             color: SettingsState.textMuted
-            font.pixelSize: 16
+            font.pixelSize: SettingsState.px(16)
             font.family: SettingsState.fontFamily
           }
 
@@ -395,7 +395,7 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             color: SettingsState.textMain
-            font.pixelSize: 16
+            font.pixelSize: SettingsState.px(16)
             font.family: SettingsState.fontFamily
             clip: true
             focus: true
@@ -467,7 +467,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: root.isFiles ? (root.fileResults.length + " files") : (filtered.length + " / " + allApps.length)
           color: SettingsState.textMuted
-          font.pixelSize: 14
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
           horizontalAlignment: Text.AlignRight
         }
@@ -532,7 +532,7 @@ Item {
               visible: !modelData || modelData.icon === ""
               text: (modelData && modelData.name) ? modelData.name.substring(0, 1).toUpperCase() : "?"
               color: isSelected ? SettingsState.textActive : SettingsState.textSecondary
-              font.pixelSize: 16
+              font.pixelSize: SettingsState.px(16)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -548,7 +548,7 @@ Item {
               width: parent.width
               text: (modelData && modelData.name) ? modelData.name : ""
               color: isSelected ? SettingsState.textMain : SettingsState.textMain
-              font.pixelSize: 16
+              font.pixelSize: SettingsState.px(16)
               font.bold: false
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
@@ -558,7 +558,7 @@ Item {
               width: parent.width
               text: root.getSubtitle(modelData)
               color: isSelected ? SettingsState.textSecondary : SettingsState.textMuted
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
             }
@@ -632,7 +632,7 @@ Item {
               width: parent.width
               text: root.fileName(modelData ? modelData.path : "")
               color: SettingsState.textMain
-              font.pixelSize: 16
+              font.pixelSize: SettingsState.px(16)
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
             }
@@ -641,7 +641,7 @@ Item {
               width: parent.width
               text: root.fileParent(modelData ? modelData.path : "")
               color: isSelected ? SettingsState.textSecondary : SettingsState.textMuted
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.family: SettingsState.fontFamily
               elide: Text.ElideLeft
             }
@@ -675,7 +675,7 @@ Item {
         anchors.centerIn: parent
         text: root.isFiles ? "⏎ Folder→Browse · File→Open (photo→gthumb) · ⌫ Up · Shift+⏎ in Thunar" : "↓  Drag an AppImage onto the pill  ·  Ctrl+2 Files"
         color: SettingsState.textMuted
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
         opacity: 0.75
       }

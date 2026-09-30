@@ -78,7 +78,7 @@ PanelWindow {
               visible: !modelData || modelData.appIcon === ""
               text: (modelData && modelData.appName) ? modelData.appName.substring(0, 1).toUpperCase() : "?"
               color: "#9aa39a"
-              font.pixelSize: 14
+              font.pixelSize: SettingsState.px(14)
               font.bold: true
             }
           }
@@ -90,7 +90,7 @@ PanelWindow {
             Text {
               text: (modelData && modelData.appName) ? modelData.appName : ""
               color: "#9aa39a"
-              font.pixelSize: 10
+              font.pixelSize: SettingsState.px(10)
               font.family: SettingsState.fontFamily
             }
             Text {
@@ -98,7 +98,7 @@ PanelWindow {
               text: (modelData && modelData.summary) ? modelData.summary : ""
               textFormat: Text.PlainText
               color: "#f2f2f2"
-              font.pixelSize: 13
+              font.pixelSize: SettingsState.px(13)
               font.bold: true
               elide: Text.ElideRight
               maximumLineCount: 1
@@ -109,7 +109,7 @@ PanelWindow {
               text: (modelData && modelData.body) ? modelData.body : ""
               textFormat: Text.PlainText
               color: "#9aa39a"
-              font.pixelSize: 11
+              font.pixelSize: SettingsState.px(11)
               elide: Text.ElideRight
               maximumLineCount: 2
               wrapMode: Text.WordWrap

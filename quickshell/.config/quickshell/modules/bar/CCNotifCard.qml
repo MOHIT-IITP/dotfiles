@@ -51,7 +51,7 @@ Rectangle {
         visible: !entry || entry.appIcon === ""
         text: (entry && entry.appName) ? entry.appName.substring(0, 1).toUpperCase() : "?"
         color: "#9aa39a"
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
       }
     }
@@ -63,7 +63,7 @@ Rectangle {
       Text {
         text: (entry && entry.appName) ? entry.appName : ""
         color: "#9aa39a"
-        font.pixelSize: 13
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
       Text {
@@ -71,7 +71,7 @@ Rectangle {
         text: (entry && entry.summary) ? entry.summary : ""
         textFormat: Text.PlainText
         color: "#f2f2f2"
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         elide: Text.ElideRight
         maximumLineCount: 1
@@ -82,7 +82,7 @@ Rectangle {
         text: (entry && entry.body) ? entry.body : ""
         textFormat: Text.PlainText
         color: "#9aa39a"
-        font.pixelSize: 14
+        font.pixelSize: SettingsState.px(14)
         elide: Text.ElideRight
         maximumLineCount: 2
         wrapMode: Text.WordWrap

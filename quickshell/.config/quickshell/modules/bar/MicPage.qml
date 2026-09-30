@@ -38,7 +38,7 @@ Column {
           text: "\uf053"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
-          font.pixelSize: 22
+          font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
 
@@ -67,7 +67,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: "MICROPHONE INPUT"
         color: SettingsState.textMain
-        font.pixelSize: 16
+        font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
         font.letterSpacing: 1.2
@@ -83,7 +83,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         text: circle.inMuted ? "Muted" : (Math.round(circle.inVol * 100) + "%")
         color: circle.inMuted ? "#ff8a8a" : SettingsState.textActive
-        font.pixelSize: 14
+        font.pixelSize: SettingsState.px(14)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
@@ -153,7 +153,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       text: "Select Input Device"
       color: SettingsState.textSecondary
-      font.pixelSize: 14
+      font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -163,7 +163,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       text: (AudioState.sources.length || 0) + " available"
       color: SettingsState.textMuted
-      font.pixelSize: 13
+      font.pixelSize: SettingsState.px(13)
       font.family: SettingsState.fontFamily
     }
   }
@@ -221,7 +221,7 @@ Column {
             width: parent.width
             text: modelData.description || modelData.name || "Input Device"
             color: modelData.isDefault ? SettingsState.textActive : SettingsState.textMain
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.bold: modelData.isDefault
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -231,7 +231,7 @@ Column {
             width: parent.width
             text: modelData.isDefault ? "Active Input Route" : (modelData.name || "Audio Source")
             color: modelData.isDefault ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
           }
@@ -253,7 +253,7 @@ Column {
             text: "✓"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.isDark ? "#121612" : "#ffffff"
-            font.pixelSize: 14
+            font.pixelSize: SettingsState.px(14)
             font.bold: true
           }
         }

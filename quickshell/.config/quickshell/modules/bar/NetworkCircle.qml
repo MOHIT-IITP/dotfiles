@@ -61,7 +61,7 @@ Rectangle {
   implicitHeight: {
     if (!netMouse.containsMouse) return 34;
     if (root.activePage === "power") return 130;
-    if (root.activePage === "settings") return settingsPage.implicitHeight + 56;
+    if (root.activePage === "settings") return settingsPage.implicitHeight + 76;
     if (root.activePage === "sound" || root.activePage === "mic") return 520;
     if (root.activePage === "mixer") return 380;
     if (root.activePage === "screenshot") return 254;
@@ -108,6 +108,10 @@ Rectangle {
   function execCmd(args) {
     powerProc.command = args;
     powerProc.running = true;
+  }
+
+  function forceFocusFontSearch() {
+    if (settingsPage) settingsPage.forceFocusFontSearch();
   }
 
   // Bluetooth device list sorted by connected > paired > name

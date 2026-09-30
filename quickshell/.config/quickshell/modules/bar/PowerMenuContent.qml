@@ -146,7 +146,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "電"
             color: SettingsState.accent
-            font.pixelSize: 15
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
           }
 
@@ -154,7 +154,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "POWER"
             color: SettingsState.textMain
-            font.pixelSize: 13
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
             font.letterSpacing: 1.5
@@ -184,7 +184,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: root.activeActionName
             color: root.activeActionName === "Power Off" ? "#ef5350" : (root.activeActionName === "Restart" ? "#ffd23f" : SettingsState.accent)
-            font.pixelSize: 12
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }

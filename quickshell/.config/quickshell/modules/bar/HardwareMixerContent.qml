@@ -82,7 +82,7 @@ Item {
           visible: SettingsState.japaneseGlyphs
           text: "調"
           color: SettingsState.accent
-          font.pixelSize: 20
+          font.pixelSize: SettingsState.px(20)
           font.bold: true
         }
 
@@ -91,7 +91,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "MIXER"
           color: SettingsState.textMain
-          font.pixelSize: 15
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
           font.letterSpacing: 2
