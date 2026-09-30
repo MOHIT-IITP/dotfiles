@@ -252,6 +252,8 @@ Item {
           anchors.leftMargin: 10
           anchors.rightMargin: 8
           spacing: 8
+          // Must sit above itemMouse below, else row MouseArea eats delete clicks.
+          z: 1
 
           // Thumbnail for images
           Rectangle {
@@ -351,6 +353,7 @@ Item {
         MouseArea {
           id: itemMouse
           anchors.fill: parent
+          z: 0
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
           onEntered: root.sel = index

@@ -59,6 +59,10 @@ Scope {
       MixerState.toggle();
     }
 
+    function about(): void {
+      AboutState.toggle();
+    }
+
     function recorder(): void {
       RecorderState.toggle();
     }
@@ -85,6 +89,26 @@ Scope {
 
     function wifiAuth(ssid: string): void {
       AuthState.prompt(ssid);
+    }
+
+    function notifDebug(): string {
+      try {
+        var list = NotifCenter.trackedList || [];
+        var out = [];
+        for (var i = 0; i < list.length; ++i) {
+          var n = list[i];
+          out.push({
+            appName: n ? n.appName : null,
+            appIcon: n ? n.appIcon : null,
+            summary: n ? n.summary : null,
+            body: n ? n.body : null,
+            hasImage: !!(n && n.image)
+          });
+        }
+        return JSON.stringify({ count: NotifCenter.count, items: out });
+      } catch (e) {
+        return "ERR: " + e;
+      }
     }
   }
 }

@@ -18,6 +18,33 @@ Singleton {
   property bool showNotificationPill: currentNotification !== null
   property bool isHovered: false
 
+  // Dedup rapid identical resends (common "2 popups every time" cause)
+  property string _lastSig: ""
+  property int _lastTime: 0
+
+  function notifSig(n) {
+    try {
+      return (n.appName || "") + "|" + (n.summary || "") + "|" + (n.body || "");
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function isEmptyNotif(n) {
+    try {
+      var s = ((n.summary || "").replace(/<[^>]*>/g, "")).trim();
+      var b = ((n.body || "").replace(/<[^>]*>/g, "")).trim();
+      if (s || b)
+        return false;
+      // Keep image-only notifications (e.g. screenshots)
+      if (n.image)
+        return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   NotificationServer {
     id: server
     bodySupported: true
@@ -25,6 +52,33 @@ Singleton {
     actionsSupported: true
     bodyMarkupSupported: true
     onNotification: function (n) {
+      // Drop blank spam: no summary + no body + no image.
+      // These render as empty cards in toasts + center pill.
+      if (isEmptyNotif(n)) {
+        console.log("[NotifCenter] dropping empty notification from:", n.appName);
+        try {
+          n.tracked = false;
+        } catch (e) {}
+        try {
+          n.dismiss();
+        } catch (e) {}
+        return;
+      }
+      // Drop instant duplicates (same app+summary+body within 1.5s)
+      var sig = notifSig(n);
+      var now = Date.now();
+      if (sig && sig === root._lastSig && (now - root._lastTime) < 1500) {
+        console.log("[NotifCenter] dropping duplicate notification:", sig);
+        try {
+          n.tracked = false;
+        } catch (e) {}
+        try {
+          n.dismiss();
+        } catch (e) {}
+        return;
+      }
+      root._lastSig = sig;
+      root._lastTime = now;
       n.tracked = true;
       // When notification is closed externally or dismissed
       n.closed.connect(function () {
@@ -41,7 +95,12 @@ Singleton {
   }
 
   readonly property var tracked: server.trackedNotifications
-  readonly property int count: server.trackedNotifications.values.length
+  // Plain array of tracked Notification objects for ListView/Repeater models.
+  // NOTE: `tracked` above is an ObjectModel (of non-visual objects) and cannot
+  // be used directly as a ListView model with a separate delegate — that is
+  // why the control-center list stayed empty. Use `trackedList` instead.
+  readonly property var trackedList: server.trackedNotifications.values
+  readonly property int count: trackedList.length
 
   // Live toast queue (subset of tracked)
   property var popups: []
@@ -150,7 +209,7 @@ Singleton {
     notificationQueue = [];
     currentNotification = null;
     pillTimer.stop();
-    var list = (server.trackedNotifications && server.trackedNotifications.values) ? server.trackedNotifications.values : [];
+    var list = trackedList ? trackedList.slice(0) : [];
     var ns = [];
     for (var j = 0; j < list.length; ++j) {
       if (list[j]) ns.push(list[j]);

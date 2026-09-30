@@ -19,6 +19,7 @@ hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("qs ipc call mohiitp files"))
 hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder"))
 hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer "))
 hl.bind(mainMod .. " + CTRL + C ", hl.dsp.exec_cmd("qs ipc call mohiitp clipboard  "))
+hl.bind(mainMod .. " + CTRL + A ", hl.dsp.exec_cmd("qs ipc call mohiitp about"))
 
 -- Super+C / Super+V as Copy / Paste (terminal-aware)
 -- Sends CTRL+C/V normally, CTRL+SHIFT+C/V in terminals where CTRL+C = interrupt

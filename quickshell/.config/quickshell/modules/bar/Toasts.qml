@@ -45,7 +45,7 @@ PanelWindow {
 
         // auto-hide (toast only — tracked copy stays in the CC)
         Timer {
-          interval: (modelData && modelData.expireTimeout > 0 ? modelData.expireTimeout : 5) * 1000
+          interval: (modelData && modelData.expireTimeout > 0 ? modelData.expireTimeout : 5000)
           running: true
           onTriggered: NotifCenter.hidePopup(modelData)
         }

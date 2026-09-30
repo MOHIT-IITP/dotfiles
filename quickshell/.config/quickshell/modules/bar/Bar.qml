@@ -6,7 +6,7 @@ import QtQuick.Effects
 import "../services"
 
 // Top bar: centered clock pill with media player on the left
-// and network circle on the right, plus notification toasts.
+// and network circle on the right.
 Scope {
   Variants {
     model: Quickshell.screens
@@ -35,7 +35,7 @@ Scope {
         // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap
         exclusiveZone: Math.round((34 + SettingsState.barGap) * SettingsState.uiScale)
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || (netCircle && netCircle.fontDropdownOpen)
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || (netCircle && (netCircle.fontDropdownOpen || netCircle.aboutInputOpen))
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -55,6 +55,7 @@ Scope {
               else if (ClipboardState.open && clockPill) clockPill.forceFocusClipboard();
               else if (MixerState.open && clockPill) clockPill.forceFocusMixer();
               else if (AuthState.open && clockPill) clockPill.forceFocusAuth();
+              else if (AboutState.open && clockPill) clockPill.forceFocusAbout();
             });
           }
         }
@@ -78,6 +79,7 @@ Scope {
             if (ClipboardState.open) ClipboardState.close();
             if (MixerState.open) MixerState.close();
             if (AuthState.open) AuthState.close();
+            if (AboutState.open) AboutState.close();
             if (FileTrayState.open) FileTrayState.close();
           }
         }

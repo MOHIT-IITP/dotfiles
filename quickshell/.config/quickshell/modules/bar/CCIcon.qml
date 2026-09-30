@@ -52,6 +52,16 @@ Item {
     if (k === "folder" || k === "folders" || k === "directory") return "";
     if (k === "file" || k === "files" || k === "doc" || k === "document") return "";
     if (k === "scale") return "";
+    if (k === "about" || k === "user" || k === "person" || k === "profile" || k === "id") return "";
+    if (k === "info") return "";
+    if (k === "link" || k === "url" || k === "web") return "";
+    if (k === "mail" || k === "email" || k === "envelope") return "";
+    if (k === "github" || k === "gh") return "";
+    if (k === "linkedin" || k === "in") return "";
+    if (k === "plus" || k === "add") return "";
+    if (k === "trash" || k === "delete" || k === "remove") return "";
+    if (k === "external" || k === "open") return "";
+    if (k === "copy") return "";
     if (k === "wave" || k === "motion") return "󰐊";
     if (k === "font") return "";
     if (k === "eye" || k === "autohide" || k === "hide") return "";

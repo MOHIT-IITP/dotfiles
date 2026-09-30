@@ -148,7 +148,6 @@ alias gs="git status"
 # Project shortcuts
 alias mg="cd ~/moLib/moGit"
 alias mc="cd ~/moLib/moCode"
-alias mn="cd ~/moLib/moNote"
 
 #npm thingi
 alias nrd="npm run dev"

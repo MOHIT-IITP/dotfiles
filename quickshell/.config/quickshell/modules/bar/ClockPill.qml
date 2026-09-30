@@ -67,18 +67,19 @@ Rectangle {
   readonly property bool showAuth: AuthState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
   readonly property bool showNotif: NotifCenter.showNotificationPill && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
   readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showFileTray
+  readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showFileTray
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showFileTray && !showAbout
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: wxView.visible && wxView.calHover
-  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || showNotif || FileTrayState.open || FileTrayState.dndHover
+  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || FileTrayState.open || FileTrayState.dndHover
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showFileTray ? 190 : (showWeather ? 265 : 168))))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showWeather ? 520 : 300))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showWeather ? 265 : 168)))))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showWeather ? 520 : 300)))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
 
-  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showFileTray ? 36 : (showWeather ? 20 : 28))))))))) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showWeather ? 20 : 28)))))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
@@ -117,6 +118,12 @@ Rectangle {
   function forceFocusAuth() {
     if (authContent) {
       authContent.forceFocus();
+    }
+  }
+
+  function forceFocusAbout() {
+    if (aboutContent) {
+      aboutContent.forceFocus();
     }
   }
 
@@ -233,6 +240,18 @@ Rectangle {
     target: FileTrayState
     function onOpenChanged() {
       if (FileTrayState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: AboutState
+    function onOpenChanged() {
+      if (AboutState.open) {
+        root.isWeatherView = false;
+        forceFocusAbout();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
     }
@@ -754,7 +773,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -833,23 +852,32 @@ Rectangle {
         }
       }
 
-      // 7-day strip centered on today (today-3 .. today+3)
+      // 5-day strip centered on today (today-2 .. today+2)
       Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 14
+        spacing: 8
 
         Repeater {
-          model: 7
+          model: 5
 
           delegate: Column {
+            width: 28
             spacing: 4
+            // Fade outward from today; left side fades harder than right.
+            opacity: {
+              if (index === 2)
+                return 1.0;
+              if (index < 2)
+                return [0.4, 0.65][index];
+              return [0.85, 0.6][index - 3];
+            }
 
             property var dayDate: {
               var d = new Date(root.date);
-              d.setDate(d.getDate() + (index - 3));
+              d.setDate(d.getDate() + (index - 2));
               return d;
             }
-            property bool isToday: index === 3
+            property bool isToday: index === 2
             property bool isSunday: dayDate.getDay() === 0
 
             Text {
@@ -1000,6 +1028,20 @@ Rectangle {
     }
   }
 
+  // ========================================================
+  // 13. EMBEDDED ABOUT / PROFILE LINKS VIEW (keybind Super+Ctrl+A)
+  // ========================================================
+  AboutContent {
+    id: aboutContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showAbout) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
   // Close the calendar shortly after the pointer fully leaves the pill
   // (both the gesture layer and the calendar buttons). The delay avoids
   // flicker when moving between the background and the day/chevron buttons.
@@ -1035,7 +1077,7 @@ Rectangle {
     id: mouse
     anchors.fill: parent
     z: -1
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showFileTray
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showFileTray && !root.showAbout
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
