@@ -76,7 +76,7 @@ Rectangle {
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showWeather ? 265 : 168)))))))))) : 34
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showWeather ? 265 : 162)))))))))) : 34
   implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showWeather ? 520 : 300)))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
 
   radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showWeather ? 20 : 28)))))))))) : implicitHeight / 2
@@ -782,15 +782,18 @@ Rectangle {
 
     Column {
       anchors.centerIn: parent
-      spacing: 12
+      spacing: 6
 
-      // Big 12hr time
-      Row {
+      // Big time - centered, AM/PM as small superscript
+      Item {
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 8
+        width: bigTimeText.implicitWidth
+        height: bigTimeText.height
 
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
+          anchors.right: bigTimeText.left
+          anchors.rightMargin: 8
           width: 10
           height: 10
           radius: 5
@@ -817,6 +820,8 @@ Rectangle {
 
         Text {
           id: bigTimeText
+          anchors.horizontalCenter: parent.horizontalCenter
+          anchors.verticalCenter: parent.verticalCenter
           text: {
             var h = root.date.getHours();
             var m = root.date.getMinutes();
@@ -841,12 +846,16 @@ Rectangle {
           font.family: SettingsState.fontFamily
         }
         Text {
-          anchors.baseline: bigTimeText.baseline
+          id: ampmText
+          anchors.left: bigTimeText.right
+          anchors.leftMargin: 3
+          anchors.top: bigTimeText.top
+          anchors.topMargin: 5
           visible: SettingsState.timeFormat !== "24h"
           text: Qt.formatDateTime(root.date, "AP")
           color: SettingsState.accent
-          opacity: 0.8
-          font.pixelSize: 15
+          opacity: 0.7
+          font.pixelSize: 11
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -855,14 +864,14 @@ Rectangle {
       // 5-day strip centered on today (today-2 .. today+2)
       Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 8
+        spacing: 4
 
         Repeater {
           model: 5
 
           delegate: Column {
-            width: 28
-            spacing: 4
+            width: 26
+            spacing: 3
             // Fade outward from today; left side fades harder than right.
             opacity: {
               if (index === 2)
