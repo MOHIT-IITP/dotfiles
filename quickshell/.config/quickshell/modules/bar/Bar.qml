@@ -35,7 +35,7 @@ Scope {
         // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap
         exclusiveZone: Math.round((34 + SettingsState.barGap) * SettingsState.uiScale)
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || (netCircle && (netCircle.fontDropdownOpen || netCircle.aboutInputOpen))
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || (netCircle && (netCircle.fontDropdownOpen || netCircle.aboutInputOpen))
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -56,6 +56,7 @@ Scope {
               else if (MixerState.open && clockPill) clockPill.forceFocusMixer();
               else if (AuthState.open && clockPill) clockPill.forceFocusAuth();
               else if (AboutState.open && clockPill) clockPill.forceFocusAbout();
+              else if (NotifCenter.inboxOpen && clockPill) clockPill.forceFocusNotifInbox();
               else if (netCircle && netCircle.fontDropdownOpen) netCircle.forceFocusFontSearch();
             });
           }
@@ -81,6 +82,7 @@ Scope {
             if (MixerState.open) MixerState.close();
             if (AuthState.open) AuthState.close();
             if (AboutState.open) AboutState.close();
+            if (NotifCenter.inboxOpen) NotifCenter.closeInbox();
             if (FileTrayState.open) FileTrayState.close();
           }
         }

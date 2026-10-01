@@ -89,31 +89,25 @@ Item {
           anchors.centerIn: parent
           width: 17
           height: 17
-          visible: root.n && (root.n.image || root.n.appIcon !== "" || (root.n.appName && root.n.appName.toLowerCase().indexOf("chrome") !== -1))
+          visible: status === Image.Ready
           source: {
             if (!root.n) return "";
+            var s = NotifCenter.iconSourceFor(root.n);
+            if (s && (s + "") !== "") return s;
             if (root.n.image) return root.n.image;
-            var iconName = (root.n.appIcon || "").trim();
-            if (!iconName && root.n.appName) {
-              var low = root.n.appName.toLowerCase();
-              if (low.indexOf("chrome") !== -1) iconName = "google-chrome";
-              else if (low.indexOf("firefox") !== -1) iconName = "firefox";
-              else if (low.indexOf("discord") !== -1) iconName = "discord";
-              else if (low.indexOf("spotify") !== -1) iconName = "spotify";
-            }
-            return iconName ? Quickshell.iconPath(iconName, "google-chrome") : "";
+            return "";
           }
           smooth: true
           asynchronous: true
         }
 
-        Text {
+        CCIcon {
           anchors.centerIn: parent
-          visible: !imgView.visible || imgView.status === Image.Error
-          text: "󰂚"
-            font.family: SettingsState.nerdIconFont
-          color: SettingsState.textSecondary
-          font.pixelSize: SettingsState.px(13)
+          width: 15
+          height: 15
+          visible: imgView.status !== Image.Ready
+          kind: NotifCenter.iconKindFor(root.n)
+          glyph: SettingsState.textSecondary
         }
       }
 

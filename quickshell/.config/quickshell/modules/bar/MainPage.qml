@@ -654,7 +654,7 @@ Column {
             anchors.centerIn: parent
             width: 16
             height: 16
-            kind: "bell-slash"
+            kind: "moon"
             glyph: NotifCenter.dnd ? (SettingsState.isDark ? "#121612" : "#ffffff") : (dndMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
           }
         }

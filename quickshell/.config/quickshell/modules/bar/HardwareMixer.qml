@@ -179,7 +179,7 @@ Rectangle {
               anchors.centerIn: parent
               width: 14
               height: 14
-              kind: "bell-slash"
+              kind: "moon"
               glyph: NotifCenter.dnd ? SettingsState.textActive : SettingsState.textSecondary
             }
             MouseArea {

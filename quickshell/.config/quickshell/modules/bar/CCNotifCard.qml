@@ -17,61 +17,72 @@ Rectangle {
     return list[entryIndex];
   }
   width: ListView.view.width
-  radius: 18
+  radius: 12
   color: "#181d18"
   border.color: "#252c25"
   border.width: 1
-  implicitHeight: nrow.implicitHeight + 20
+  implicitHeight: nrow.implicitHeight + 12
 
   Row {
     id: nrow
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    anchors.margins: 10
-    spacing: 10
+    anchors.leftMargin: 8
+    anchors.rightMargin: 8
+    anchors.topMargin: 6
+    anchors.bottomMargin: 6
+    spacing: 8
 
     Rectangle {
       anchors.verticalCenter: parent.verticalCenter
-      width: 30
-      height: 30
-      radius: 15
+      width: 24
+      height: 24
+      radius: 12
       color: "#2c302c"
       Image {
+        id: nicon
         anchors.centerIn: parent
-        width: 20
-        height: 20
-        visible: entry && entry.appIcon !== ""
-        source: (entry && entry.appIcon !== "") ? Quickshell.iconPath(entry.appIcon, "image-missing") : ""
+        width: 16
+        height: 16
+        visible: status === Image.Ready
+        source: {
+          var s = NotifCenter.iconSourceFor(entry);
+          if (s && (s + "") !== "") return s;
+          if (entry && entry.image) return entry.image;
+          return "";
+        }
         smooth: true
         asynchronous: true
       }
-      Text {
+      CCIcon {
         anchors.centerIn: parent
-        visible: !entry || entry.appIcon === ""
-        text: (entry && entry.appName) ? entry.appName.substring(0, 1).toUpperCase() : "?"
-        color: "#9aa39a"
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
+        width: 14
+        height: 14
+        visible: nicon.status !== Image.Ready
+        kind: NotifCenter.iconKindFor(entry)
+        glyph: "#9aa39a"
       }
     }
 
     Column {
-      width: parent.width - 80
+      width: parent.width - 68
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 2
+      spacing: 0
       Text {
         text: (entry && entry.appName) ? entry.appName : ""
         color: "#9aa39a"
-        font.pixelSize: SettingsState.px(13)
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+        maximumLineCount: 1
       }
       Text {
         width: parent.width
         text: (entry && entry.summary) ? entry.summary : ""
         textFormat: Text.PlainText
         color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(16)
+        font.pixelSize: SettingsState.px(13)
         font.bold: true
         elide: Text.ElideRight
         maximumLineCount: 1
@@ -82,17 +93,16 @@ Rectangle {
         text: (entry && entry.body) ? entry.body : ""
         textFormat: Text.PlainText
         color: "#9aa39a"
-        font.pixelSize: SettingsState.px(14)
+        font.pixelSize: SettingsState.px(12)
         elide: Text.ElideRight
-        maximumLineCount: 2
-        wrapMode: Text.WordWrap
+        maximumLineCount: 1
       }
     }
 
     Canvas {
       anchors.verticalCenter: parent.verticalCenter
-      width: 12
-      height: 12
+      width: 10
+      height: 10
       onPaint: {
         var ctx = getContext("2d");
         ctx.reset();

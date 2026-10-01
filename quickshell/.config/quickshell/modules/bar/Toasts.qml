@@ -65,21 +65,27 @@ PanelWindow {
             radius: 16
             color: "#2c302c"
             Image {
+              id: ticon
               anchors.centerIn: parent
               width: 20
               height: 20
-              visible: modelData && modelData.appIcon !== ""
-              source: (modelData && modelData.appIcon !== "") ? Quickshell.iconPath(modelData.appIcon, "image-missing") : ""
+              visible: status === Image.Ready
+              source: {
+                var s = NotifCenter.iconSourceFor(modelData);
+                if (s && (s + "") !== "") return s;
+                if (modelData && modelData.image) return modelData.image;
+                return "";
+              }
               smooth: true
               asynchronous: true
             }
-            Text {
+            CCIcon {
               anchors.centerIn: parent
-              visible: !modelData || modelData.appIcon === ""
-              text: (modelData && modelData.appName) ? modelData.appName.substring(0, 1).toUpperCase() : "?"
-              color: "#9aa39a"
-              font.pixelSize: SettingsState.px(14)
-              font.bold: true
+              width: 18
+              height: 18
+              visible: ticon.status !== Image.Ready
+              kind: NotifCenter.iconKindFor(modelData)
+              glyph: "#9aa39a"
             }
           }
 

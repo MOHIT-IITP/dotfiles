@@ -65,21 +65,22 @@ Rectangle {
   readonly property bool showClipboard: ClipboardState.open && !showLauncher && !showWallpaper && !showPower
   readonly property bool showMixer: MixerState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard
   readonly property bool showAuth: AuthState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer
-  readonly property bool showNotif: NotifCenter.showNotificationPill && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
+  readonly property bool showInbox: NotifCenter.inboxOpen && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
+  readonly property bool showNotif: NotifCenter.showNotificationPill && !showInbox && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
   readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
-  readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showFileTray
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showFileTray && !showAbout
+  readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: wxView.visible && wxView.calHover
-  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || FileTrayState.open || FileTrayState.dndHover
+  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showWeather ? 265 : 162)))))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showWeather ? 520 : 300)))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 28) : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showWeather ? 265 : 162))))))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showWeather ? 520 : 300))))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
 
-  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showWeather ? 20 : 28)))))))))) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showInbox ? 22 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showWeather ? 20 : 28))))))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.borderBase
   border.width: 1
@@ -124,6 +125,12 @@ Rectangle {
   function forceFocusAbout() {
     if (aboutContent) {
       aboutContent.forceFocus();
+    }
+  }
+
+  function forceFocusNotifInbox() {
+    if (notifInboxContent) {
+      notifInboxContent.forceFocus();
     }
   }
 
@@ -251,6 +258,18 @@ Rectangle {
       if (AboutState.open) {
         root.isWeatherView = false;
         forceFocusAbout();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+        root.isWeatherView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: NotifCenter
+    function onInboxOpenChanged() {
+      if (NotifCenter.inboxOpen) {
+        root.isWeatherView = false;
+        forceFocusNotifInbox();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
       }
@@ -424,7 +443,7 @@ Rectangle {
       anchors.verticalCenter: parent.verticalCenter
       width: 16
       height: 16
-      kind: "dnd"
+      kind: "moon"
       glyph: "#ffd60a"
       visible: NotifCenter.dnd
     }
@@ -646,7 +665,7 @@ Rectangle {
       anchors.verticalCenter: parent.verticalCenter
       width: 16
       height: 16
-      kind: "dnd"
+      kind: "moon"
       glyph: "#ffd60a"
       visible: NotifCenter.dnd
     }
@@ -773,7 +792,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -917,7 +936,7 @@ Rectangle {
   WeatherCalendarView {
     id: wxView
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif) ? 1 : 0
+    opacity: (root.isExpanded && root.showWeather && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1015,7 +1034,7 @@ Rectangle {
   NotificationContent {
     id: notificationContent
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showNotif) ? 1 : 0
+    opacity: (root.isExpanded && root.showNotif && !root.showInbox) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1024,12 +1043,25 @@ Rectangle {
   }
 
   // ========================================================
+  // 11b. EMBEDDED NOTIFICATION INBOX VIEW (Super+Ctrl+N)
+  // ========================================================
+  NotifInboxContent {
+    id: notifInboxContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showInbox) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
   // 12. EMBEDDED FILE SHELF VIEW (Directly inside Center Bar)
   // ========================================================
   FileTrayContent {
     id: fileTrayContent
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showFileTray) ? 1 : 0
+    opacity: (root.isExpanded && root.showFileTray && !root.showInbox) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1043,7 +1075,7 @@ Rectangle {
   AboutContent {
     id: aboutContent
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showAbout) ? 1 : 0
+    opacity: (root.isExpanded && root.showAbout && !root.showInbox) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1086,7 +1118,7 @@ Rectangle {
     id: mouse
     anchors.fill: parent
     z: -1
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showFileTray && !root.showAbout
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showFileTray && !root.showAbout
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton

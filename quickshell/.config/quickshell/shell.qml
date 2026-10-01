@@ -12,6 +12,7 @@ Scope {
   // Super+W: toggle wallpaper selector
   // Super+Ctrl+V: toggle clipboard history
   // Super+Ctrl+M: toggle hardware mixer
+  // Super+Ctrl+N: toggle notification inbox
   // Super+Esc: toggle power menu
   IpcHandler {
     target: "mohiitp"
@@ -57,6 +58,14 @@ Scope {
 
     function mixer(): void {
       MixerState.toggle();
+    }
+
+    function notifInbox(): void {
+      NotifCenter.toggleInbox();
+    }
+
+    function notifications(): void {
+      NotifCenter.toggleInbox();
     }
 
     function about(): void {
