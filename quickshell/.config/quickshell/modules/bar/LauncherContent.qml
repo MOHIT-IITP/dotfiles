@@ -52,6 +52,13 @@ Item {
     return i > 0 ? p.substring(0, i) : "/";
   }
 
+  // Newline-terminated uri list for outbound drag (Chrome, Discord, ...).
+  function fileDragUrls(path) {
+    if (!path) return "";
+    var p = path.toString();
+    return "file://" + encodeURI(p) + "\r\n";
+  }
+
   function runFileSearch() {
     fileResults = [];
     fileSearching = true;
@@ -592,6 +599,7 @@ Item {
       currentIndex: sel
 
       delegate: Rectangle {
+        id: fileRow
         required property var modelData
         required property int index
         readonly property bool isSelected: index === root.sel
@@ -607,6 +615,23 @@ Item {
 
         Behavior on color {
           ColorAnimation { duration: 70 }
+        }
+
+        // ---- Outbound drag: drop the file onto Chrome / any app ----
+        Drag.active: fileMouse.drag.active
+        Drag.dragType: Drag.Automatic
+        Drag.supportedActions: Qt.CopyAction | Qt.MoveAction | Qt.LinkAction
+        Drag.mimeData: ({ "text/uri-list": root.fileDragUrls(modelData ? modelData.path : "") })
+        Drag.hotSpot.x: width / 2
+        Drag.hotSpot.y: height / 2
+
+        // Invisible proxy so the row itself never moves while dragging out.
+        Item {
+          id: fileDragProxy
+          width: 1
+          height: 1
+          x: -10
+          y: -10
         }
 
         Row {
@@ -652,9 +677,29 @@ Item {
           id: fileMouse
           anchors.fill: parent
           hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
+          cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
           acceptedButtons: Qt.LeftButton | Qt.RightButton
+          preventStealing: true
+          drag.target: fileDragProxy
+          drag.axis: Drag.XAndYAxis
+
+          property bool dragging: false
+
+          onPressed: function(mouse) {
+            dragging = false;
+            root.sel = index;
+            fileRow.grabToImage(function(result) {
+              fileRow.Drag.imageSource = result.url;
+            });
+          }
+          onPositionChanged: {
+            if (fileMouse.drag.active) dragging = true;
+          }
           onClicked: function(mouse) {
+            if (dragging) {
+              dragging = false;
+              return;
+            }
             root.sel = index;
             if (mouse.button === Qt.RightButton) root.revealFile(modelData.path);
             else root.activateFile(modelData);

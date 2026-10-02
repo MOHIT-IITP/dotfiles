@@ -44,8 +44,8 @@ local function super_paste()
     end
 end
 
-hl.bind(mainMod .. " + C", super_copy, { description = "Copy (Super+C)" })
-hl.bind(mainMod .. " + V", super_paste, { description = "Paste (Super+V)" })
+hl.bind(mainMod .. " + C", super_copy, { release = true, description = "Copy (Super+C)" })
+hl.bind(mainMod .. " + V", super_paste, { release = true, description = "Paste (Super+V)" })
 
 -- Screenshot keybindings:
 -- Print / Super+Shift+S: Area capture (drag to select)
