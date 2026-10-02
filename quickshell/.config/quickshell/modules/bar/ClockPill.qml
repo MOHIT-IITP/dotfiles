@@ -82,7 +82,7 @@ Rectangle {
 
   radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showInbox ? 22 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showWeather ? 20 : 28))))))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
-  border.color: SettingsState.borderBase
+  border.color: SettingsState.barBorder
   border.width: 1
   clip: true
 
@@ -344,7 +344,7 @@ Rectangle {
       id: visualizerRow
       anchors.verticalCenter: parent.verticalCenter
       spacing: 2
-      visible: SettingsState.musicVisualizer
+      visible: SettingsState.musicVisualizer || RecorderState.isRecording
 
       Repeater {
         model: 5
@@ -353,9 +353,14 @@ Rectangle {
           width: 2.8
           height: root.barHeights[index] || 3
           radius: 1.4
-          color: SettingsState.accent
+          color: RecorderState.isRecording ? "#ff453a" : SettingsState.accent
           anchors.verticalCenter: parent.verticalCenter
 
+          Behavior on color {
+            ColorAnimation {
+              duration: 200
+            }
+          }
           Behavior on height {
             NumberAnimation {
               duration: 50
@@ -383,31 +388,6 @@ Rectangle {
       font.pixelSize: SettingsState.px(17)
       font.bold: true
       font.family: SettingsState.fontFamily
-    }
-
-    // Privacy indicators: solid orange-yellow = mic in use, solid green = camera in use (never blink)
-    Row {
-      anchors.verticalCenter: parent.verticalCenter
-      spacing: 5
-      visible: PrivacyState.cameraActive || PrivacyState.micActive
-
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 8
-        height: 8
-        radius: 4
-        color: "#30d158"
-        visible: PrivacyState.cameraActive
-      }
-
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 8
-        height: 8
-        radius: 4
-        color: "#ffd60a"
-        visible: PrivacyState.micActive
-      }
     }
 
     Item {
@@ -458,6 +438,32 @@ Rectangle {
       font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
+    }
+
+    // Privacy indicators: solid orange-yellow = mic in use, solid green = camera in use (never blink)
+    // Pinned to the right end of the center bar, after DND / recording timer.
+    Row {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 5
+      visible: PrivacyState.cameraActive || PrivacyState.micActive
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#30d158"
+        visible: PrivacyState.cameraActive
+      }
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#ffd60a"
+        visible: PrivacyState.micActive
+      }
     }
 
     // File shelf: inline thumbnail of first stashed file + count, click to open
@@ -611,31 +617,6 @@ Rectangle {
       }
     }
 
-    // Privacy indicators: solid orange-yellow = mic in use, solid green = camera in use (never blink)
-    Row {
-      anchors.verticalCenter: parent.verticalCenter
-      spacing: 5
-      visible: PrivacyState.cameraActive || PrivacyState.micActive
-
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 8
-        height: 8
-        radius: 4
-        color: "#30d158"
-        visible: PrivacyState.cameraActive
-      }
-
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 8
-        height: 8
-        radius: 4
-        color: "#ffd60a"
-        visible: PrivacyState.micActive
-      }
-    }
-
     Item {
       width: 6
       height: 1
@@ -668,6 +649,32 @@ Rectangle {
       kind: "moon"
       glyph: "#ffd60a"
       visible: NotifCenter.dnd
+    }
+
+    // Privacy indicators: solid orange-yellow = mic in use, solid green = camera in use (never blink)
+    // Pinned to the right end, after DND.
+    Row {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 5
+      visible: PrivacyState.cameraActive || PrivacyState.micActive
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#30d158"
+        visible: PrivacyState.cameraActive
+      }
+
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        radius: 4
+        color: "#ffd60a"
+        visible: PrivacyState.micActive
+      }
     }
 
     // File shelf: inline thumbnail + count (mirrors collapsed row)
@@ -859,7 +866,7 @@ Rectangle {
             }
             return pad(h12) + ":" + pad(m) + (SettingsState.clockSeconds ? ":" + pad(s) : "");
           }
-          color: SettingsState.accent
+          color: RecorderState.isRecording ? "#ff453a" : SettingsState.accent
           font.pixelSize: SettingsState.px(34)
           font.bold: true
           font.family: SettingsState.fontFamily

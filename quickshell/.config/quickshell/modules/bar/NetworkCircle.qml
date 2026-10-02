@@ -31,6 +31,13 @@ Rectangle {
 
   property bool fontDropdownOpen: false
   property bool recMicDropdownOpen: false
+  // Config subfolder: "" (folder list) | "general" | "ui" | "theme"
+  property string settingsSub: ""
+
+  onActivePageChanged: {
+    if (root.activePage === "settings")
+      root.settingsSub = "";
+  }
   // True while the About add-form is open in the control center — Bar.qml
   // uses this to grab keyboard focus (same mechanism as fontDropdownOpen).
   // NOTE: the keybind-driven About view lives in the center ClockPill and
@@ -81,7 +88,7 @@ Rectangle {
   clip: true
 
   color: netMouse.containsMouse ? SettingsState.bgSurface : SettingsState.bgSurface
-  border.color: SettingsState.borderBase
+  border.color: SettingsState.barBorder
   border.width: 1
 
   Behavior on implicitWidth {

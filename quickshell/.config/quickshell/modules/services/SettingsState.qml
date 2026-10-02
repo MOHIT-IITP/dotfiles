@@ -73,6 +73,9 @@ Singleton {
 
   readonly property color borderActive: mixc(Qt.hsva(accentHue, 0.45, 0.60, 1.0), Qt.hsva(accentHue, 0.45, 0.35, 1.0), themeBlend)
 
+  // Lighter border for the top bar pills (clock, media, network) only.
+  readonly property color barBorder: mixc(Qt.hsva(accentHue, 0.13, 0.82, 1.0), Qt.hsva(accentHue, 0.20, 0.24, 1.0), themeBlend)
+
   readonly property color textMain: mixc("#121612", "#f2f2f2", themeBlend)
   readonly property color textSecondary: mixc("#4c574c", "#9aa39a", themeBlend)
   readonly property color textMuted: mixc("#788478", "#6e756e", themeBlend)

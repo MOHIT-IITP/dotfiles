@@ -619,6 +619,7 @@ Column {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
+          circle.settingsSub = "";
           circle.activePage = "settings";
         }
       }

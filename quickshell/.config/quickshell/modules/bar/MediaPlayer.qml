@@ -17,7 +17,7 @@ Rectangle {
   clip: true
 
   color: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
-  border.color: SettingsState.borderBase
+  border.color: SettingsState.barBorder
   border.width: 1
 
   Behavior on implicitWidth {
