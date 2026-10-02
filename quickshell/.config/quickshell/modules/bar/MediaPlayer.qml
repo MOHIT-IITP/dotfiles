@@ -14,7 +14,7 @@ Rectangle {
   property bool showStats: false
 
   implicitWidth: playerMouse.containsMouse ? 328 : 34
-  implicitHeight: playerMouse.containsMouse ? 148 : 34
+  implicitHeight: playerMouse.containsMouse ? (root.showStats ? 192 : 148) : 34
   radius: playerMouse.containsMouse ? 22 : 17
   clip: true
 
@@ -111,12 +111,8 @@ Rectangle {
   // Sits below the controls so buttons and progress bar keep their clicks.
   MouseArea {
     id: statsGesture
-    anchors.top: parent.top
-    anchors.right: parent.right
-    anchors.topMargin: 14
-    anchors.rightMargin: 14
-    width: 300
-    height: 120
+    anchors.fill: parent
+    anchors.margins: 14
     visible: playerMouse.containsMouse
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     property real _pressX: 0
@@ -151,12 +147,8 @@ Rectangle {
   // ---- Expanded: compact player card ----
   Item {
     id: expandedView
-    anchors.top: parent.top
-    anchors.right: parent.right
-    anchors.topMargin: 14
-    anchors.rightMargin: 14
-    width: 300
-    height: 120
+    anchors.fill: parent
+    anchors.margins: 14
     opacity: playerMouse.containsMouse ? 1 : 0
     visible: opacity > 0
 
@@ -168,7 +160,7 @@ Rectangle {
 
     Text {
       anchors.centerIn: parent
-      visible: !hasPlayer
+      visible: !hasPlayer && !root.showStats
       text: "Nothing playing"
       color: "#8f8f8f"
       font.pixelSize: SettingsState.px(14)
@@ -294,7 +286,7 @@ Rectangle {
       // Progress: elapsed | bar | -remaining (click to seek)
       Row {
         width: parent.width
-        height: 12
+        height: 14
         spacing: 8
 
         Text {
@@ -310,8 +302,8 @@ Rectangle {
           id: progTrack
           anchors.verticalCenter: parent.verticalCenter
           width: parent.width - 32 - 38 - 16
-          height: 3
-          radius: 1.5
+          height: 6
+          radius: 3
           color: "#3a3f3a"
 
           Rectangle {
@@ -319,14 +311,6 @@ Rectangle {
             height: parent.height
             radius: parent.radius
             color: "#d4d4d4"
-          }
-          Rectangle {
-            x: ((player && player.length > 0) ? progTrack.width * Math.min(1, (player.position || 0) / player.length) : 0) - 3
-            anchors.verticalCenter: parent.verticalCenter
-            width: 6
-            height: 6
-            radius: 3
-            color: "#7ee2a8"
           }
 
           MouseArea {
@@ -357,35 +341,26 @@ Rectangle {
       // Controls: prev / play-pause / next + source app
       Item {
         width: parent.width
-        height: 34
+        height: 42
 
         Row {
           anchors.centerIn: parent
-          spacing: 16
+          spacing: 10
 
           // Previous
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 28
-            height: 28
-            radius: 14
+            width: 40
+            height: 40
+            radius: 20
             color: prevArea.containsMouse ? "#2e332e" : "transparent"
             opacity: player?.canGoPrevious ? 1 : 0.3
-            Canvas {
+            Text {
               anchors.centerIn: parent
-              width: 12
-              height: 12
-              onPaint: {
-                var ctx = getContext("2d");
-                ctx.fillStyle = "#e8e8e8";
-                ctx.fillRect(1, 3, 2.5, 8);
-                ctx.beginPath();
-                ctx.moveTo(12.5, 2.5);
-                ctx.lineTo(4.5, 7);
-                ctx.lineTo(12.5, 11.5);
-                ctx.closePath();
-                ctx.fill();
-              }
+              text: "󰒮"
+              font.family: SettingsState.nerdIconFont
+              color: "#e8e8e8"
+              font.pixelSize: SettingsState.px(27)
             }
             MouseArea {
               id: prevArea
@@ -403,36 +378,36 @@ Rectangle {
           // Play / pause
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 34
-            height: 34
-            radius: 17
+            width: 42
+            height: 42
+            radius: 21
             color: playArea.containsMouse ? "#3a403a" : "transparent"
             Canvas {
               anchors.centerIn: parent
-              width: 14
-              height: 14
+              width: 22
+              height: 22
               visible: !isPlaying
               onPaint: {
                 var ctx = getContext("2d");
                 ctx.fillStyle = "#f2f2f2";
                 ctx.beginPath();
-                ctx.moveTo(4, 2);
-                ctx.lineTo(13, 8);
-                ctx.lineTo(4, 14);
+                ctx.moveTo(5, 2.5);
+                ctx.lineTo(17, 11);
+                ctx.lineTo(5, 19.5);
                 ctx.closePath();
                 ctx.fill();
               }
             }
             Canvas {
               anchors.centerIn: parent
-              width: 14
-              height: 14
+              width: 22
+              height: 22
               visible: isPlaying
               onPaint: {
                 var ctx = getContext("2d");
                 ctx.fillStyle = "#f2f2f2";
-                ctx.fillRect(3, 2, 3.5, 12);
-                ctx.fillRect(9.5, 2, 3.5, 12);
+                ctx.fillRect(4.5, 3, 5, 16);
+                ctx.fillRect(12.5, 3, 5, 16);
               }
             }
             MouseArea {
@@ -451,26 +426,17 @@ Rectangle {
           // Next
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 28
-            height: 28
-            radius: 14
+            width: 40
+            height: 40
+            radius: 20
             color: nextArea.containsMouse ? "#2e332e" : "transparent"
             opacity: player?.canGoNext ? 1 : 0.3
-            Canvas {
+            Text {
               anchors.centerIn: parent
-              width: 12
-              height: 12
-              onPaint: {
-                var ctx = getContext("2d");
-                ctx.fillStyle = "#e8e8e8";
-                ctx.fillRect(10.5, 3, 2.5, 8);
-                ctx.beginPath();
-                ctx.moveTo(1.5, 2.5);
-                ctx.lineTo(9.5, 7);
-                ctx.lineTo(1.5, 11.5);
-                ctx.closePath();
-                ctx.fill();
-              }
+              text: "󰒭"
+              font.family: SettingsState.nerdIconFont
+              color: "#e8e8e8"
+              font.pixelSize: SettingsState.px(27)
             }
             MouseArea {
               id: nextArea
@@ -505,12 +471,9 @@ Rectangle {
   // ---- Expanded: system stats (right-swipe from now playing) ----
   Item {
     id: statsView
-    anchors.top: parent.top
-    anchors.right: parent.right
-    anchors.topMargin: 14
-    anchors.rightMargin: 14
-    width: 300
-    height: 120
+    anchors.fill: parent
+    anchors.margins: 14
+    anchors.bottomMargin: 20
     opacity: (playerMouse.containsMouse && root.showStats) ? 1 : 0
     visible: opacity > 0
 
@@ -520,15 +483,15 @@ Rectangle {
 
     Grid {
       anchors.fill: parent
-      anchors.margins: 8
+      anchors.margins: 12
       columns: 2
-      columnSpacing: 14
-      rowSpacing: 10
+      columnSpacing: 16
+      rowSpacing: 12
 
       // RAM cell
       Column {
-        width: (parent.width - 14) / 2
-        spacing: 1
+        width: (parent.width - 16) / 2
+        spacing: 2
 
         Row {
           width: parent.width
@@ -536,15 +499,15 @@ Rectangle {
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 16
-            height: 16
+            width: 20
+            height: 20
             kind: "ram"
             glyph: "#e8a33d"
           }
 
           Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 22 - pctRam.implicitWidth - 12
+            width: parent.width - 26 - pctRam.implicitWidth - 12
             height: 1
           }
 
@@ -553,7 +516,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.ramPct) + "%"
             color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(13)
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -562,7 +525,7 @@ Rectangle {
         Text {
           text: "RAM"
           color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(11)
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -570,7 +533,7 @@ Rectangle {
         Text {
           text: SysStats.ready ? SysStats.ramText : "--"
           color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(10)
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
         }
 
@@ -591,8 +554,8 @@ Rectangle {
 
       // Swap cell
       Column {
-        width: (parent.width - 14) / 2
-        spacing: 1
+        width: (parent.width - 16) / 2
+        spacing: 2
 
         Row {
           width: parent.width
@@ -600,15 +563,15 @@ Rectangle {
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 16
-            height: 16
+            width: 20
+            height: 20
             kind: "swap"
             glyph: "#7fb5e8"
           }
 
           Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 22 - pctSwap.implicitWidth - 12
+            width: parent.width - 26 - pctSwap.implicitWidth - 12
             height: 1
           }
 
@@ -617,7 +580,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.swapPct) + "%"
             color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(13)
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -626,7 +589,7 @@ Rectangle {
         Text {
           text: "Swap"
           color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(11)
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -634,7 +597,7 @@ Rectangle {
         Text {
           text: SysStats.ready ? SysStats.swapText : "--"
           color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(10)
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
         }
 
@@ -655,8 +618,8 @@ Rectangle {
 
       // CPU cell
       Column {
-        width: (parent.width - 14) / 2
-        spacing: 1
+        width: (parent.width - 16) / 2
+        spacing: 2
 
         Row {
           width: parent.width
@@ -664,15 +627,15 @@ Rectangle {
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 16
-            height: 16
+            width: 20
+            height: 20
             kind: "cpu"
             glyph: "#e86a65"
           }
 
           Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 22 - pctCpu.implicitWidth - 12
+            width: parent.width - 26 - pctCpu.implicitWidth - 12
             height: 1
           }
 
@@ -681,7 +644,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.cpuPct) + "%"
             color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(13)
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -690,7 +653,7 @@ Rectangle {
         Text {
           text: "CPU"
           color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(11)
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -698,7 +661,7 @@ Rectangle {
         Text {
           text: SysStats.tempText
           color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(10)
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
         }
 
@@ -719,8 +682,8 @@ Rectangle {
 
       // Disk cell
       Column {
-        width: (parent.width - 14) / 2
-        spacing: 1
+        width: (parent.width - 16) / 2
+        spacing: 2
 
         Row {
           width: parent.width
@@ -728,15 +691,15 @@ Rectangle {
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 16
-            height: 16
+            width: 20
+            height: 20
             kind: "disk"
             glyph: "#7ee2a8"
           }
 
           Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 22 - pctDisk.implicitWidth - 12
+            width: parent.width - 26 - pctDisk.implicitWidth - 12
             height: 1
           }
 
@@ -745,7 +708,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.diskPct) + "%"
             color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(13)
+            font.pixelSize: SettingsState.px(17)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -754,7 +717,7 @@ Rectangle {
         Text {
           text: "Disk"
           color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(11)
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -762,7 +725,7 @@ Rectangle {
         Text {
           text: SysStats.ready ? SysStats.diskText : "--"
           color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(10)
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
         }
 

@@ -896,16 +896,11 @@ Rectangle {
           model: 5
 
           delegate: Column {
-            width: 26
+            property int dist: Math.abs(index - 2)
+            width: dist === 0 ? 34 : (dist === 1 ? 28 : 24)
             spacing: 3
-            // Fade outward from today; left side fades harder than right.
-            opacity: {
-              if (index === 2)
-                return 1.0;
-              if (index < 2)
-                return [0.4, 0.65][index];
-              return [0.85, 0.6][index - 3];
-            }
+            // Current date biggest + brightest, ±1 medium, ±2 smallest + dimmest.
+            opacity: dist === 0 ? 1.0 : (dist === 1 ? 0.7 : 0.38)
 
             property var dayDate: {
               var d = new Date(root.date);
@@ -919,7 +914,7 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: isToday ? Qt.formatDateTime(dayDate, "ddd").toUpperCase() : Qt.formatDateTime(dayDate, "ddd").substring(0, 1).toUpperCase()
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textMuted)
-              font.pixelSize: SettingsState.px(isToday ? 13 : 12)
+              font.pixelSize: SettingsState.px(parent.dist === 0 ? 14 : (parent.dist === 1 ? 12 : 10))
               font.bold: isToday || isSunday
               font.family: SettingsState.fontFamily
             }
@@ -927,7 +922,7 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: Qt.formatDateTime(dayDate, "d")
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textSecondary)
-              font.pixelSize: SettingsState.px(isToday ? 18 : 15)
+              font.pixelSize: SettingsState.px(parent.dist === 0 ? 23 : (parent.dist === 1 ? 17 : 13))
               font.bold: isToday
               font.family: SettingsState.fontFamily
             }
