@@ -9,12 +9,15 @@ Rectangle {
   id: root
   readonly property var player: MediaState.activePlayer
   readonly property bool hasPlayer: MediaState.hasPlayer
+  readonly property bool hasTrack: MediaState.hasTrack
   readonly property bool isPlaying: MediaState.isPlaying
   // Right-swipe on the expanded card flips to system stats.
+  // When nothing is playing, stats show automatically on hover.
   property bool showStats: false
+  readonly property bool statsVisible: root.showStats || !root.hasTrack
 
   implicitWidth: playerMouse.containsMouse ? 328 : 34
-  implicitHeight: playerMouse.containsMouse ? (root.showStats ? 192 : 148) : 34
+  implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 34
   radius: playerMouse.containsMouse ? 22 : 17
   clip: true
 
@@ -71,7 +74,7 @@ Rectangle {
     Item {
       id: thumbClip
       anchors.fill: parent
-      visible: (player?.trackArtUrl ?? "") !== ""
+      visible: root.hasTrack && (player?.trackArtUrl ?? "") !== ""
 
       layer.enabled: true
       layer.effect: MultiEffect {
@@ -91,7 +94,7 @@ Rectangle {
 
       Image {
         anchors.fill: parent
-        source: player?.trackArtUrl ?? ""
+        source: (root.hasTrack && player?.trackArtUrl) ? player.trackArtUrl : ""
         fillMode: Image.PreserveAspectCrop
         smooth: true
         asynchronous: true
@@ -99,9 +102,9 @@ Rectangle {
     }
     Text {
       anchors.centerIn: parent
-      visible: !player?.trackArtUrl
+      visible: !thumbClip.visible
       text: "\uf001"
-        font.family: SettingsState.nerdIconFont
+      font.family: SettingsState.nerdIconFont
       color: "#8f8f8f"
       font.pixelSize: SettingsState.px(11)
     }
@@ -132,15 +135,19 @@ Rectangle {
         root.showStats = true;
       } else if (dx < -24) {
         statsGesture._moved = true;
-        root.showStats = false;
+        // Keep stats when there is no player to go back to.
+        if (root.hasTrack)
+          root.showStats = false;
       }
     }
 
     onWheel: wheel => {
       if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0)
         root.showStats = true;
-      else if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0)
-        root.showStats = false;
+      else if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
+        if (root.hasTrack)
+          root.showStats = false;
+      }
     }
   }
 
@@ -158,19 +165,10 @@ Rectangle {
       }
     }
 
-    Text {
-      anchors.centerIn: parent
-      visible: !hasPlayer && !root.showStats
-      text: "Nothing playing"
-      color: "#8f8f8f"
-      font.pixelSize: SettingsState.px(14)
-      font.family: SettingsState.fontFamily
-    }
-
     Column {
       anchors.fill: parent
       spacing: 8
-      visible: hasPlayer && !root.showStats
+      visible: hasTrack && !root.statsVisible
 
       // Top row: rounded art + title/artist + live EQ
       Row {
@@ -473,8 +471,8 @@ Rectangle {
     id: statsView
     anchors.fill: parent
     anchors.margins: 14
-    anchors.bottomMargin: 20
-    opacity: (playerMouse.containsMouse && root.showStats) ? 1 : 0
+    anchors.bottomMargin: 14
+    opacity: (playerMouse.containsMouse && root.statsVisible) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -483,263 +481,351 @@ Rectangle {
 
     Grid {
       anchors.fill: parent
-      anchors.margins: 12
+      anchors.margins: 6
       columns: 2
-      columnSpacing: 16
-      rowSpacing: 12
+      columnSpacing: 18
+      rowSpacing: 14
 
-      // RAM cell
+      // 1. RAM cell
       Column {
-        width: (parent.width - 16) / 2
-        spacing: 2
+        width: (parent.width - 18) / 2
+        spacing: 3
 
+        // Icon + % Row
         Row {
           width: parent.width
-          spacing: 6
-
-          CCIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 20
-            height: 20
-            kind: "ram"
-            glyph: "#e8a33d"
-          }
-
           Item {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 26 - pctRam.implicitWidth - 12
-            height: 1
+            width: parent.width - pctRam.implicitWidth
+            height: 20
+            CCIcon {
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+              width: 18
+              height: 18
+              kind: "ram"
+              glyph: "#cddc39"
+            }
           }
 
           Text {
             id: pctRam
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.ramPct) + "%"
-            color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(17)
+            color: "#f5f5f5"
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
         }
 
+        // Title
         Text {
           text: "RAM"
-          color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(15)
+          color: "#e0e0e0"
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
 
+        // Value subtitle
         Text {
           text: SysStats.ready ? SysStats.ramText : "--"
-          color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(14)
+          color: "#8a8a8a"
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
 
-        Rectangle {
+        // Sleek Capsule Slider
+        Item {
           width: parent.width
-          height: 3
-          radius: 2
-          color: "#3a3f3a"
+          height: 12
 
           Rectangle {
-            width: parent.width * Math.min(1, SysStats.ramPct / 100)
-            height: parent.height
-            radius: parent.radius
-            color: "#e8a33d"
+            id: ramTrack
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
+            height: 6
+            radius: 3
+            color: "#2a2d24"
+            clip: true
+
+            Rectangle {
+              anchors.left: parent.left
+              anchors.top: parent.top
+              anchors.bottom: parent.bottom
+              width: parent.width * Math.max(0, Math.min(1, SysStats.ramPct / 100))
+              radius: 3
+              color: "#cddc39"
+            }
+          }
+
+          // Indicator tick at the current value
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.ramPct / 100)) - width / 2))
+            width: 3
+            height: 8
+            radius: 1.5
+            color: "#e6ee9c"
+            visible: SysStats.ramPct > 0
           }
         }
       }
 
-      // Swap cell
+      // 2. Swap cell
       Column {
-        width: (parent.width - 16) / 2
-        spacing: 2
+        width: (parent.width - 18) / 2
+        spacing: 3
 
+        // Icon + % Row
         Row {
           width: parent.width
-          spacing: 6
-
-          CCIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 20
-            height: 20
-            kind: "swap"
-            glyph: "#7fb5e8"
-          }
-
           Item {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 26 - pctSwap.implicitWidth - 12
-            height: 1
+            width: parent.width - pctSwap.implicitWidth
+            height: 20
+            CCIcon {
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+              width: 18
+              height: 18
+              kind: "swap"
+              glyph: "#a1887f"
+            }
           }
 
           Text {
             id: pctSwap
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.swapPct) + "%"
-            color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(17)
+            color: "#f5f5f5"
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
         }
 
+        // Title
         Text {
           text: "Swap"
-          color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(15)
+          color: "#e0e0e0"
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
 
+        // Value subtitle
         Text {
           text: SysStats.ready ? SysStats.swapText : "--"
-          color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(14)
+          color: "#8a8a8a"
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
 
-        Rectangle {
+        // Sleek Capsule Slider
+        Item {
           width: parent.width
-          height: 3
-          radius: 2
-          color: "#3a3f3a"
+          height: 12
 
           Rectangle {
-            width: parent.width * Math.min(1, SysStats.swapPct / 100)
-            height: parent.height
-            radius: parent.radius
-            color: "#7fb5e8"
+            id: swapTrack
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
+            height: 6
+            radius: 3
+            color: "#2d2826"
+            clip: true
+
+            Rectangle {
+              anchors.left: parent.left
+              anchors.top: parent.top
+              anchors.bottom: parent.bottom
+              width: parent.width * Math.max(0, Math.min(1, SysStats.swapPct / 100))
+              radius: 3
+              color: "#a1887f"
+            }
+          }
+
+          // Indicator tick at the current value
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.swapPct / 100)) - width / 2))
+            width: 3
+            height: 8
+            radius: 1.5
+            color: "#d7ccc8"
+            visible: SysStats.swapPct > 0
           }
         }
       }
 
-      // CPU cell
+      // 3. CPU cell
       Column {
-        width: (parent.width - 16) / 2
-        spacing: 2
+        width: (parent.width - 18) / 2
+        spacing: 3
 
+        // Icon + % Row
         Row {
           width: parent.width
-          spacing: 6
-
-          CCIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 20
-            height: 20
-            kind: "cpu"
-            glyph: "#e86a65"
-          }
-
           Item {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 26 - pctCpu.implicitWidth - 12
-            height: 1
+            width: parent.width - pctCpu.implicitWidth
+            height: 20
+            CCIcon {
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+              width: 18
+              height: 18
+              kind: "cpu"
+              glyph: "#ffb74d"
+            }
           }
 
           Text {
             id: pctCpu
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.cpuPct) + "%"
-            color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(17)
+            color: "#f5f5f5"
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
         }
 
+        // Title
         Text {
           text: "CPU"
-          color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(15)
+          color: "#e0e0e0"
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
 
+        // Value subtitle
         Text {
           text: SysStats.tempText
-          color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(14)
+          color: "#8a8a8a"
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
 
-        Rectangle {
+        // Sleek Capsule Slider
+        Item {
           width: parent.width
-          height: 3
-          radius: 2
-          color: "#3a3f3a"
+          height: 12
 
           Rectangle {
-            width: parent.width * Math.min(1, SysStats.cpuPct / 100)
-            height: parent.height
-            radius: parent.radius
-            color: "#e86a65"
+            id: cpuTrack
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
+            height: 6
+            radius: 3
+            color: "#352a1e"
+            clip: true
+
+            Rectangle {
+              anchors.left: parent.left
+              anchors.top: parent.top
+              anchors.bottom: parent.bottom
+              width: parent.width * Math.max(0, Math.min(1, SysStats.cpuPct / 100))
+              radius: 3
+              color: "#ffb74d"
+            }
+          }
+
+          // Indicator tick at the current value
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.cpuPct / 100)) - width / 2))
+            width: 3
+            height: 8
+            radius: 1.5
+            color: "#ffe0b2"
+            visible: SysStats.cpuPct > 0
           }
         }
       }
 
-      // Disk cell
+      // 4. Disk cell
       Column {
-        width: (parent.width - 16) / 2
-        spacing: 2
+        width: (parent.width - 18) / 2
+        spacing: 3
 
+        // Icon + % Row
         Row {
           width: parent.width
-          spacing: 6
-
-          CCIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 20
-            height: 20
-            kind: "disk"
-            glyph: "#7ee2a8"
-          }
-
           Item {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 26 - pctDisk.implicitWidth - 12
-            height: 1
+            width: parent.width - pctDisk.implicitWidth
+            height: 20
+            CCIcon {
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+              width: 18
+              height: 18
+              kind: "disk"
+              glyph: "#cddc39"
+            }
           }
 
           Text {
             id: pctDisk
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.diskPct) + "%"
-            color: "#f2f2f2"
-            font.pixelSize: SettingsState.px(17)
+            color: "#f5f5f5"
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
         }
 
+        // Title
         Text {
           text: "Disk"
-          color: "#b9b9b9"
-          font.pixelSize: SettingsState.px(15)
+          color: "#e0e0e0"
+          font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
 
+        // Value subtitle
         Text {
           text: SysStats.ready ? SysStats.diskText : "--"
-          color: "#8f8f8f"
-          font.pixelSize: SettingsState.px(14)
+          color: "#8a8a8a"
+          font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
 
-        Rectangle {
+        // Sleek Capsule Slider
+        Item {
           width: parent.width
-          height: 3
-          radius: 2
-          color: "#3a3f3a"
+          height: 12
 
           Rectangle {
-            width: parent.width * Math.min(1, SysStats.diskPct / 100)
-            height: parent.height
-            radius: parent.radius
-            color: "#7ee2a8"
+            id: diskTrack
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
+            height: 6
+            radius: 3
+            color: "#2a2d24"
+            clip: true
+
+            Rectangle {
+              anchors.left: parent.left
+              anchors.top: parent.top
+              anchors.bottom: parent.bottom
+              width: parent.width * Math.max(0, Math.min(1, SysStats.diskPct / 100))
+              radius: 3
+              color: "#cddc39"
+            }
+          }
+
+          // Indicator tick at the current value
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.diskPct / 100)) - width / 2))
+            width: 3
+            height: 8
+            radius: 1.5
+            color: "#e6ee9c"
+            visible: SysStats.diskPct > 0
           }
         }
       }

@@ -1,7 +1,7 @@
 import QtQuick
 import "../services"
 
-// Crisp icon representation rendering directly with the selected font.
+// Crisp icon representation rendering directly with the selected Nerd Font icon symbol.
 Item {
   id: root
   width: 20
@@ -79,13 +79,13 @@ Item {
     if (k === "external" || k === "open") return "";
     if (k === "copy") return "";
     if (k === "wave" || k === "motion") return "󰐊";
-    if (k === "cpu" || k === "processor" || k === "chip") return "";
-    if (k === "ram" || k === "memory") return "󰌛";
-    if (k === "swap" || k === "exchange") return "";
-    if (k === "disk" || k === "hdd" || k === "drive" || k === "storage") return "";
+    if (k === "cpu" || k === "processor" || k === "chip" || k === "pulse" || k === "activity" || k === "sine_wave") return "󰥛"; // nf-md-sine_wave
+    if (k === "ram" || k === "memory") return ""; // nf-oct-cpu
+    if (k === "swap" || k === "exchange" || k === "transfer" || k === "swap_horizontal") return "󰓢"; // nf-md-swap_horizontal
+    if (k === "disk" || k === "hdd" || k === "drive" || k === "storage") return "󰋊"; // nf-md-harddisk
+    if (k === "ethernet" || k === "wired") return "󰈀"; // nf-md-ethernet
     if (k === "font") return "";
     if (k === "eye" || k === "autohide" || k === "hide") return "";
-    if (k === "ethernet" || k === "wired") return "";
     return "";
   }
 
@@ -93,8 +93,6 @@ Item {
     anchors.fill: parent
     text: root.iconSymbol
     color: root.glyph
-    // Icons always use CommitMono Nerd Font Propo, independent of the
-    // Appearance font picker (SettingsState.fontFamily is text-only).
     font.family: SettingsState.nerdIconFont
     font.pixelSize: root.iconSize
     horizontalAlignment: Text.AlignHCenter

@@ -228,7 +228,7 @@ Singleton {
     // Display in Center Bar Pill
     if (!currentNotification) {
       currentNotification = n;
-      pillTimer.interval = 1000; // 1s display duration
+      pillTimer.interval = 2800; // 2.8s display duration
       pillTimer.restart();
     } else if (currentNotification !== n) {
       if (notificationQueue.indexOf(n) === -1) {
@@ -258,7 +258,7 @@ Singleton {
       var nq = notificationQueue.slice(0);
       currentNotification = nq.shift();
       notificationQueue = nq;
-      pillTimer.interval = 1000;
+      pillTimer.interval = 2800;
       pillTimer.restart();
     } else {
       currentNotification = null;

@@ -1,7 +1,7 @@
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 local terminal    = "kitty"
-local fileManager = "thunar"
+local fileManager = "nautilus"
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + RETURN  ", hl.dsp.exec_cmd(terminal))
