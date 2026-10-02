@@ -247,10 +247,190 @@ Column {
         }
 
         Text {
-          text: "• 60 fps • High quality • Fullscreen"
+          text: RecorderState.mode === "area" ? (RecorderState.areaGeometry !== "" ? ("• 60 fps • High quality • " + RecorderState.areaGeometry) : "• 60 fps • High quality • Select an area") : "• 60 fps • High quality • Fullscreen"
           color: "#8e998e"
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
+        }
+      }
+    }
+  }
+
+  // 2b. Capture Target: Fullscreen | Record area
+  Row {
+    width: parent.width
+    height: 40
+    spacing: 8
+
+    // Fullscreen mode card
+    Rectangle {
+      width: (parent.width - 8) / 2
+      height: 40
+      radius: 12
+      color: (RecorderState.mode === "fullscreen") ? "#223022" : (fullMouse.containsMouse ? "#1d241d" : "#161b16")
+      border.color: (RecorderState.mode === "fullscreen") ? "#4a6b4a" : (fullMouse.containsMouse ? "#425842" : "#252c25")
+      border.width: 1
+
+      Row {
+        anchors.centerIn: parent
+        spacing: 8
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 15
+          height: 15
+          kind: "display"
+          glyph: (RecorderState.mode === "fullscreen") ? "#7ee2a8" : SettingsState.textSecondary
+        }
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          text: "Fullscreen"
+          color: (RecorderState.mode === "fullscreen") ? "#f2f2f2" : SettingsState.textMain
+          font.pixelSize: SettingsState.px(14)
+          font.bold: RecorderState.mode === "fullscreen"
+          font.family: SettingsState.fontFamily
+        }
+      }
+
+      MouseArea {
+        id: fullMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        enabled: !RecorderState.isRecording
+        onClicked: RecorderState.mode = "fullscreen"
+      }
+    }
+
+    // Area mode card
+    Rectangle {
+      width: (parent.width - 8) / 2
+      height: 40
+      radius: 12
+      color: (RecorderState.mode === "area") ? "#223022" : (areaRecMouse.containsMouse ? "#1d241d" : "#161b16")
+      border.color: (RecorderState.mode === "area") ? "#4a6b4a" : (areaRecMouse.containsMouse ? "#425842" : "#252c25")
+      border.width: 1
+
+      Row {
+        anchors.centerIn: parent
+        spacing: 8
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 15
+          height: 15
+          kind: "area"
+          glyph: (RecorderState.mode === "area") ? "#7ee2a8" : SettingsState.textSecondary
+        }
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          text: "Record area"
+          color: (RecorderState.mode === "area") ? "#f2f2f2" : SettingsState.textMain
+          font.pixelSize: SettingsState.px(14)
+          font.bold: RecorderState.mode === "area"
+          font.family: SettingsState.fontFamily
+        }
+      }
+
+      MouseArea {
+        id: areaRecMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        enabled: !RecorderState.isRecording
+        onClicked: {
+          RecorderState.mode = "area";
+          if (RecorderState.areaGeometry === "" && !RecorderState.selectingArea) {
+            RecorderState.selectArea(false);
+          }
+        }
+      }
+    }
+  }
+
+  // 2c. Area selection row (only in area mode)
+  Rectangle {
+    visible: RecorderState.mode === "area"
+    width: parent.width
+    height: RecorderState.mode === "area" ? 36 : 0
+    radius: 12
+    color: "#161b16"
+    border.color: "#252c25"
+    border.width: 1
+    clip: true
+
+    Row {
+      anchors.fill: parent
+      anchors.leftMargin: 12
+      anchors.rightMargin: 6
+      anchors.topMargin: 6
+      anchors.bottomMargin: 6
+      spacing: 8
+
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width - selectAreaBtn.width - (clearAreaBtn.visible ? clearAreaBtn.width + 8 : 0) - 24
+        text: RecorderState.selectingArea ? "Drag to select area..." : (RecorderState.areaGeometry !== "" ? ("◈ " + RecorderState.areaGeometry) : "No area selected")
+        color: RecorderState.areaGeometry !== "" ? "#7ee2a8" : "#8e998e"
+        font.pixelSize: SettingsState.px(13)
+        font.family: "monospace"
+        elide: Text.ElideRight
+      }
+
+      Rectangle {
+        id: clearAreaBtn
+        visible: RecorderState.areaGeometry !== "" && !RecorderState.isRecording
+        anchors.verticalCenter: parent.verticalCenter
+        height: 24
+        width: clearAreaTxt.implicitWidth + 14
+        radius: 12
+        color: clearAreaMouse.containsMouse ? "#322222" : "#221a1a"
+        border.color: "#382525"
+        border.width: 1
+
+        Text {
+          id: clearAreaTxt
+          anchors.centerIn: parent
+          text: "✕"
+          color: "#ff8a8a"
+          font.pixelSize: SettingsState.px(12)
+          font.bold: true
+        }
+
+        MouseArea {
+          id: clearAreaMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: RecorderState.clearArea()
+        }
+      }
+
+      Rectangle {
+        id: selectAreaBtn
+        anchors.verticalCenter: parent.verticalCenter
+        height: 24
+        width: selectAreaTxt.implicitWidth + 16
+        radius: 12
+        color: RecorderState.selectingArea ? "#223022" : (selAreaMouse.containsMouse ? "#2a3a2a" : "#1e2a1e")
+        border.color: "#4a6b4a"
+        border.width: 1
+
+        Text {
+          id: selectAreaTxt
+          anchors.centerIn: parent
+          text: RecorderState.selectingArea ? "..." : (RecorderState.areaGeometry !== "" ? "RESELECT" : "SELECT")
+          color: "#7ee2a8"
+          font.pixelSize: SettingsState.px(12)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+
+        MouseArea {
+          id: selAreaMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          enabled: !RecorderState.isRecording && !RecorderState.selectingArea
+          onClicked: RecorderState.selectArea(false)
         }
       }
     }
@@ -290,7 +470,7 @@ Column {
 
       Text {
         anchors.verticalCenter: parent.verticalCenter
-        text: RecorderState.isRecording ? ("Stop recording (" + RecorderState.formattedTime + ")") : "Start recording"
+        text: RecorderState.isRecording ? ("Stop recording (" + RecorderState.formattedTime + ")") : (RecorderState.selectingArea ? "Select area on screen..." : ((RecorderState.mode === "area" && RecorderState.areaGeometry === "") ? "Select area & record" : "Start recording"))
         color: RecorderState.isRecording ? "#ff8a8a" : "#f2f2f2"
         font.pixelSize: SettingsState.px(16)
         font.bold: true

@@ -14,6 +14,12 @@ Singleton {
   property var recentRecordings: []
   property bool loadingRecent: false
 
+  // Capture target: "fullscreen" | "area"
+  property string mode: "fullscreen"
+  property string areaGeometry: "" // slurp raw: "X,Y WxH"
+  property string areaRegion: "" // gpu-screen-recorder form: "WxH+X+Y"
+  property bool selectingArea: false
+
   readonly property string currentAudio: {
     var hasMic = !AudioState.inMuted && AudioState.inVol > 0.01;
     var hasDesk = !AudioState.outMuted && AudioState.outVol > 0.01;
@@ -38,19 +44,50 @@ Singleton {
   }
 
   function start() {
+    // Area mode without a selection: run slurp first, then start.
+    if (mode === "area" && areaGeometry === "") {
+      selectArea(true);
+      return;
+    }
     isRecording = true;
     elapsedSeconds = 0;
     startStdout = "";
     if (startProc.running) {
       startProc.running = false;
     }
-    startProc.command = [
+    var cmd = [
       "bash",
       "/home/mohiitp/.config/quickshell/scripts/recorder.sh",
       "start",
-      currentAudio
+      currentAudio,
+      mode
     ];
+    if (mode === "area" && areaGeometry !== "") {
+      cmd.push(areaGeometry);
+    }
+    startProc.command = cmd;
     startProc.running = true;
+  }
+
+  function selectArea(autoStart) {
+    if (selectingArea || isRecording) return;
+    selectingArea = true;
+    selectStdout = "";
+    _selectAutoStart = !!autoStart;
+    if (selectProc.running) {
+      selectProc.running = false;
+    }
+    selectProc.command = [
+      "bash",
+      "/home/mohiitp/.config/quickshell/scripts/recorder.sh",
+      "select-area"
+    ];
+    selectProc.running = true;
+  }
+
+  function clearArea() {
+    areaGeometry = "";
+    areaRegion = "";
   }
 
   function stop() {
@@ -156,6 +193,8 @@ Singleton {
   property string listStdout: ""
   property string statusStdout: ""
   property string startStdout: ""
+  property string selectStdout: ""
+  property bool _selectAutoStart: false
 
   Process {
     id: listProc
@@ -212,6 +251,42 @@ Singleton {
   }
 
   Process {
+    id: selectProc
+    running: false
+
+    stdout: SplitParser {
+      splitMarker: "\n"
+      onRead: data => {
+        if (data) {
+          root.selectStdout += data;
+        }
+      }
+    }
+
+    onExited: function(code, status) {
+      root.selectingArea = false;
+      try {
+        var txt = (root.selectStdout || "").trim();
+        if (txt !== "") {
+          var res = JSON.parse(txt);
+          if (res.status === "selected" && res.geometry) {
+            root.areaGeometry = res.geometry;
+            root.areaRegion = res.region || "";
+            root.mode = "area";
+            if (root._selectAutoStart) {
+              root._selectAutoStart = false;
+              root.start();
+              return;
+            }
+          }
+        }
+      } catch (e) {}
+      root._selectAutoStart = false;
+      root.checkStatus();
+    }
+  }
+
+  Process {
     id: startProc
     running: false
 
@@ -225,7 +300,7 @@ Singleton {
     }
 
     onExited: function(code, status) {
-      if (code !== 0 || root.startStdout.indexOf("cancelled") !== -1 || root.startStdout.indexOf("no_recorder") !== -1) {
+      if (code !== 0 || root.startStdout.indexOf("cancelled") !== -1 || root.startStdout.indexOf("failed") !== -1 || root.startStdout.indexOf("no_recorder") !== -1 || root.startStdout.indexOf("no_slurp") !== -1) {
         root.isRecording = false;
       }
       root.checkStatus();

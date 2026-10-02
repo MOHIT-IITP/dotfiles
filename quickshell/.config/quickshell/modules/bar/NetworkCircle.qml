@@ -71,7 +71,9 @@ Rectangle {
     if (root.activePage === "recorder") {
       var extraMic = root.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0;
       var extraList = (RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(180, RecorderState.recentRecordings.length * 60) : 30;
-      return 460 + extraMic + extraList;
+      var extraMode = 52; // Fullscreen | Record area toggle
+      if (RecorderState.mode === "area") extraMode += 48; // area selection row
+      return 460 + extraMode + extraMic + extraList;
     }
     return mainPage.implicitHeight + 36;
   }

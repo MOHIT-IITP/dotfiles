@@ -32,6 +32,10 @@ Scope {
         // transparent + masked so empty area is click-through.
         implicitHeight: Math.round(960 * SettingsState.uiScale)
         color: "transparent"
+        // Hidden while picking a screen-record area so slurp's overlay is
+        // topmost and receives all pointer input (otherwise the expanded
+        // panel sits above slurp and selection can never complete).
+        visible: !RecorderState.selectingArea
         // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap
         exclusiveZone: Math.round((34 + SettingsState.barGap) * SettingsState.uiScale)
 
