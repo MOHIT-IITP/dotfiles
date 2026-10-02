@@ -79,6 +79,10 @@ Item {
     if (k === "external" || k === "open") return "";
     if (k === "copy") return "";
     if (k === "wave" || k === "motion") return "󰐊";
+    if (k === "cpu" || k === "processor" || k === "chip") return "";
+    if (k === "ram" || k === "memory") return "󰌛";
+    if (k === "swap" || k === "exchange") return "";
+    if (k === "disk" || k === "hdd" || k === "drive" || k === "storage") return "";
     if (k === "font") return "";
     if (k === "eye" || k === "autohide" || k === "hide") return "";
     if (k === "ethernet" || k === "wired") return "";

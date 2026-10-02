@@ -10,6 +10,8 @@ Rectangle {
   readonly property var player: MediaState.activePlayer
   readonly property bool hasPlayer: MediaState.hasPlayer
   readonly property bool isPlaying: MediaState.isPlaying
+  // Right-swipe on the expanded card flips to system stats.
+  property bool showStats: false
 
   implicitWidth: playerMouse.containsMouse ? 328 : 34
   implicitHeight: playerMouse.containsMouse ? 148 : 34
@@ -105,6 +107,47 @@ Rectangle {
     }
   }
 
+  // Swipe layer over the expanded card: right swipe -> stats, left swipe -> player.
+  // Sits below the controls so buttons and progress bar keep their clicks.
+  MouseArea {
+    id: statsGesture
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.topMargin: 14
+    anchors.rightMargin: 14
+    width: 300
+    height: 120
+    visible: playerMouse.containsMouse
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    property real _pressX: 0
+    property bool _moved: false
+
+    onPressed: function (ev) {
+      statsGesture._pressX = ev.x;
+      statsGesture._moved = false;
+    }
+
+    onPositionChanged: function (ev) {
+      if (!statsGesture.pressed || statsGesture._moved)
+        return;
+      var dx = ev.x - statsGesture._pressX;
+      if (dx > 24) {
+        statsGesture._moved = true;
+        root.showStats = true;
+      } else if (dx < -24) {
+        statsGesture._moved = true;
+        root.showStats = false;
+      }
+    }
+
+    onWheel: wheel => {
+      if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0)
+        root.showStats = true;
+      else if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0)
+        root.showStats = false;
+    }
+  }
+
   // ---- Expanded: compact player card ----
   Item {
     id: expandedView
@@ -135,7 +178,7 @@ Rectangle {
     Column {
       anchors.fill: parent
       spacing: 8
-      visible: hasPlayer
+      visible: hasPlayer && !root.showStats
 
       // Top row: rounded art + title/artist + live EQ
       Row {
@@ -456,6 +499,296 @@ Rectangle {
           maximumLineCount: 1
         }
       }
+    }
+  }
+
+  // ---- Expanded: system stats (right-swipe from now playing) ----
+  Item {
+    id: statsView
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.topMargin: 14
+    anchors.rightMargin: 14
+    width: 300
+    height: 120
+    opacity: (playerMouse.containsMouse && root.showStats) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 200 }
+    }
+
+    Grid {
+      anchors.fill: parent
+      anchors.margins: 8
+      columns: 2
+      columnSpacing: 14
+      rowSpacing: 10
+
+      // RAM cell
+      Column {
+        width: (parent.width - 14) / 2
+        spacing: 1
+
+        Row {
+          width: parent.width
+          spacing: 6
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 16
+            height: 16
+            kind: "ram"
+            glyph: "#e8a33d"
+          }
+
+          Item {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 22 - pctRam.implicitWidth - 12
+            height: 1
+          }
+
+          Text {
+            id: pctRam
+            anchors.verticalCenter: parent.verticalCenter
+            text: Math.round(SysStats.ramPct) + "%"
+            color: "#f2f2f2"
+            font.pixelSize: SettingsState.px(13)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+        }
+
+        Text {
+          text: "RAM"
+          color: "#b9b9b9"
+          font.pixelSize: SettingsState.px(11)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+
+        Text {
+          text: SysStats.ready ? SysStats.ramText : "--"
+          color: "#8f8f8f"
+          font.pixelSize: SettingsState.px(10)
+          font.family: SettingsState.fontFamily
+        }
+
+        Rectangle {
+          width: parent.width
+          height: 3
+          radius: 2
+          color: "#3a3f3a"
+
+          Rectangle {
+            width: parent.width * Math.min(1, SysStats.ramPct / 100)
+            height: parent.height
+            radius: parent.radius
+            color: "#e8a33d"
+          }
+        }
+      }
+
+      // Swap cell
+      Column {
+        width: (parent.width - 14) / 2
+        spacing: 1
+
+        Row {
+          width: parent.width
+          spacing: 6
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 16
+            height: 16
+            kind: "swap"
+            glyph: "#7fb5e8"
+          }
+
+          Item {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 22 - pctSwap.implicitWidth - 12
+            height: 1
+          }
+
+          Text {
+            id: pctSwap
+            anchors.verticalCenter: parent.verticalCenter
+            text: Math.round(SysStats.swapPct) + "%"
+            color: "#f2f2f2"
+            font.pixelSize: SettingsState.px(13)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+        }
+
+        Text {
+          text: "Swap"
+          color: "#b9b9b9"
+          font.pixelSize: SettingsState.px(11)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+
+        Text {
+          text: SysStats.ready ? SysStats.swapText : "--"
+          color: "#8f8f8f"
+          font.pixelSize: SettingsState.px(10)
+          font.family: SettingsState.fontFamily
+        }
+
+        Rectangle {
+          width: parent.width
+          height: 3
+          radius: 2
+          color: "#3a3f3a"
+
+          Rectangle {
+            width: parent.width * Math.min(1, SysStats.swapPct / 100)
+            height: parent.height
+            radius: parent.radius
+            color: "#7fb5e8"
+          }
+        }
+      }
+
+      // CPU cell
+      Column {
+        width: (parent.width - 14) / 2
+        spacing: 1
+
+        Row {
+          width: parent.width
+          spacing: 6
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 16
+            height: 16
+            kind: "cpu"
+            glyph: "#e86a65"
+          }
+
+          Item {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 22 - pctCpu.implicitWidth - 12
+            height: 1
+          }
+
+          Text {
+            id: pctCpu
+            anchors.verticalCenter: parent.verticalCenter
+            text: Math.round(SysStats.cpuPct) + "%"
+            color: "#f2f2f2"
+            font.pixelSize: SettingsState.px(13)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+        }
+
+        Text {
+          text: "CPU"
+          color: "#b9b9b9"
+          font.pixelSize: SettingsState.px(11)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+
+        Text {
+          text: SysStats.tempText
+          color: "#8f8f8f"
+          font.pixelSize: SettingsState.px(10)
+          font.family: SettingsState.fontFamily
+        }
+
+        Rectangle {
+          width: parent.width
+          height: 3
+          radius: 2
+          color: "#3a3f3a"
+
+          Rectangle {
+            width: parent.width * Math.min(1, SysStats.cpuPct / 100)
+            height: parent.height
+            radius: parent.radius
+            color: "#e86a65"
+          }
+        }
+      }
+
+      // Disk cell
+      Column {
+        width: (parent.width - 14) / 2
+        spacing: 1
+
+        Row {
+          width: parent.width
+          spacing: 6
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 16
+            height: 16
+            kind: "disk"
+            glyph: "#7ee2a8"
+          }
+
+          Item {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 22 - pctDisk.implicitWidth - 12
+            height: 1
+          }
+
+          Text {
+            id: pctDisk
+            anchors.verticalCenter: parent.verticalCenter
+            text: Math.round(SysStats.diskPct) + "%"
+            color: "#f2f2f2"
+            font.pixelSize: SettingsState.px(13)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+        }
+
+        Text {
+          text: "Disk"
+          color: "#b9b9b9"
+          font.pixelSize: SettingsState.px(11)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+        }
+
+        Text {
+          text: SysStats.ready ? SysStats.diskText : "--"
+          color: "#8f8f8f"
+          font.pixelSize: SettingsState.px(10)
+          font.family: SettingsState.fontFamily
+        }
+
+        Rectangle {
+          width: parent.width
+          height: 3
+          radius: 2
+          color: "#3a3f3a"
+
+          Rectangle {
+            width: parent.width * Math.min(1, SysStats.diskPct / 100)
+            height: parent.height
+            radius: parent.radius
+            color: "#7ee2a8"
+          }
+        }
+      }
+    }
+  }
+
+
+  Connections {
+    target: playerMouse
+    function onContainsMouseChanged() {
+      if (!playerMouse.containsMouse)
+        root.showStats = false;
     }
   }
 
