@@ -31,6 +31,9 @@ Rectangle {
 
   property bool fontDropdownOpen: false
   property bool recMicDropdownOpen: false
+  // Control-center pills: hidden group (apps, wall, clip, mixer, power)
+  // collapsed until the expander row is tapped.
+  property bool pillsExpanded: false
   // Config subfolder: "" (folder list) | "general" | "ui" | "theme"
   property string settingsSub: ""
 
