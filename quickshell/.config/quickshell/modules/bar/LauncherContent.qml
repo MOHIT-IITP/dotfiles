@@ -250,24 +250,27 @@ Item {
   Column {
     id: contentCol
     anchors.fill: parent
-    anchors.margins: 14
-    spacing: 8
+    anchors.leftMargin: 20
+    anchors.rightMargin: 20
+    anchors.topMargin: 16
+    anchors.bottomMargin: 16
+    spacing: 10
 
     // ========================================================
     // 0. MODE TABS (Apps / Files toggle)
     // ========================================================
     Row {
       width: parent.width
-      spacing: 6
+      spacing: 8
 
       Repeater {
         model: [{ "id": "apps", "label": "Apps" }, { "id": "files", "label": "Files" }]
         delegate: Rectangle {
           required property var modelData
           readonly property bool active: LauncherState.mode === modelData.id
-          width: 64
-          height: 24
-          radius: 12
+          width: 72
+          height: 28
+          radius: 14
           color: active ? SettingsState.bgActivePill : (tabMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
           border.color: active ? SettingsState.borderActive : SettingsState.borderBase
           border.width: 1
@@ -313,15 +316,15 @@ Item {
     // ========================================================
     Row {
       width: parent.width
-      spacing: 8
+      spacing: 10
       visible: root.isFiles
       height: root.isFiles ? implicitHeight : 0
 
       Rectangle {
         anchors.verticalCenter: parent.verticalCenter
-        width: 24
-        height: 24
-        radius: 12
+        width: 28
+        height: 28
+        radius: 14
         color: crumbMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         border.color: SettingsState.borderBase
         border.width: 1
@@ -330,7 +333,7 @@ Item {
           anchors.centerIn: parent
           text: "‹"
           color: SettingsState.textSecondary
-          font.pixelSize: SettingsState.px(14)
+          font.pixelSize: SettingsState.px(15)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -346,7 +349,7 @@ Item {
 
       Text {
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - 32
+        width: parent.width - 38
         text: root.browsePath + (root.query !== "" ? "  ·  ⌕ " + root.query : "")
         color: SettingsState.textMuted
         font.pixelSize: SettingsState.px(13)
@@ -361,11 +364,11 @@ Item {
     // ========================================================
     Item {
       width: parent.width
-      height: 32
+      height: 36
 
       Row {
         anchors.fill: parent
-        spacing: 10
+        spacing: 12
 
         // Search Kanji Glyph 探
         Text {
@@ -373,7 +376,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: "探"
           color: SettingsState.textMuted
-          font.pixelSize: SettingsState.px(18)
+          font.pixelSize: SettingsState.px(19)
           font.family: SettingsState.fontFamily
         }
 
@@ -487,8 +490,8 @@ Item {
     ListView {
       id: appListView
       width: parent.width
-      height: 200
-      spacing: 2
+      height: 220
+      spacing: 4
       clip: true
       visible: !root.isFiles
       model: filtered
@@ -500,8 +503,8 @@ Item {
         readonly property bool isSelected: index === root.sel
 
         width: ListView.view.width
-        height: 48
-        radius: 10
+        height: 52
+        radius: 14
         color: isSelected
           ? (SettingsState.isDark ? "#232629" : "#e6eaee")
           : (itemMouse.containsMouse ? (SettingsState.isDark ? "#191c1e" : "#f0f3f6") : "transparent")
@@ -514,20 +517,20 @@ Item {
 
         Row {
           anchors.fill: parent
-          anchors.leftMargin: 10
-          anchors.rightMargin: 10
-          spacing: 12
+          anchors.leftMargin: 14
+          anchors.rightMargin: 14
+          spacing: 14
 
           // App Icon
           Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: 26
-            height: 26
+            width: 28
+            height: 28
 
             Image {
               anchors.centerIn: parent
-              width: 24
-              height: 24
+              width: 26
+              height: 26
               visible: modelData && modelData.icon !== ""
               source: (modelData && modelData.icon !== "") ? Quickshell.iconPath(modelData.icon, "application-x-executable") : ""
               smooth: true
@@ -548,8 +551,8 @@ Item {
           // 2-Line Text: App Name + Subtitle/Category
           Column {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 42
-            spacing: 1
+            width: parent.width - 48
+            spacing: 2
 
             Text {
               width: parent.width
@@ -591,8 +594,8 @@ Item {
     ListView {
       id: fileListView
       width: parent.width
-      height: 200
-      spacing: 5
+      height: 220
+      spacing: 4
       clip: true
       visible: root.isFiles
       model: root.fileResults
@@ -605,8 +608,8 @@ Item {
         readonly property bool isSelected: index === root.sel
 
         width: ListView.view.width
-        height: 48
-        radius: 10
+        height: 52
+        radius: 14
         color: isSelected
           ? (SettingsState.isDark ? "#232629" : "#e6eaee")
           : (fileMouse.containsMouse ? (SettingsState.isDark ? "#191c1e" : "#f0f3f6") : "transparent")
@@ -636,22 +639,22 @@ Item {
 
         Row {
           anchors.fill: parent
-          anchors.leftMargin: 10
-          anchors.rightMargin: 10
-          spacing: 12
+          anchors.leftMargin: 14
+          anchors.rightMargin: 14
+          spacing: 14
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 22
-            height: 22
+            width: 24
+            height: 24
             kind: (modelData && modelData.isDir) ? "folder" : "file"
             glyph: isSelected ? SettingsState.textActive : SettingsState.textSecondary
           }
 
           Column {
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 42
-            spacing: 1
+            width: parent.width - 48
+            spacing: 2
 
             Text {
               width: parent.width
@@ -713,7 +716,7 @@ Item {
     // ========================================================
     Item {
       width: parent.width
-      height: root.isFiles ? 0 : 18
+      height: root.isFiles ? 0 : 22
       visible: !root.isFiles
 
       Text {

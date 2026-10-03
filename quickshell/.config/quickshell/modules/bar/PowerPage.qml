@@ -7,7 +7,7 @@ Column {
   id: powerPage
   required property var circle
   required property bool hovered
-  spacing: 8
+  spacing: 12
   opacity: (hovered && circle.activePage === "power") ? 1 : 0
   visible: opacity > 0
 
@@ -112,7 +112,7 @@ Column {
   // 5 Power Action Buttons Row (Lock, Logout, Suspend, Reboot, Shutdown)
   Row {
     anchors.horizontalCenter: parent.horizontalCenter
-    spacing: 8
+    spacing: 10
 
     // 1. Lock
     Rectangle {

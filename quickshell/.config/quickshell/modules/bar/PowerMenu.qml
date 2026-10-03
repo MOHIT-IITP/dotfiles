@@ -12,9 +12,9 @@ Rectangle {
   readonly property bool open: PowerState.open
   property int sel: -1 // 0: lock, 1: logout, 2: sleep, 3: reboot, 4: poweroff
 
-  implicitWidth: 330
-  implicitHeight: open ? 116 : 0
-  radius: 22
+  implicitWidth: 360
+  implicitHeight: open ? 132 : 0
+  radius: 38
   clip: true
 
   color: "#101210"
@@ -141,8 +141,11 @@ Rectangle {
 
     Column {
       anchors.fill: parent
-      anchors.margins: 14
-      spacing: 10
+      anchors.leftMargin: 20
+      anchors.rightMargin: 20
+      anchors.topMargin: 16
+      anchors.bottomMargin: 16
+      spacing: 12
 
       // Header row: "電 POWER" on left, dynamic action title on right
       Item {
@@ -213,7 +216,7 @@ Rectangle {
       // 5 Action buttons row
       Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 8
+        spacing: 10
 
         // 1. Lock
         Rectangle {

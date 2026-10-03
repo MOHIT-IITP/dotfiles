@@ -271,7 +271,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: TimerState.finished ? "00:00" : (TimerState.running || TimerState.paused ? TimerState.formatted : TimerState.selectedLabel)
         color: root.timerOrange
-        font.pixelSize: 44
+        font.pixelSize: 50
         font.bold: true
         font.family: SettingsState.fontFamily
 

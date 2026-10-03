@@ -29,7 +29,7 @@ PanelWindow {
     id: list
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    width: 380
+    width: 400
     spacing: 10
 
     Repeater {
@@ -37,11 +37,11 @@ PanelWindow {
 
       delegate: Rectangle {
         width: list.width
-        radius: 28
+        radius: 30
         color: "#141714"
         border.color: "#2c332c"
         border.width: 1
-        implicitHeight: trow.implicitHeight + 24
+        implicitHeight: trow.implicitHeight + 28
 
         // auto-hide (toast only — tracked copy stays in the CC)
         Timer {
@@ -55,8 +55,11 @@ PanelWindow {
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.top: parent.top
-          anchors.margins: 12
-          spacing: 10
+          anchors.leftMargin: 16
+          anchors.rightMargin: 16
+          anchors.topMargin: 14
+          anchors.bottomMargin: 14
+          spacing: 12
 
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter

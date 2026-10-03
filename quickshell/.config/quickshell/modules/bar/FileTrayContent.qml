@@ -8,8 +8,8 @@ import "../services"
 Item {
   id: root
 
-  implicitWidth: 460
-  implicitHeight: 190
+  implicitWidth: 480
+  implicitHeight: 204
 
   readonly property bool dndActive: FileTrayState.dndHover
 
@@ -72,8 +72,8 @@ Item {
   Rectangle {
     id: trayBox
     anchors.fill: parent
-    anchors.margins: 10
-    radius: 28
+    anchors.margins: 12
+    radius: 30
     color: root.dndActive ? Qt.rgba(SettingsState.accent.r, SettingsState.accent.g, SettingsState.accent.b, 0.12) : "transparent"
     border.width: 0
 
@@ -87,7 +87,7 @@ Item {
         try { ctx.setLineDash([7, 6]); } catch (e) {}
         ctx.strokeStyle = root.dndActive ? SettingsState.accent.toString() : SettingsState.borderBase.toString();
         ctx.lineWidth = root.dndActive ? 2 : 1.2;
-        var r = 28, lw = ctx.lineWidth;
+        var r = 30, lw = ctx.lineWidth;
         ctx.beginPath();
         var x = lw, y = lw, w = width - lw * 2, h = height - lw * 2;
         ctx.moveTo(x + r, y);
@@ -108,29 +108,29 @@ Item {
 
     Column {
       anchors.fill: parent
-      anchors.margins: 12
-      spacing: 6
+      anchors.margins: 14
+      spacing: 8
 
       // header
       Item {
         width: parent.width
-        height: 24
+        height: 26
         Row {
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
-          spacing: 7
+          spacing: 8
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "󰷏"
             font.family: SettingsState.nerdIconFont
-            font.pixelSize: SettingsState.px(14)
+            font.pixelSize: SettingsState.px(15)
             color: root.dndActive ? SettingsState.accent : SettingsState.textSecondary
           }
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: root.dndActive ? "Drop to stash" : ("Files Tray · " + FileTrayState.count)
             color: root.dndActive ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(12)
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -138,11 +138,11 @@ Item {
         Row {
           anchors.right: parent.right
           anchors.verticalCenter: parent.verticalCenter
-          spacing: 6
+          spacing: 8
           Rectangle {
-            width: 56
-            height: 22
-            radius: 11
+            width: 58
+            height: 24
+            radius: 12
             color: addMouse.containsMouse ? SettingsState.accent : SettingsState.bgCardHover
             border.color: SettingsState.borderBase
             border.width: 1
@@ -150,7 +150,7 @@ Item {
               anchors.centerIn: parent
               text: "+ Add"
               color: addMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textMain
-              font.pixelSize: SettingsState.px(10)
+              font.pixelSize: SettingsState.px(11)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -163,9 +163,9 @@ Item {
             }
           }
           Rectangle {
-            width: 52
-            height: 22
-            radius: 11
+            width: 54
+            height: 24
+            radius: 12
             visible: FileTrayState.count > 0
             color: clearMouse.containsMouse ? "#e86a65" : SettingsState.bgCardHover
             border.color: SettingsState.borderBase
@@ -174,7 +174,7 @@ Item {
               anchors.centerIn: parent
               text: "Clear"
               color: clearMouse.containsMouse ? "#ffffff" : SettingsState.textSecondary
-              font.pixelSize: SettingsState.px(10)
+              font.pixelSize: SettingsState.px(11)
               font.bold: true
               font.family: SettingsState.fontFamily
             }
@@ -199,7 +199,7 @@ Item {
         visible: FileTrayState.count === 0 || root.dndActive
         text: root.dndActive ? "Release to stash files here" : "Drag files onto the clock bar to stash them here — then drag them out to any app."
         color: root.dndActive ? SettingsState.accent : SettingsState.textMuted
-        font.pixelSize: SettingsState.px(10)
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
 
@@ -209,7 +209,7 @@ Item {
         visible: FileTrayState.count > 0 && !root.dndActive
         text: "Drag out to any app · Shift+click multi-select · click opens · right-click removes"
         color: SettingsState.textMuted
-        font.pixelSize: SettingsState.px(9)
+        font.pixelSize: SettingsState.px(10)
         font.family: SettingsState.fontFamily
       }
 
@@ -217,16 +217,16 @@ Item {
       ListView {
         id: strip
         width: parent.width
-        height: 92
+        height: 100
         visible: FileTrayState.count > 0
         clip: true
         orientation: ListView.Horizontal
-        spacing: 6
+        spacing: 8
         model: FileTrayState.files
         delegate: Item {
           id: cell
-          width: 86
-          height: 92
+          width: 92
+          height: 100
           required property var modelData
           required property int index
 
@@ -243,9 +243,9 @@ Item {
           Rectangle {
             id: chip
             anchors.centerIn: parent
-            width: 84
-            height: 90
-            radius: 12
+            width: 90
+            height: 98
+            radius: 14
             color: chipMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface
             border.color: (cell.modelData && root.isSelected(cell.modelData.path)) ? SettingsState.accent : (chipMouse.containsMouse ? SettingsState.accent : SettingsState.borderBase)
             border.width: (cell.modelData && root.isSelected(cell.modelData.path)) ? 2 : (chipMouse.containsMouse ? 1.5 : 1)

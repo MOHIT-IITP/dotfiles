@@ -160,29 +160,28 @@ Column {
     }
   }
 
-  // Slim pill track (warm tan fill on dark cocoa track, tick + end icon)
+  // Slim modern slider track
   Item {
     width: parent.width
-    height: 24
+    height: 20
 
     Rectangle {
       id: track
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      height: 12
-      radius: 6
+      height: 6
+      radius: 3
       color: Qt.rgba(SettingsState.accent.r, SettingsState.accent.g, SettingsState.accent.b, SettingsState.isDark ? 0.25 : 0.30)
 
-      // Active fill bar (stops before the icon zone at the right end).
-      // Right corners kept flat via the square cap below.
+      // Active fill bar
       Rectangle {
         id: fillBar
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: Math.max(0, (parent.width - 24) * root.shown)
-        radius: 6
+        width: Math.max(0, parent.width * root.shown)
+        radius: 3
         color: root.muted ? SettingsState.borderBase : SettingsState.accent
 
         Behavior on width {
@@ -191,36 +190,15 @@ Column {
         }
       }
 
-      // Square cap: flattens the fill's leading edge into a straight bar.
-      Rectangle {
-        x: fillBar.width - 6
-        anchors.top: fillBar.top
-        anchors.bottom: fillBar.bottom
-        width: 6
-        color: fillBar.color
-        visible: fillBar.width > 6
-      }
-
       // Edge tick at the fill boundary
       Rectangle {
-        x: Math.max(0, Math.min(parent.width - 24 - width, (parent.width - 24) * root.shown - width / 2))
+        x: Math.max(0, Math.min(parent.width - width, parent.width * root.shown - width / 2))
         anchors.verticalCenter: parent.verticalCenter
         width: 2
         height: parent.height + 4
         radius: 1
         color: root.muted ? SettingsState.textMuted : Qt.lighter(SettingsState.accent, 1.35)
         visible: root.shown > 0.02 && root.shown < 0.995
-      }
-
-      // Right-end icon inside the track
-      CCIcon {
-        anchors.right: parent.right
-        anchors.rightMargin: 5
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        height: 10
-        kind: root.muted ? (root.icon + "-mute") : root.icon
-        glyph: root.muted ? "#ef5350" : SettingsState.accent
       }
     }
 

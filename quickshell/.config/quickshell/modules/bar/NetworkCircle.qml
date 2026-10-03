@@ -63,14 +63,14 @@ Rectangle {
 
   implicitWidth: {
     if (!netMouse.containsMouse) return 34;
-    if (root.activePage === "power") return 340;
+    if (root.activePage === "power") return 360;
     if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
     return 410;
   }
 
   implicitHeight: {
     if (!netMouse.containsMouse) return 34;
-    if (root.activePage === "power") return 130;
+    if (root.activePage === "power") return 138;
     if (root.activePage === "settings") return settingsPage.implicitHeight + 76;
     if (root.activePage === "sound" || root.activePage === "mic") return 520;
     if (root.activePage === "mixer") return 380;

@@ -82,8 +82,8 @@ Rectangle {
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 28) : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 218 : (showWeather ? 265 : 162)))))))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 218 : (showWeather ? 265 : 162)))))))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
 
   radius: isExpanded ? 38 : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
@@ -440,7 +440,7 @@ Rectangle {
       width: 16
       height: 16
       kind: "mic-mute"
-      glyph: "#ff8a8a"
+      glyph: "#ff3b30"
       visible: AudioState.inMuted
     }
 
@@ -451,7 +451,7 @@ Rectangle {
       width: 16
       height: 16
       kind: "sound-mute"
-      glyph: "#ff8a8a"
+      glyph: "#ff3b30"
       visible: AudioState.outMuted
     }
 
@@ -577,7 +577,7 @@ Rectangle {
   Row {
     id: timerCollapsedRow
     anchors.centerIn: parent
-    spacing: 64
+    spacing: 18
     opacity: root.showTimerCollapsed ? 1 : 0
     visible: opacity > 0
 
@@ -590,6 +590,7 @@ Rectangle {
       anchors.verticalCenter: parent.verticalCenter
       width: 26
       height: 26
+      transform: Translate { x: -8 }
       property real prog: TimerState.progress
       onProgChanged: requestPaint()
       Component.onCompleted: requestPaint()
@@ -622,7 +623,7 @@ Rectangle {
       horizontalAlignment: Text.AlignHCenter
       text: TimerState.finished ? "00:00" : TimerState.formatted
       color: "#FF9E2C"
-      font.pixelSize: SettingsState.px(14)
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
       font.family: SettingsState.fontFamily
 
@@ -641,7 +642,7 @@ Rectangle {
       visible: false
       text: (TimerState.totalSeconds >= 6000 || TimerState.selectedMinutes >= 100) ? "888:88" : "88:88"
       color: "transparent"
-      font.pixelSize: SettingsState.px(14)
+      font.pixelSize: SettingsState.px(16)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -741,7 +742,7 @@ Rectangle {
       width: 16
       height: 16
       kind: "mic-mute"
-      glyph: "#ff8a8a"
+      glyph: "#ff3b30"
       visible: AudioState.inMuted
     }
 
@@ -750,7 +751,7 @@ Rectangle {
       width: 16
       height: 16
       kind: "sound-mute"
-      glyph: "#ff8a8a"
+      glyph: "#ff3b30"
       visible: AudioState.outMuted
     }
 

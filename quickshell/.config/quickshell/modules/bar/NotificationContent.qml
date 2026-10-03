@@ -7,8 +7,8 @@ import "../services"
 Item {
   id: root
 
-  implicitWidth: 340
-  implicitHeight: 118
+  implicitWidth: 380
+  implicitHeight: 136
 
   readonly property var n: NotifCenter.currentNotification
 
@@ -38,24 +38,24 @@ Item {
 
   Column {
     anchors.fill: parent
-    anchors.leftMargin: 16
-    anchors.rightMargin: 16
-    anchors.topMargin: 13
-    anchors.bottomMargin: 13
-    spacing: 8
+    anchors.leftMargin: 20
+    anchors.rightMargin: 20
+    anchors.topMargin: 16
+    anchors.bottomMargin: 16
+    spacing: 10
 
     // 1. Top Row: [App Badge / Status] [Icon] [Timestamp]
     Row {
       width: parent.width
-      height: 22
+      height: 24
       spacing: 8
 
       // App Pill Badge
       Rectangle {
         anchors.verticalCenter: parent.verticalCenter
-        height: 20
-        width: Math.min(120, appText.implicitWidth + 18)
-        radius: 10
+        height: 22
+        width: Math.min(130, appText.implicitWidth + 20)
+        radius: 11
         color: SettingsState.accent
         opacity: 0.9
 
@@ -64,7 +64,7 @@ Item {
           anchors.centerIn: parent
           text: root.formatAppName(root.n)
           color: SettingsState.isDark ? "#0d140e" : "#ffffff"
-          font.pixelSize: SettingsState.px(10)
+          font.pixelSize: SettingsState.px(11)
           font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -74,21 +74,21 @@ Item {
       }
 
       Item {
-        width: parent.width - (appText.parent.width + 56)
+        width: parent.width - (appText.parent.width + 60)
         height: 1
       }
 
       // App Icon / Favicon in Top-Right
       Item {
         anchors.verticalCenter: parent.verticalCenter
-        width: 20
-        height: 20
+        width: 22
+        height: 22
 
         Image {
           id: imgView
           anchors.centerIn: parent
-          width: 17
-          height: 17
+          width: 18
+          height: 18
           visible: status === Image.Ready
           source: {
             if (!root.n) return "";
@@ -103,8 +103,8 @@ Item {
 
         CCIcon {
           anchors.centerIn: parent
-          width: 15
-          height: 15
+          width: 16
+          height: 16
           visible: imgView.status !== Image.Ready
           kind: NotifCenter.iconKindFor(root.n)
           glyph: SettingsState.textSecondary
@@ -116,7 +116,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: "now"
         color: SettingsState.textMuted
-        font.pixelSize: SettingsState.px(10)
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
     }
@@ -124,14 +124,14 @@ Item {
     // 2. Middle Content (Summary Title + Body Description)
     Column {
       width: parent.width
-      spacing: 2
+      spacing: 3
 
       Text {
         width: parent.width
         text: (root.n && root.n.summary) ? root.n.summary : ""
         textFormat: Text.StyledText
         color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(13)
+        font.pixelSize: SettingsState.px(14)
         font.bold: true
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
@@ -144,7 +144,7 @@ Item {
         text: (root.n && root.n.body) ? root.n.body : ""
         textFormat: Text.StyledText
         color: SettingsState.textSecondary
-        font.pixelSize: SettingsState.px(11)
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
         maximumLineCount: 1
@@ -154,14 +154,14 @@ Item {
     // 3. Bottom Row: Action Pills
     Row {
       width: parent.width
-      height: 26
-      spacing: 8
+      height: 28
+      spacing: 10
 
       // Dismiss Pill (✕)
       Rectangle {
-        height: 26
-        width: 38
-        radius: 13
+        height: 28
+        width: 42
+        radius: 14
         color: dismissMouse.containsMouse ? SettingsState.bgCardHover : (SettingsState.isDark ? "#202620" : "#e0e6e0")
         border.color: SettingsState.borderBase
         border.width: 1
@@ -171,7 +171,7 @@ Item {
           text: "✕"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.accent
-          font.pixelSize: SettingsState.px(11)
+          font.pixelSize: SettingsState.px(12)
           font.bold: true
         }
 
@@ -186,9 +186,9 @@ Item {
 
       // Open Action Pill
       Rectangle {
-        height: 26
-        width: parent.width - 46
-        radius: 13
+        height: 28
+        width: parent.width - 52
+        radius: 14
         color: openMouse.containsMouse ? SettingsState.accent : SettingsState.bgCard
         border.color: SettingsState.borderBase
         border.width: 1
@@ -205,7 +205,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: root.getActionLabel(root.n)
             color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textMain
-            font.pixelSize: SettingsState.px(11)
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
           }

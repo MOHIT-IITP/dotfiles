@@ -80,8 +80,8 @@ Rectangle {
       launch(filtered[sel]);
   }
 
-  implicitWidth: 420
-  implicitHeight: open ? contentCol.implicitHeight + 28 : 0
+  implicitWidth: 440
+  implicitHeight: open ? contentCol.implicitHeight + 32 : 0
   radius: 36
   clip: true
 
@@ -108,14 +108,17 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: 14
-    spacing: 10
+    anchors.leftMargin: 20
+    anchors.rightMargin: 20
+    anchors.topMargin: 16
+    anchors.bottomMargin: 16
+    spacing: 12
 
     // Minimal Search Input Bar
     Row {
       width: parent.width
-      height: 32
-      spacing: 10
+      height: 36
+      spacing: 12
 
       // Search Icon
       CCIcon {
@@ -232,7 +235,7 @@ Rectangle {
     ListView {
       id: appListView
       width: parent.width
-      height: Math.min(filtered.length * 40, 320)
+      height: Math.min(filtered.length * 48, 320)
       spacing: 4
       clip: true
       model: filtered
@@ -244,8 +247,8 @@ Rectangle {
         readonly property bool isSelected: index === root.sel
 
         width: ListView.view.width
-        height: 36
-        radius: 12
+        height: 44
+        radius: 14
         color: isSelected ? SettingsState.bgActivePill : (itemMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
         border.color: isSelected ? SettingsState.borderActive : "transparent"
         border.width: 1
@@ -256,20 +259,20 @@ Rectangle {
 
         Row {
           anchors.fill: parent
-          anchors.leftMargin: 8
-          anchors.rightMargin: 8
-          spacing: 10
+          anchors.leftMargin: 12
+          anchors.rightMargin: 12
+          spacing: 12
 
           // App Icon
           Item {
             anchors.verticalCenter: parent.verticalCenter
-            width: 22
-            height: 22
+            width: 24
+            height: 24
 
             Image {
               anchors.centerIn: parent
-              width: 20
-              height: 20
+              width: 22
+              height: 22
               visible: modelData && modelData.icon !== ""
               source: (modelData && modelData.icon !== "") ? Quickshell.iconPath(modelData.icon, "application-x-executable") : ""
               smooth: true
