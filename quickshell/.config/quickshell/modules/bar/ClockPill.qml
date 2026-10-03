@@ -616,7 +616,10 @@ Rectangle {
     }
 
     Text {
+      id: timerCollapsedText
       anchors.verticalCenter: parent.verticalCenter
+      width: timerCollapsedMetrics.implicitWidth
+      horizontalAlignment: Text.AlignHCenter
       text: TimerState.finished ? "00:00" : TimerState.formatted
       color: "#FF9E2C"
       font.pixelSize: SettingsState.px(14)
@@ -629,6 +632,18 @@ Rectangle {
         NumberAnimation { from: 1.0; to: 0.4; duration: 600; easing.type: Easing.InOutSine }
         NumberAnimation { from: 0.4; to: 1.0; duration: 600; easing.type: Easing.InOutSine }
       }
+    }
+
+    // Invisible reserve: widest digits ("8") so per-second digit changes
+    // never alter the visible text width -> Row/pill width stays constant.
+    Text {
+      id: timerCollapsedMetrics
+      visible: false
+      text: (TimerState.totalSeconds >= 6000 || TimerState.selectedMinutes >= 100) ? "888:88" : "88:88"
+      color: "transparent"
+      font.pixelSize: SettingsState.px(14)
+      font.bold: true
+      font.family: SettingsState.fontFamily
     }
   }
 
