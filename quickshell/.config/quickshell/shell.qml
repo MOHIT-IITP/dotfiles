@@ -80,6 +80,10 @@ Scope {
       CalendarState.toggle();
     }
 
+    function timer(): void {
+      TimerState.toggle();
+    }
+
     function screenshot(): void {
       ScreenshotState.capture(ScreenshotState.mode);
     }

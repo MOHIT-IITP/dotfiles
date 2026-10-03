@@ -195,7 +195,6 @@ Item {
       visible: NotifCenter.count > 0
       model: NotifCenter.trackedList
       delegate: CCNotifCard {
-        entryIndex: index
       }
     }
   }

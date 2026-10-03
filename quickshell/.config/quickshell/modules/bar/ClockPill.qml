@@ -18,6 +18,7 @@ Rectangle {
   readonly property int currentWsId: Hyprland.focusedWorkspace?.id ?? 1
   property bool showWorkspaces: false
   property bool isWeatherView: false
+  property bool isTimerView: false
 
   onCurrentWsIdChanged: {
     showWorkspaces = true;
@@ -69,18 +70,22 @@ Rectangle {
   readonly property bool showNotif: NotifCenter.showNotificationPill && !showInbox && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
   readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
   readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
+  readonly property bool showTimer: isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isWeatherView
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: wxView.visible && wxView.calHover
-  readonly property bool isExpanded: mouse.containsMouse || calHovering || root.isWeatherView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover
+  readonly property bool timerHovering: timerView.visible && timerView.timerHover
+  readonly property bool isExpanded: mouse.containsMouse || calHovering || timerHovering || root.isWeatherView || root.isTimerView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
+  // Running countdown takes over the collapsed bar: progress ring + MM:SS
+  readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 28) : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showWeather ? 265 : 162))))))))))) : 34
-  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showWeather ? 520 : 300))))))))))) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 28) : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 218 : (showWeather ? 265 : 162)))))))))))) : 34
+  implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
 
-  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showInbox ? 22 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showWeather ? 20 : 28))))))))))) : implicitHeight / 2
+  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showInbox ? 22 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showTimer ? 26 : (showWeather ? 20 : 28)))))))))))) : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.barBorder
   border.width: 1
@@ -160,13 +165,28 @@ Rectangle {
 
   // Handle IPC and keybind toggle
   Connections {
+    target: TimerState
+    function onOpenChanged() {
+      if (TimerState.open) {
+        root.isTimerView = true;
+        root.isWeatherView = false;
+        CalendarState.close();
+      } else if (!mouse.containsMouse) {
+        root.isTimerView = false;
+      }
+    }
+  }
+
+  Connections {
     target: CalendarState
     function onOpenChanged() {
       if (CalendarState.open) {
         root.isWeatherView = true;
+        root.isTimerView = false;
         CalendarState.refreshWeather();
       } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -176,9 +196,11 @@ Rectangle {
     function onOpenChanged() {
       if (LauncherState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusLauncher();
       } else if (!mouse.containsMouse && !CalendarState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -188,9 +210,11 @@ Rectangle {
     function onOpenChanged() {
       if (WallpaperState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusWallpaper();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -200,9 +224,11 @@ Rectangle {
     function onOpenChanged() {
       if (PowerState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusPower();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -212,9 +238,11 @@ Rectangle {
     function onOpenChanged() {
       if (ClipboardState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusClipboard();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -224,9 +252,11 @@ Rectangle {
     function onOpenChanged() {
       if (MixerState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusMixer();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -236,9 +266,11 @@ Rectangle {
     function onOpenChanged() {
       if (AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusAuth();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -248,6 +280,7 @@ Rectangle {
     function onOpenChanged() {
       if (FileTrayState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -257,9 +290,11 @@ Rectangle {
     function onOpenChanged() {
       if (AboutState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusAbout();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -269,9 +304,11 @@ Rectangle {
     function onInboxOpenChanged() {
       if (NotifCenter.inboxOpen) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         forceFocusNotifInbox();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isWeatherView = false;
+        root.isTimerView = false;
       }
     }
   }
@@ -304,7 +341,7 @@ Rectangle {
     id: collapsedRow
     anchors.centerIn: parent
     spacing: RecorderState.isRecording ? 14 : 7
-    opacity: (!root.isExpanded && !root.showWorkspaces && !root.showCapture) ? 1 : 0
+    opacity: (!root.isExpanded && !root.showWorkspaces && !root.showCapture && !root.showTimerCollapsed) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -530,6 +567,67 @@ Rectangle {
           FileTrayState.openTray();
           ev.accepted = true;
         }
+      }
+    }
+  }
+
+  // ========================================================
+  // 1b. COLLAPSED TIMER VIEW: progress ring + MM:SS (like Dynamic Island)
+  // ========================================================
+  Row {
+    id: timerCollapsedRow
+    anchors.centerIn: parent
+    spacing: 64
+    opacity: root.showTimerCollapsed ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 160 }
+    }
+
+    Canvas {
+      id: timerRing
+      anchors.verticalCenter: parent.verticalCenter
+      width: 26
+      height: 26
+      property real prog: TimerState.progress
+      onProgChanged: requestPaint()
+      Component.onCompleted: requestPaint()
+      onPaint: {
+        var ctx = getContext("2d");
+        ctx.reset();
+        var cx = 13, cy = 13, r = 10;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        // Track
+        ctx.strokeStyle = "#4a3826";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        // Elapsed arc
+        var a0 = -Math.PI / 2;
+        var p = Math.max(0, Math.min(1, prog));
+        var a1 = a0 + Math.PI * 2 * p;
+        ctx.strokeStyle = "#FF9E2C";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, a0, a1);
+        ctx.stroke();
+      }
+    }
+
+    Text {
+      anchors.verticalCenter: parent.verticalCenter
+      text: TimerState.finished ? "00:00" : TimerState.formatted
+      color: "#FF9E2C"
+      font.pixelSize: SettingsState.px(14)
+      font.bold: true
+      font.family: SettingsState.fontFamily
+
+      SequentialAnimation on opacity {
+        running: TimerState.finished
+        loops: Animation.Infinite
+        NumberAnimation { from: 1.0; to: 0.4; duration: 600; easing.type: Easing.InOutSine }
+        NumberAnimation { from: 0.4; to: 1.0; duration: 600; easing.type: Easing.InOutSine }
       }
     }
   }
@@ -799,7 +897,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showTimer && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -938,7 +1036,21 @@ Rectangle {
   WeatherCalendarView {
     id: wxView
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
+    opacity: (root.isExpanded && root.showWeather && !root.showTimer && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 220 }
+    }
+  }
+
+  // ========================================================
+  // 4b. TIMER VIEW (1st left-swipe: Clock -> Timer -> Weather)
+  // ========================================================
+  TimerView {
+    id: timerView
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showTimer) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1093,15 +1205,16 @@ Rectangle {
     interval: 350
     repeat: false
     onTriggered: {
-      if (!mouse.containsMouse && !root.calHovering) {
+      if (!mouse.containsMouse && !root.calHovering && !root.timerHovering) {
         root.isWeatherView = false;
+        root.isTimerView = false;
         CalendarState.close();
       }
     }
   }
 
   function pokeLeaveTimer(): void {
-    if (mouse.containsMouse || root.calHovering) {
+    if (mouse.containsMouse || root.calHovering || root.timerHovering) {
       leaveTimer.stop();
     } else {
       leaveTimer.restart();
@@ -1109,6 +1222,11 @@ Rectangle {
   }
 
   onCalHoveringChanged: pokeLeaveTimer()
+  onTimerHoveringChanged: pokeLeaveTimer()
+  onIsTimerViewChanged: {
+    if (TimerState.open !== root.isTimerView)
+      TimerState.open = root.isTimerView;
+  }
 
   // GESTURE & INTERACTION HANDLER
   // ========================================================
@@ -1140,28 +1258,51 @@ Rectangle {
       var dx = ev.x - root._pressX;
       var dy = Math.abs(ev.y - root._pressY);
 
-      // Left swipe -> open Weather & Calendar inside center bar
+      // Left swipe -> Weather | Right swipe -> Timer (from clock)
+      // Opposite swipe returns to clock.
       if (dx < -18 && dy < 45) {
         root._swiped = true;
-        root.isWeatherView = true;
-        CalendarState.refreshWeather();
+        if (root.isTimerView) {
+          root.isTimerView = false;
+          TimerState.open = false;
+        } else if (!root.isWeatherView && !CalendarState.open) {
+          root.isWeatherView = true;
+          CalendarState.refreshWeather();
+        }
       }
-      // Right swipe -> return to clock view
+      // Right swipe -> Timer (or back to clock from Weather)
       else if (dx > 18 && dy < 45) {
         root._swiped = true;
-        root.isWeatherView = false;
+        if (root.isWeatherView || CalendarState.open) {
+          root.isWeatherView = false;
+          CalendarState.close();
+        } else if (!root.isTimerView) {
+          root.isTimerView = true;
+          TimerState.open = true;
+        }
       }
     }
 
     onWheel: wheel => {
-      // Touchpad horizontal swipe left -> Open Weather & Calendar inside center bar
+      // Touchpad horizontal swipe left -> Weather, right -> Timer
       if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
-        root.isWeatherView = true;
-        CalendarState.refreshWeather();
+        if (root.isTimerView) {
+          root.isTimerView = false;
+          TimerState.open = false;
+        } else if (!root.isWeatherView && !CalendarState.open) {
+          root.isWeatherView = true;
+          CalendarState.refreshWeather();
+        }
       }
-      // Touchpad horizontal swipe right -> Return to clock view
+      // Touchpad horizontal swipe right -> Timer (or back to clock from Weather)
       else if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
-        root.isWeatherView = false;
+        if (root.isWeatherView || CalendarState.open) {
+          root.isWeatherView = false;
+          CalendarState.close();
+        } else if (!root.isTimerView) {
+          root.isTimerView = true;
+          TimerState.open = true;
+        }
       }
       // Vertical scroll -> Workspace switch
       else if (wheel.angleDelta.y > 0) {

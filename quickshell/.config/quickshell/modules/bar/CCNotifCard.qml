@@ -9,12 +9,12 @@ import "../services"
 // via the ListView's `modelData`, which did not propagate the Notification
 // objects into delegates (cards rendered blank).
 Rectangle {
-  required property int entryIndex
+  required property int index
   readonly property var entry: {
     var list = NotifCenter.trackedList;
-    if (!list || entryIndex < 0 || entryIndex >= list.length)
+    if (!list || index < 0 || index >= list.length)
       return null;
-    return list[entryIndex];
+    return list[index];
   }
   width: ListView.view.width
   radius: 12
