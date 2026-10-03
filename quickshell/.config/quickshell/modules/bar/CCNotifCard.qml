@@ -17,7 +17,7 @@ Rectangle {
     return list[index];
   }
   width: ListView.view.width
-  radius: 12
+  radius: 18
   color: "#181d18"
   border.color: "#252c25"
   border.width: 1

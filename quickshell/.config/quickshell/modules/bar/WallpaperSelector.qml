@@ -13,7 +13,7 @@ Rectangle {
 
   implicitWidth: 720
   implicitHeight: open ? 260 : 0
-  radius: 28
+  radius: 36
   clip: true
 
   color: SettingsState.bgSurface

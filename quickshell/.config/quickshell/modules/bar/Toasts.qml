@@ -37,7 +37,7 @@ PanelWindow {
 
       delegate: Rectangle {
         width: list.width
-        radius: 16
+        radius: 28
         color: "#141714"
         border.color: "#2c332c"
         border.width: 1

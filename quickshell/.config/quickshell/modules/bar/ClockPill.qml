@@ -85,7 +85,7 @@ Rectangle {
   implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 28) : (showWallpaper ? 260 : (showPower ? 116 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 28) : (showNotif ? 118 : (showFileTray ? 190 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 218 : (showWeather ? 265 : 162)))))))))))) : 34
   implicitWidth: isExpanded ? (showLauncher ? 400 : (showWallpaper ? 720 : (showPower ? 340 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 340 : (showFileTray ? 460 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
 
-  radius: isExpanded ? (showLauncher ? 24 : (showWallpaper ? 26 : (showPower ? 22 : (showClipboard ? 22 : (showMixer ? 26 : (showAuth ? 24 : (showInbox ? 22 : (showNotif ? 28 : (showFileTray ? 36 : (showAbout ? 24 : (showTimer ? 26 : (showWeather ? 20 : 28)))))))))))) : implicitHeight / 2
+  radius: isExpanded ? 38 : implicitHeight / 2
   color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
   border.color: SettingsState.barBorder
   border.width: 1

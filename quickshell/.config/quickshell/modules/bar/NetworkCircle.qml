@@ -87,7 +87,7 @@ Rectangle {
     }
     return mainPage.implicitHeight + 36;
   }
-  radius: netMouse.containsMouse ? 30 : 17
+  radius: netMouse.containsMouse ? 36 : 17
   clip: true
 
   color: netMouse.containsMouse ? SettingsState.bgSurface : SettingsState.bgSurface

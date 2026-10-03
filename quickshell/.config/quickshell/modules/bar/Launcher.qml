@@ -82,7 +82,7 @@ Rectangle {
 
   implicitWidth: 420
   implicitHeight: open ? contentCol.implicitHeight + 28 : 0
-  radius: 26
+  radius: 36
   clip: true
 
   color: SettingsState.bgSurface

@@ -18,7 +18,7 @@ Rectangle {
 
   implicitWidth: playerMouse.containsMouse ? 328 : 34
   implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 34
-  radius: playerMouse.containsMouse ? 22 : 17
+  radius: playerMouse.containsMouse ? 34 : 17
   clip: true
 
   color: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface

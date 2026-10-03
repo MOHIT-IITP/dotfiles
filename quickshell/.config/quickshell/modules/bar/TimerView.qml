@@ -2,7 +2,7 @@ import QtQuick
 import "../services"
 
 // Center-bar countdown timer picker (iOS Dynamic-Island style).
-// Top: draggable ruler (numbers every 5 min, ticks every 1 min).
+// Top: draggable ruler (numbers every 5 min, uniform-height rounded tick lines every 1 min, edge fades).
 // Bottom: Start/Cancel pill (left) + MM:SS readout (right).
 Item {
   id: root
@@ -13,7 +13,8 @@ Item {
   property bool timerHover: false
   readonly property bool isRunning: TimerState.running || TimerState.paused || TimerState.finished
   readonly property color timerOrange: "#FF9E2C"
-  readonly property color tickDim: "#5C4A38"
+  readonly property color tickDim: "#3D2413"
+  readonly property color textDim: "#6E4522"
 
   HoverHandler {
     id: hoverH
@@ -22,95 +23,141 @@ Item {
 
   Column {
     anchors.fill: parent
-    anchors.margins: 14
-    spacing: 6
+    anchors.margins: 16
+    spacing: 8
 
-    // ================= RULER =================
+    // ================= RULER / SLIDER BAR =================
     Item {
       id: rulerArea
       width: parent.width
-      height: 112
+      height: 110
 
-      property real tickGap: 14
-      property int window: 11 // +/- minutes shown around selection
+      property real tickGap: 10
+      property int window: 16 // +/- 16 minutes shown around selection
       property real pressX: 0
-      property int pressMin: 22
+      property int pressMin: 15
       property bool dragging: false
 
-      // Labels row (numbers every 5 min)
-      Row {
-        id: labelRow
+      // Ruler content (Labels + uniform tick lines)
+      Item {
         anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 0
-        Repeater {
-          model: rulerArea.window * 2 + 1
-          delegate: Item {
-            property int minute: TimerState.selectedMinutes + (index - rulerArea.window)
-            property bool valid: minute >= 1 && minute <= 120
-            property bool labeled: valid && minute % 5 === 0
-            property bool active: (index - rulerArea.window) <= 0
-            width: rulerArea.tickGap
-            height: 26
-            Text {
-              anchors.centerIn: parent
-              visible: labeled
-              text: valid ? minute : ""
-              color: active ? root.timerOrange : root.tickDim
-              opacity: active ? 1.0 : 0.55
-              font.pixelSize: 18
-              font.bold: true
-              font.family: SettingsState.fontFamily
+        anchors.bottom: markerArea.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        // Labels row (numbers every 5 min: 0, 5, 10, 15, 20, 25, 30...)
+        Row {
+          id: labelRow
+          anchors.top: parent.top
+          anchors.topMargin: 2
+          anchors.horizontalCenter: parent.horizontalCenter
+          spacing: 0
+
+          Repeater {
+            model: rulerArea.window * 2 + 1
+            delegate: Item {
+              property int minute: TimerState.selectedMinutes + (index - rulerArea.window)
+              property bool valid: minute >= 0 && minute <= 120
+              property bool labeled: valid && minute % 5 === 0
+              property bool active: (index - rulerArea.window) <= 0
+              width: rulerArea.tickGap
+              height: 22
+
+              Text {
+                anchors.centerIn: parent
+                visible: labeled
+                text: valid ? minute : ""
+                color: active ? root.timerOrange : root.textDim
+                opacity: active ? 1.0 : 0.6
+                font.pixelSize: 15
+                font.bold: true
+                font.family: SettingsState.fontFamily
+              }
+            }
+          }
+        }
+
+        // Ticks row (vertical rounded capsule lines of identical height)
+        Row {
+          id: ticksRow
+          anchors.top: labelRow.bottom
+          anchors.topMargin: 6
+          anchors.horizontalCenter: parent.horizontalCenter
+          spacing: 0
+
+          Repeater {
+            model: rulerArea.window * 2 + 1
+            delegate: Item {
+              property int minute: TimerState.selectedMinutes + (index - rulerArea.window)
+              property bool valid: minute >= 0 && minute <= 120
+              property bool active: (index - rulerArea.window) <= 0
+              width: rulerArea.tickGap
+              height: 34
+
+              Rectangle {
+                anchors.centerIn: parent
+                width: 2.8
+                height: 32
+                radius: 1.4
+                visible: valid
+                color: active ? root.timerOrange : root.tickDim
+                opacity: active ? 1.0 : 0.65
+              }
             }
           }
         }
       }
 
-      // Ticks row
-      Row {
-        anchors.top: labelRow.bottom
-        anchors.topMargin: 4
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 0
-        Repeater {
-          model: rulerArea.window * 2 + 1
-          delegate: Item {
-            property int minute: TimerState.selectedMinutes + (index - rulerArea.window)
-            property bool valid: minute >= 1 && minute <= 120
-            property bool major: valid && minute % 5 === 0
-            property bool active: (index - rulerArea.window) <= 0
-            width: rulerArea.tickGap
-            height: 46
-            Rectangle {
-              anchors.top: parent.top
-              anchors.horizontalCenter: parent.horizontalCenter
-              width: major ? 3.5 : 2.5
-              height: major ? 42 : 26
-              radius: 1.5
-              visible: valid
-              color: active ? root.timerOrange : root.tickDim
-              opacity: active ? 1.0 : 0.5
-            }
-          }
+      // Left edge fade overlay
+      Rectangle {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: markerArea.top
+        width: 48
+        z: 2
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: SettingsState.bgCard }
+          GradientStop { position: 1.0; color: "transparent" }
         }
       }
 
-      // Center marker triangle
-      Text {
-        anchors.horizontalCenter: parent.horizontalCenter
+      // Right edge fade overlay
+      Rectangle {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: markerArea.top
+        width: 48
+        z: 2
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0.0; color: "transparent" }
+          GradientStop { position: 1.0; color: SettingsState.bgCard }
+        }
+      }
+
+      // Center marker triangle area
+      Item {
+        id: markerArea
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
-        text: "▲"
-        color: root.timerOrange
-        font.pixelSize: 16
-        font.family: SettingsState.fontFamily
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: 24
+        height: 18
+
+        Text {
+          anchors.centerIn: parent
+          text: "▲"
+          color: root.timerOrange
+          font.pixelSize: 13
+          font.family: SettingsState.fontFamily
+        }
       }
 
       // Running progress hint (thin bar under marker)
       Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: -2
+        anchors.bottomMargin: 0
         width: 120 * TimerState.progress
         height: 2
         radius: 1
@@ -118,6 +165,7 @@ Item {
         color: root.timerOrange
       }
 
+      // Mouse drag & scroll handling for the ruler
       MouseArea {
         anchors.fill: parent
         enabled: !TimerState.running && !TimerState.paused
@@ -147,7 +195,7 @@ Item {
     // ================= BOTTOM ROW =================
     Item {
       width: parent.width
-      height: 66
+      height: 60
 
       // Left: Start / Cancel (+ pause when running)
       Row {
@@ -157,9 +205,9 @@ Item {
 
         Rectangle {
           id: mainBtn
-          width: (TimerState.running || TimerState.paused) ? 52 : 160
-          height: 52
-          radius: 26
+          width: (TimerState.running || TimerState.paused) ? 50 : 136
+          height: 48
+          radius: 24
           color: Qt.rgba(1.0, 0.62, 0.17, 0.16)
 
           Behavior on width {
@@ -170,12 +218,13 @@ Item {
             anchors.centerIn: parent
             text: TimerState.finished ? "Dismiss" : (TimerState.running || TimerState.paused ? "×" : "Start Timer")
             color: root.timerOrange
-            font.pixelSize: (TimerState.running || TimerState.paused) ? 24 : 18
+            font.pixelSize: (TimerState.running || TimerState.paused) ? 22 : 16
             font.bold: true
             font.family: SettingsState.fontFamily
           }
 
           MouseArea {
+            id: startBtnMouse
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
@@ -189,9 +238,9 @@ Item {
 
         // Pause / resume circle (only while running)
         Rectangle {
-          width: 52
-          height: 52
-          radius: 26
+          width: 48
+          height: 48
+          radius: 24
           visible: TimerState.running || TimerState.paused
           color: pauseMouse.containsMouse ? Qt.rgba(1.0, 0.62, 0.17, 0.28) : Qt.rgba(1.0, 0.62, 0.17, 0.16)
           border.color: Qt.rgba(1.0, 0.62, 0.17, 0.35)
@@ -200,7 +249,7 @@ Item {
             anchors.centerIn: parent
             text: TimerState.paused ? "▶" : "⏸"
             color: root.timerOrange
-            font.pixelSize: 17
+            font.pixelSize: 16
             font.family: SettingsState.fontFamily
           }
           MouseArea {
@@ -222,7 +271,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: TimerState.finished ? "00:00" : (TimerState.running || TimerState.paused ? TimerState.formatted : TimerState.selectedLabel)
         color: root.timerOrange
-        font.pixelSize: 42
+        font.pixelSize: 44
         font.bold: true
         font.family: SettingsState.fontFamily
 
