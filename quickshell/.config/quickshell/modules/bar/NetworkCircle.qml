@@ -188,9 +188,9 @@ Rectangle {
       anchors.centerIn: parent
       width: 18
       height: 18
-      opacity: activeType === "wired" ? 0.55 : 1.0
+      opacity: activeType === "wired" ? 0.75 : 1.0
       kind: activeType === "wired" ? "ethernet" : (wifiUp ? "wifi" : (activeType === "none" ? "wifi-off" : "wifi"))
-      glyph: activeType === "wired" ? "#8a918a" : (activeType === "none" ? "#6e756e" : "#f2f2f2")
+      glyph: activeType === "wired" ? "#a8b0a8" : (activeType === "none" ? "#6e756e" : "#f2f2f2")
     }
   }
 

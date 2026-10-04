@@ -280,10 +280,12 @@ Singleton {
   function activateCurrent() {
     if (currentNotification) {
       var n = currentNotification;
+      var a = openableAction(n);
       hidePopup(n);
       try {
-        if (n.actions && n.actions.length > 0) {
-          n.actions[0].trigger();
+        if (a) {
+          if (typeof a.invoke === "function") a.invoke();
+          else if (typeof a.trigger === "function") a.trigger();
         }
       } catch (e) {}
       try { n.tracked = false; } catch (e) {}
@@ -291,6 +293,35 @@ Singleton {
     } else {
       nextNotification();
     }
+  }
+
+  // The notification's first invocable action, or null when it has none.
+  // NOTE: NotificationAction exposes invoke(), not trigger().
+  function openableAction(n) {
+    try {
+      if (!n || !n.actions || n.actions.length === 0) return null;
+      for (var i = 0; i < n.actions.length; ++i) {
+        var a = n.actions[i];
+        if (a && (typeof a.invoke === "function" || typeof a.trigger === "function")) return a;
+      }
+      return n.actions[0];
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function hasOpenableAction(n) {
+    return openableAction(n) !== null;
+  }
+
+  function actionLabel(n) {
+    var a = openableAction(n);
+    if (!a) return "";
+    try {
+      if (a.text && (a.text + "").trim() !== "") return (a.text + "").trim();
+      if (typeof a === "string" && a.toLowerCase() !== "default" && a.trim() !== "") return a.trim();
+    } catch (e) {}
+    return "Open";
   }
 
   function dismissNotification(n) {

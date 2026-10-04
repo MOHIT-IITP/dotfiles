@@ -27,14 +27,10 @@ Item {
   }
 
   function getActionLabel(item) {
-    if (!item) return "Open";
-    if (item.actions && item.actions.length > 0) {
-      var act = item.actions[0];
-      if (act && act.text && act.text.trim().length > 0) return act.text.trim();
-      if (typeof act === "string" && act.toLowerCase() !== "default") return act;
-    }
-    return "Open";
+    return NotifCenter.actionLabel(item);
   }
+
+  readonly property bool hasOpenAction: NotifCenter.hasOpenableAction(root.n)
 
   Column {
     anchors.fill: parent
@@ -184,10 +180,11 @@ Item {
         }
       }
 
-      // Open Action Pill
+      // Open Action Pill (only when the notification has an invocable action)
       Rectangle {
         height: 28
-        width: parent.width - 52
+        width: root.hasOpenAction ? parent.width - 52 : 0
+        visible: root.hasOpenAction
         radius: 14
         color: openMouse.containsMouse ? SettingsState.accent : SettingsState.bgCard
         border.color: SettingsState.borderBase
