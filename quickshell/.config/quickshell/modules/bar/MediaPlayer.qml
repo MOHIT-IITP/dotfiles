@@ -8,6 +8,9 @@ import "WavySliderPaint.js" as WavyPaint
 // Hovered: compact player card (rounded art, metadata, progress, controls).
 Rectangle {
   id: root
+  // Public hover flag for the bar's auto-hide tracking: true while the
+  // cursor is anywhere on the player, including the expanded card.
+  readonly property bool hovered: playerMouse.containsMouse
   readonly property var player: MediaState.activePlayer
   readonly property bool hasPlayer: MediaState.hasPlayer
   readonly property bool hasTrack: MediaState.hasTrack
@@ -302,20 +305,46 @@ Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           width: parent.width - 32 - 38 - 16
           height: 14
-          readonly property real shown: (player && player.length > 0) ? Math.min(1, Math.max(0, (player.position || 0) / player.length)) : 0
+
+          readonly property real liveFraction: (player && player.length > 0) ? Math.min(1, Math.max(0, (player.position || 0) / player.length)) : 0
+          property real currentPos: liveFraction
+          readonly property real shown: currentPos
+
+          onLiveFractionChanged: {
+            if (!seekAnim.running && !trackMouse.pressed) {
+              currentPos = liveFraction;
+            }
+          }
+
           onShownChanged: progCanvas.requestPaint()
+          onCurrentPosChanged: progCanvas.requestPaint()
           onWidthChanged: progCanvas.requestPaint()
+
+          NumberAnimation {
+            id: seekAnim
+            target: progTrack
+            property: "currentPos"
+            duration: 350
+            easing.type: Easing.InOutCubic
+            onRunningChanged: progCanvas.requestPaint()
+            onFinished: {
+              if (!trackMouse.pressed) {
+                currentPos = progTrack.liveFraction;
+                progCanvas.requestPaint();
+              }
+            }
+          }
 
           Canvas {
             id: progCanvas
             anchors.fill: parent
             antialiasing: true
-            renderStrategy: Canvas.Cooperative
+            renderStrategy: Canvas.Immediate
             onPaint: {
               WavyPaint.paint(getContext("2d"), width, height, {
                 shown: progTrack.shown,
                 showTrack: true,
-                showHandle: true,
+                showHandle: false,
                 showRemaining: false,
                 waveColor: SettingsState.accent,
                 trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -336,21 +365,58 @@ Rectangle {
             function onIsDarkChanged() { progCanvas.requestPaint(); }
           }
 
-          function seekAt(x) {
+          function applySeek(fraction) {
             if (player && player.canSeek && player.length > 0) {
-              var r = Math.min(1, Math.max(0, x / progTrack.width));
-              player.position = r * player.length;
+              player.position = fraction * player.length;
               player.positionChanged();
             }
           }
 
           MouseArea {
+            id: trackMouse
             anchors.fill: parent
-            anchors.margins: -6
+            anchors.topMargin: -4
+            anchors.bottomMargin: -4
             cursorShape: Qt.PointingHandCursor
-            onPressed: function (ev) { progTrack.seekAt(ev.x); }
+
+            property real startX: 0
+            property bool dragging: false
+
+            onPressed: function (ev) {
+              if (progTrack.width <= 0) return;
+              trackMouse.startX = ev.x;
+              trackMouse.dragging = false;
+
+              var startVal = progTrack.currentPos;
+              var r = Math.min(1, Math.max(0, ev.x / progTrack.width));
+
+              // Smoothly animate from exact current position to clicked target
+              seekAnim.stop();
+              progTrack.currentPos = startVal;
+              seekAnim.from = startVal;
+              seekAnim.to = r;
+              seekAnim.restart();
+
+              progTrack.applySeek(r);
+            }
+
             onPositionChanged: function (ev) {
-              if (pressed) progTrack.seekAt(ev.x);
+              if (!pressed || progTrack.width <= 0) return;
+              // Only treat as drag if cursor moved more than 4px (filters out click jitter)
+              if (!trackMouse.dragging && Math.abs(ev.x - trackMouse.startX) > 4) {
+                trackMouse.dragging = true;
+                seekAnim.stop();
+              }
+              if (trackMouse.dragging) {
+                var r = Math.min(1, Math.max(0, ev.x / progTrack.width));
+                progTrack.currentPos = r;
+                progCanvas.requestPaint();
+                progTrack.applySeek(r);
+              }
+            }
+
+            onReleased: function () {
+              trackMouse.dragging = false;
             }
           }
         }

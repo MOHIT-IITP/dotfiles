@@ -47,6 +47,9 @@ Rectangle {
   // uses AboutState.open directly; this only covers the hover subview here.
   readonly property bool aboutInputOpen: root.activePage === "about" && aboutPage.adding && netMouse.containsMouse
   property string fontSearchQuery: ""
+  // Public hover flag for the bar's auto-hide tracking: true while the
+  // cursor is anywhere on the circle, including expanded pages.
+  readonly property bool hovered: netMouse.containsMouse
   readonly property var filteredFonts: {
     var all = SettingsState.availableFonts || [];
     var q = (fontSearchQuery || "").trim().toLowerCase();

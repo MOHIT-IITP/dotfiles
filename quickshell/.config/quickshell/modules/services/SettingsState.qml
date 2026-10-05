@@ -21,6 +21,7 @@ Singleton {
   // 3. UI scale & Bar Gap
   property real uiScale: 1.0
   property int barGap: 2 // Extra gap below bar in pixels (0 - 24px)
+  property bool barAutoHide: false // slide the bar away until the cursor hits the top edge
 
   // 3b. Font size offset applied on top of base pixel sizes (-5..+5 px)
   property int fontSizeDelta: 0
@@ -299,6 +300,16 @@ Singleton {
     saveSettings();
   }
 
+  function setBarAutoHide(v) {
+    barAutoHide = !!v;
+    saveSettings();
+  }
+
+  function toggleBarAutoHide() {
+    barAutoHide = !barAutoHide;
+    saveSettings();
+  }
+
   function setFontSizeDelta(d) {
     fontSizeDelta = Math.max(-5, Math.min(5, Math.round(d)));
     saveSettings();
@@ -352,6 +363,7 @@ Singleton {
       isDark: root.isDark,
       uiScale: root.uiScale,
       barGap: root.barGap,
+      barAutoHide: root.barAutoHide,
       fontSizeDelta: root.fontSizeDelta,
       fontFamily: root.fontFamily
     };
@@ -408,6 +420,7 @@ Singleton {
           }
           if (parsed.uiScale !== undefined) root.uiScale = parsed.uiScale;
           if (parsed.barGap !== undefined) root.barGap = parsed.barGap;
+          if (parsed.barAutoHide !== undefined) root.barAutoHide = !!parsed.barAutoHide;
           if (parsed.fontSizeDelta !== undefined) root.fontSizeDelta = Math.max(-5, Math.min(5, Math.round(parsed.fontSizeDelta)));
           if (parsed.fontFamily !== undefined && parsed.fontFamily !== "") {
             root.fontFamily = parsed.fontFamily;

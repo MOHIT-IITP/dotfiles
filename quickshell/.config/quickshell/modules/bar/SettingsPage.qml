@@ -128,7 +128,7 @@ Item {
         Repeater {
           model: [
             { key: "general", title: "General", desc: "Time, glyphs, visualizer", icon: "gear" },
-            { key: "ui", title: "UI", desc: "Scale, gap, font, wallpaper", icon: "display" },
+            { key: "ui", title: "UI", desc: "Scale, gap, auto-hide, wallpaper", icon: "display" },
             { key: "theme", title: "Theme", desc: "Light, dark, manual, accent", icon: "palette" }
           ]
 
@@ -522,6 +522,62 @@ Item {
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               onClicked: WallpaperState.toggle()
+            }
+          }
+        }
+
+        // 6b. Auto-hide bar: slide away until the cursor hits the top edge
+        Item {
+          width: parent.width
+          height: 30
+
+          Row {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 10
+
+            CCIcon {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 16
+              height: 16
+              kind: "eye"
+              glyph: SettingsState.textSecondary
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: "Auto-hide bar"
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(15)
+              font.family: SettingsState.fontFamily
+            }
+          }
+
+          Rectangle {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: 36
+            height: 20
+            radius: 10
+            color: SettingsState.barAutoHide ? SettingsState.accent : SettingsState.bgCard
+
+            Behavior on color { ColorAnimation { duration: 180 } }
+
+            Rectangle {
+              width: 14
+              height: 14
+              radius: 7
+              color: "#ffffff"
+              anchors.verticalCenter: parent.verticalCenter
+              x: SettingsState.barAutoHide ? parent.width - width - 3 : 3
+
+              Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+            }
+
+            MouseArea {
+              anchors.fill: parent
+              cursorShape: Qt.PointingHandCursor
+              onClicked: SettingsState.toggleBarAutoHide()
             }
           }
         }
