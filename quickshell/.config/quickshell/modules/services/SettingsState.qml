@@ -26,21 +26,25 @@ Singleton {
   property int fontSizeDelta: 0
 
   // 4. Theme & Accent Colors
-  property string themeMode: "manual" // "light" | "dark" | "dynamic" | "manual"
+  property string themeMode: "dark" // "light" | "dark" | "manual"
   property real accentHue: 0.52       // 0.0 - 1.0 (0.52 = #40AABF teal/cyan from reference)
   property real accentSat: 0.65
   property real accentVal: 0.85
-  property real themeBlend: 1.0 // 0.0 = light, 1.0 = dark (slider)
-  property bool isDark: true // mirrored from themeBlend (>= 0.5), kept for icon logic compat
+  property string accentTone: "dark" // "light" | "dark" — card lightness in Manual (accent auto-inverts)
+  property real themeBlend: 1.0 // 0.0 = light, 1.0 = dark (mirrors themeMode)
+  property bool isDark: true // mirrored from themeMode, kept for icon logic compat
 
-  // Reactive primary accent color
+  // Reactive primary accent color: always the inverse of the cards for
+  // contrast — Light preset is monochrome (near-black), light cards get
+  // the dark shade of the hue, dark cards get the light shade.
   readonly property color accent: {
     if (themeMode === "light") {
-      return Qt.hsva(accentHue, 0.75, 0.70, 1.0);
-    } else if (themeMode === "dark") {
-      return Qt.hsva(0.38, 0.55, 0.85, 1.0); // Classic dark emerald/coral
+      return Qt.hsva(accentHue, 0.0, 0.20, 1.0);
     }
-    return Qt.hsva(accentHue, accentSat, accentVal, 1.0);
+    if (themeBlend >= 0.5) {
+      return Qt.hsva(accentHue, 0.55, 0.92, 1.0);
+    }
+    return Qt.hsva(accentHue, 0.65, 0.62, 1.0);
   }
 
   // Reactive hex color string e.g. "#40AABF"
@@ -60,26 +64,40 @@ Singleton {
     return Qt.rgba(ca.r + (cb.r - ca.r) * tt, ca.g + (cb.g - ca.g) * tt, ca.b + (cb.b - ca.b) * tt, ca.a + (cb.a - ca.a) * tt);
   }
 
-  // Reactive Theme Palettes (blend light -> dark via themeBlend)
-  readonly property color bgSurface: mixc(Qt.hsva(accentHue, 0.06, 0.95, 0.96), Qt.hsva(accentHue, 0.12, 0.07, 0.96), themeBlend)
+  // Hue gate for the Light preset: pure black & white means zero
+  // saturation on the light ends; Manual/Dark keep the full tint.
+  function tint(s, v, a) {
+    return Qt.hsva(accentHue, themeMode === "light" ? 0.0 : s, v, a);
+  }
 
-  readonly property color bgCard: mixc(Qt.hsva(accentHue, 0.08, 0.89, 1.0), Qt.hsva(accentHue, 0.15, 0.11, 1.0), themeBlend)
+  // Dark-end tint for cards: in Manual + dark tone every card takes the
+  // dark shade of the hue (green -> ~#1D3C16). Presets keep true black/grays.
+  function cardDark(s, v, fallback) {
+    if (themeMode === "manual" && accentTone === "dark") return Qt.hsva(accentHue, s, v, 1.0);
+    return fallback;
+  }
 
-  readonly property color bgCardHover: mixc(Qt.hsva(accentHue, 0.10, 0.84, 1.0), Qt.hsva(accentHue, 0.20, 0.15, 1.0), themeBlend)
+  // Reactive Theme Palettes (blend light -> dark via themeBlend).
+  // Dark end is pure black / neutral grays so Dark gives a true black bar.
+  readonly property color bgSurface: mixc(tint(0.06, 0.95, 0.96), Qt.rgba(0, 0, 0, 0.96), themeBlend)
 
-  readonly property color bgActivePill: mixc(Qt.hsva(accentHue, 0.30, 0.82, 1.0), Qt.hsva(accentHue, 0.40, 0.18, 1.0), themeBlend)
+  readonly property color bgCard: mixc(tint(0.08, 0.89, 1.0), cardDark(0.50, 0.20, Qt.rgba(0, 0, 0, 1.0)), themeBlend)
 
-  readonly property color borderBase: mixc(Qt.hsva(accentHue, 0.15, 0.78, 1.0), Qt.hsva(accentHue, 0.22, 0.18, 1.0), themeBlend)
+  readonly property color bgCardHover: mixc(tint(0.10, 0.84, 1.0), cardDark(0.50, 0.25, Qt.rgba(0.10, 0.10, 0.10, 1.0)), themeBlend)
 
-  readonly property color borderActive: mixc(Qt.hsva(accentHue, 0.45, 0.60, 1.0), Qt.hsva(accentHue, 0.45, 0.35, 1.0), themeBlend)
+  readonly property color bgActivePill: mixc(tint(0.30, 0.82, 1.0), cardDark(0.55, 0.28, Qt.rgba(0.16, 0.16, 0.16, 1.0)), themeBlend)
+
+  readonly property color borderBase: mixc(tint(0.15, 0.78, 1.0), cardDark(0.35, 0.22, Qt.rgba(0.17, 0.17, 0.17, 1.0)), themeBlend)
+
+  readonly property color borderActive: mixc(tint(0.45, 0.60, 1.0), cardDark(0.55, 0.38, Qt.rgba(0.28, 0.28, 0.28, 1.0)), themeBlend)
 
   // Lighter border for the top bar pills (clock, media, network) only.
-  readonly property color barBorder: mixc(Qt.hsva(accentHue, 0.13, 0.82, 1.0), Qt.hsva(accentHue, 0.20, 0.24, 1.0), themeBlend)
+  readonly property color barBorder: mixc(tint(0.13, 0.82, 1.0), cardDark(0.30, 0.26, Qt.rgba(0.17, 0.17, 0.17, 1.0)), themeBlend)
 
   readonly property color textMain: mixc("#121612", "#f2f2f2", themeBlend)
   readonly property color textSecondary: mixc("#4c574c", "#9aa39a", themeBlend)
   readonly property color textMuted: mixc("#788478", "#6e756e", themeBlend)
-  readonly property color textActive: mixc(Qt.hsva(accentHue, 0.85, 0.25, 1.0), Qt.hsva(accentHue, 0.28, 0.92, 1.0), themeBlend)
+  readonly property color textActive: mixc(tint(0.85, 0.25, 1.0), Qt.hsva(accentHue, 0.28, 0.92, 1.0), themeBlend)
 
   // 4b. Drop Shadow Properties
   readonly property color shadowColor: mixc("#30000000", "#70000000", themeBlend)
@@ -202,6 +220,7 @@ Singleton {
   }
 
   function setThemeMode(mode) {
+    if (mode !== "light" && mode !== "dark" && mode !== "manual") return;
     themeMode = mode;
     if (mode === "light") {
       themeBlend = 0.0;
@@ -209,26 +228,42 @@ Singleton {
     } else if (mode === "dark") {
       themeBlend = 1.0;
       isDark = true;
+      accentHue = 0.083; // orange accent preset
+      accentTone = "light";
+    }
+    // manual: keep the bar as-is but align the tone buttons with the
+    // current lightness, so they truthfully describe the cards.
+    // Only the hue spectrum becomes editable.
+    if (mode === "manual") {
+      accentTone = themeBlend >= 0.5 ? "dark" : "light";
     }
     saveSettings();
   }
 
   function setAccentHue(h) {
     accentHue = Math.min(1.0, Math.max(0.0, h));
-    themeMode = "manual";
+    saveSettings();
+  }
+
+  function setAccentTone(t) {
+    if (t !== "light" && t !== "dark") return;
+    accentTone = t;
+    // The tone is Manual's light/dark switch: it flips every card between
+    // the light and dark shades of the hue, and the accent follows with
+    // the opposite shade so contrast always stays readable.
+    themeBlend = (t === "light") ? 0.0 : 1.0;
+    isDark = (t === "dark");
     saveSettings();
   }
 
   function setIsDark(d) {
-    setThemeBlend(d ? 1.0 : 0.0);
+    setThemeMode(d ? "dark" : "light");
   }
 
+  // Kept for compat with persisted settings; UI now uses Light/Dark only.
   function setThemeBlend(v) {
-    themeBlend = Math.min(1.0, Math.max(0.0, v));
-    var dark = themeBlend >= 0.5;
-    if (isDark !== dark) isDark = dark;
-    themeMode = "manual";
-    saveSettings();
+    var vv = Math.min(1.0, Math.max(0.0, v));
+    setThemeMode(vv >= 0.5 ? "dark" : "light");
   }
 
   function setHexColor(hex) {
@@ -250,7 +285,6 @@ Singleton {
         if (h < 0) h += 1;
       }
       accentHue = h;
-      themeMode = "manual";
       saveSettings();
     }
   }
@@ -313,6 +347,7 @@ Singleton {
       wallpaperResizeMode: root.wallpaperResizeMode,
       themeMode: root.themeMode,
       accentHue: root.accentHue,
+      accentTone: root.accentTone,
       themeBlend: root.themeBlend,
       isDark: root.isDark,
       uiScale: root.uiScale,
@@ -346,14 +381,30 @@ Singleton {
           if (parsed.musicVisualizer !== undefined) root.musicVisualizer = parsed.musicVisualizer;
           if (parsed.wallpaperFolder !== undefined && parsed.wallpaperFolder !== "") root.wallpaperFolder = parsed.wallpaperFolder;
           if (parsed.wallpaperResizeMode !== undefined && parsed.wallpaperResizeMode !== "") root.wallpaperResizeMode = parsed.wallpaperResizeMode;
-          if (parsed.themeMode !== undefined) root.themeMode = parsed.themeMode;
+          if (parsed.themeMode !== undefined) {
+            var m = parsed.themeMode;
+            if (m === "dynamic") {
+              root.themeMode = "manual";
+            } else if (m === "light" || m === "dark" || m === "manual") {
+              root.themeMode = m;
+            }
+          }
           if (parsed.accentHue !== undefined) root.accentHue = parsed.accentHue;
+          if (parsed.accentTone === "light" || parsed.accentTone === "dark") root.accentTone = parsed.accentTone;
           if (parsed.themeBlend !== undefined) {
             root.themeBlend = Math.min(1.0, Math.max(0.0, parsed.themeBlend));
             root.isDark = root.themeBlend >= 0.5;
           } else if (parsed.isDark !== undefined) {
             root.isDark = parsed.isDark;
             root.themeBlend = parsed.isDark ? 1.0 : 0.0;
+          }
+          // Light/Dark force the bar; Manual keeps its saved bar blend.
+          if (root.themeMode === "light") {
+            root.themeBlend = 0.0;
+            root.isDark = false;
+          } else if (root.themeMode === "dark") {
+            root.themeBlend = 1.0;
+            root.isDark = true;
           }
           if (parsed.uiScale !== undefined) root.uiScale = parsed.uiScale;
           if (parsed.barGap !== undefined) root.barGap = parsed.barGap;

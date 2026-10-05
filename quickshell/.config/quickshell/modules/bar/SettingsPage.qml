@@ -129,7 +129,7 @@ Item {
           model: [
             { key: "general", title: "General", desc: "Time, glyphs, visualizer", icon: "gear" },
             { key: "ui", title: "UI", desc: "Scale, gap, font, wallpaper", icon: "display" },
-            { key: "theme", title: "Theme", desc: "Dark, light, accent colors", icon: "palette" }
+            { key: "theme", title: "Theme", desc: "Light, dark, manual, accent", icon: "palette" }
           ]
 
           delegate: Rectangle {
@@ -750,7 +750,7 @@ Item {
             spacing: 3
 
             Repeater {
-              model: ["Light", "Dark", "Dynamic", "Manual"]
+              model: ["Light", "Dark", "Manual"]
               delegate: Rectangle {
                 width: tText.implicitWidth + 14
                 height: 24
@@ -779,13 +779,20 @@ Item {
           }
         }
 
-        // 5b. Color Spectrum Gradient Slider
+        // 5b. Color Spectrum Gradient Slider (Manual mode only).
+        // Appears when Manual is picked; hue combines with the accent
+        // Light/Dark tone below, so manual works in both lightness modes.
         Rectangle {
           id: spectrumTrack
           width: parent.width
-          height: 14
+          height: SettingsState.themeMode === "manual" ? 14 : 0
+          visible: SettingsState.themeMode === "manual"
           radius: 7
           clip: false
+
+          Behavior on height {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+          }
 
           gradient: Gradient {
             orientation: Gradient.Horizontal
@@ -834,10 +841,15 @@ Item {
           }
         }
 
-        // 5c. Accent Swatch & Dark/Light Mode Switcher Row
+        // 5c. Accent Swatch & Accent Tone Row (Manual mode only)
         Item {
           width: parent.width
-          height: 38
+          height: SettingsState.themeMode === "manual" ? 38 : 0
+          visible: SettingsState.themeMode === "manual"
+
+          Behavior on height {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+          }
 
           Row {
             anchors.left: parent.left
@@ -868,7 +880,7 @@ Item {
               }
 
               Text {
-                text: SettingsState.accentHex + " • " + (SettingsState.isDark ? "dark" : "light")
+                text: SettingsState.accentHex + " • " + SettingsState.accentTone
                 color: SettingsState.textSecondary
                 font.pixelSize: SettingsState.px(13)
                 font.family: SettingsState.fontFamily
@@ -876,97 +888,63 @@ Item {
             }
           }
 
-          // Light <-> Dark slider
+          // Accent Light / Dark options (accent lightness, independent of bar theme)
           Row {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 6
+            spacing: 3
 
-            CCIcon {
-              anchors.verticalCenter: parent.verticalCenter
-              width: 16
-              height: 16
-              kind: "sun"
-              glyph: SettingsState.textSecondary
-              MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: SettingsState.setThemeBlend(0.0)
-              }
-            }
+            Repeater {
+              model: ["Light", "Dark"]
+              delegate: Rectangle {
+                width: Math.max(64, aText.implicitWidth + 14)
+                height: 24
+                radius: 6
+                color: SettingsState.accentTone === modelData.toLowerCase() ? SettingsState.bgActivePill : SettingsState.bgCard
+                border.color: SettingsState.accentTone === modelData.toLowerCase() ? SettingsState.borderActive : SettingsState.borderBase
+                border.width: 1
 
-            Rectangle {
-              id: themeTrack
-              anchors.verticalCenter: parent.verticalCenter
-              width: 110
-              height: 10
-              radius: 5
-              color: SettingsState.bgCard
-              border.color: SettingsState.borderBase
-              border.width: 1
-
-              Rectangle {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                width: Math.max(8, Math.min(parent.width, SettingsState.themeBlend * parent.width))
-                radius: 5
-                color: SettingsState.accent
-              }
-
-              Rectangle {
-                id: themeThumb
-                width: 16
-                height: 16
-                radius: 8
-                anchors.verticalCenter: parent.verticalCenter
-                x: Math.max(0, Math.min(parent.width - width, SettingsState.themeBlend * (parent.width - width)))
-                color: SettingsState.accent
-                border.color: "#ffffff"
-                border.width: 2
-
-                Behavior on x {
-                  enabled: !themeMouse.pressed
-                  NumberAnimation { duration: 80 }
-                }
-              }
-
-              MouseArea {
-                id: themeMouse
-                anchors.fill: parent
-                anchors.margins: -6
-                cursorShape: Qt.PointingHandCursor
-                onPressed: function(ev) {
-                  SettingsState.setThemeBlend(Math.min(1.0, Math.max(0.0, ev.x / themeTrack.width)));
-                }
-                onPositionChanged: function(ev) {
-                  if (pressed) {
-                    SettingsState.setThemeBlend(Math.min(1.0, Math.max(0.0, ev.x / themeTrack.width)));
+                Row {
+                  anchors.centerIn: parent
+                  spacing: 5
+                  CCIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 14
+                    height: 14
+                    kind: modelData === "Light" ? "sun" : "moon"
+                    glyph: SettingsState.accentTone === modelData.toLowerCase() ? SettingsState.textActive : SettingsState.textMuted
+                  }
+                  Text {
+                    id: aText
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: modelData
+                    color: SettingsState.accentTone === modelData.toLowerCase() ? SettingsState.textActive : SettingsState.textMuted
+                    font.pixelSize: SettingsState.px(13)
+                    font.bold: SettingsState.accentTone === modelData.toLowerCase()
+                    font.family: SettingsState.fontFamily
                   }
                 }
-              }
-            }
 
-            CCIcon {
-              anchors.verticalCenter: parent.verticalCenter
-              width: 16
-              height: 16
-              kind: "moon"
-              glyph: SettingsState.textSecondary
-              MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: SettingsState.setThemeBlend(1.0)
+                MouseArea {
+                  anchors.fill: parent
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: SettingsState.setAccentTone(modelData.toLowerCase())
+                }
               }
             }
           }
         }
 
-        // 5d. Hex Color Input / Display Row
+        // 5d. Hex Color Input / Display Row (Manual mode only)
         Rectangle {
           width: parent.width
-          height: 32
+          height: SettingsState.themeMode === "manual" ? 32 : 0
+          visible: SettingsState.themeMode === "manual"
           radius: 8
+
+          Behavior on height {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+          }
           color: SettingsState.bgCard
           border.color: hexInput.activeFocus ? SettingsState.borderActive : SettingsState.borderBase
           border.width: 1

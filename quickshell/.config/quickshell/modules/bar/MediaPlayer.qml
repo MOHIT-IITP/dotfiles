@@ -503,7 +503,7 @@ Rectangle {
               width: 18
               height: 18
               kind: "ram"
-              glyph: "#cddc39"
+              glyph: SettingsState.accent
             }
           }
 
@@ -511,7 +511,7 @@ Rectangle {
             id: pctRam
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.ramPct) + "%"
-            color: "#f5f5f5"
+            color: SettingsState.accent
             font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -540,6 +540,7 @@ Rectangle {
           width: parent.width
           height: 18
           fraction: SysStats.ramPct / 100
+          waveColor: SettingsState.accent
           showTrack: false
           showHandle: false
           showRemaining: true
@@ -563,7 +564,7 @@ Rectangle {
               width: 18
               height: 18
               kind: "swap"
-              glyph: "#a1887f"
+              glyph: SettingsState.accent
             }
           }
 
@@ -571,7 +572,7 @@ Rectangle {
             id: pctSwap
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.swapPct) + "%"
-            color: "#f5f5f5"
+            color: SettingsState.accent
             font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -600,6 +601,7 @@ Rectangle {
           width: parent.width
           height: 18
           fraction: SysStats.swapPct / 100
+          waveColor: SettingsState.accent
           showTrack: false
           showHandle: false
           showRemaining: true
@@ -623,7 +625,7 @@ Rectangle {
               width: 18
               height: 18
               kind: "cpu"
-              glyph: "#ffb74d"
+              glyph: SettingsState.accent
             }
           }
 
@@ -631,7 +633,7 @@ Rectangle {
             id: pctCpu
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.cpuPct) + "%"
-            color: "#f5f5f5"
+            color: SettingsState.accent
             font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -660,6 +662,7 @@ Rectangle {
           width: parent.width
           height: 18
           fraction: SysStats.cpuPct / 100
+          waveColor: SettingsState.accent
           showTrack: false
           showHandle: false
           showRemaining: true
@@ -683,7 +686,7 @@ Rectangle {
               width: 18
               height: 18
               kind: "disk"
-              glyph: "#cddc39"
+              glyph: SettingsState.accent
             }
           }
 
@@ -691,7 +694,7 @@ Rectangle {
             id: pctDisk
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(SysStats.diskPct) + "%"
-            color: "#f5f5f5"
+            color: SettingsState.accent
             font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -720,6 +723,7 @@ Rectangle {
           width: parent.width
           height: 18
           fraction: SysStats.diskPct / 100
+          waveColor: SettingsState.accent
           showTrack: false
           showHandle: false
           showRemaining: true
