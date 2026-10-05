@@ -35,7 +35,7 @@ Column {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf053"
+          text: "\ueab5"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
           font.pixelSize: SettingsState.px(22)
@@ -250,7 +250,7 @@ Column {
           Text {
             anchors.centerIn: parent
             visible: modelData.isDefault
-            text: "✓"
+            text: "\ueab2"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.isDark ? "#121612" : "#ffffff"
             font.pixelSize: SettingsState.px(14)

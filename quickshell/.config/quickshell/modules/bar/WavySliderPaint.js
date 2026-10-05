@@ -27,14 +27,21 @@ function paint(ctx, W, H, o) {
   var fx = x0 + (x1 - x0) * shown;
   var hx = Math.max(x0, Math.min(x1, fx));
 
-  // 1. Unfilled track (full width)
+  // 1. Unfilled track: only the remaining (unfilled) stretch, so no
+  // straight bar peeks out beside the wavy active fill.
   if (showTrack) {
-    ctx.beginPath();
-    ctx.strokeStyle = o.trackColor;
-    ctx.lineWidth = trackH;
-    ctx.moveTo(x0, cy);
-    ctx.lineTo(x1, cy);
-    ctx.stroke();
+    var trackStart = x0;
+    if (shown > 0.005) {
+      trackStart = showHandle ? (hx + handleW / 2 - 1) : fx;
+    }
+    if (x1 - Math.max(trackStart, x0) > 1) {
+      ctx.beginPath();
+      ctx.strokeStyle = o.trackColor;
+      ctx.lineWidth = trackH;
+      ctx.moveTo(Math.max(trackStart, x0), cy);
+      ctx.lineTo(x1, cy);
+      ctx.stroke();
+    }
   }
 
   // 2. Wavy fill (stops at the handle's left edge so its round cap
@@ -120,13 +127,21 @@ function paintVertical(ctx, W, H, o) {
   var fy = y0 - (y0 - y1) * shown;
   var hy = Math.max(y1, Math.min(y0, fy));
 
-  // 1. Unfilled track (full height)
-  ctx.beginPath();
-  ctx.strokeStyle = o.trackColor;
-  ctx.lineWidth = trackW;
-  ctx.moveTo(cx, y0);
-  ctx.lineTo(cx, y1);
-  ctx.stroke();
+  // 1. Unfilled track: only the remaining stretch above the handle
+  // (top y1 down to the handle's top edge), so no straight bar
+  // peeks out beside the wavy active fill rising from the bottom.
+  var remBottom = y0;
+  if (shown > 0.005) {
+    remBottom = hy - handleH / 2 + 1;
+  }
+  if (remBottom - y1 > 1) {
+    ctx.beginPath();
+    ctx.strokeStyle = o.trackColor;
+    ctx.lineWidth = trackW;
+    ctx.moveTo(cx, y1);
+    ctx.lineTo(cx, Math.min(remBottom, y0));
+    ctx.stroke();
+  }
 
   // 2. Wavy fill (bottom -> handle's bottom edge, tucks under the handle)
   var waveEnd = hy + handleH / 2 - 1;

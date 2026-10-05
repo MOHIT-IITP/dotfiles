@@ -35,7 +35,7 @@ Column {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf053"
+          text: "\ueab5"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
           font.pixelSize: SettingsState.px(22)
@@ -389,8 +389,9 @@ Column {
         Text {
           id: clearAreaTxt
           anchors.centerIn: parent
-          text: "✕"
+          text: "\uea76"
           color: "#ff8a8a"
+          font.family: SettingsState.nerdIconFont
           font.pixelSize: SettingsState.px(12)
           font.bold: true
         }
@@ -560,7 +561,7 @@ Column {
             }
 
             Text {
-              text: circle.recMicDropdownOpen ? "\uf077" : "\uf078"
+              text: circle.recMicDropdownOpen ? "\ueab7" : "\ueab4"
               color: SettingsState.textSecondary
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(10)
@@ -662,7 +663,7 @@ Column {
             Text {
               anchors.verticalCenter: parent.verticalCenter
               visible: modelData.isDefault
-              text: "✓"
+              text: "\ueab2"
                 font.family: SettingsState.nerdIconFont
               color: SettingsState.isDark ? "#121612" : "#ffffff"
               font.pixelSize: SettingsState.px(14)

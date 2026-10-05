@@ -288,7 +288,7 @@ Item {
                   color: Qt.rgba(SettingsState.accent.r, SettingsState.accent.g, SettingsState.accent.b, 0.12)
                   Text {
                     anchors.centerIn: parent
-                    text: "󰈙"
+                    text: "󰧮"
                     font.family: SettingsState.nerdIconFont
                     font.pixelSize: SettingsState.px(17)
                     color: SettingsState.accent
@@ -331,11 +331,11 @@ Item {
               visible: chipMouse.containsMouse
               Text {
                 anchors.centerIn: parent
-                text: "✕"
+                text: "\uea76"
                 font.pixelSize: SettingsState.px(8)
                 font.bold: true
                 color: rmMouse.containsMouse ? "#fff" : SettingsState.textMuted
-                font.family: SettingsState.fontFamily
+                font.family: SettingsState.nerdIconFont
               }
               MouseArea {
                 id: rmMouse

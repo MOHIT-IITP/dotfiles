@@ -37,7 +37,7 @@ Column {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf053"
+          text: "\ueab5"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
           font.pixelSize: SettingsState.px(22)

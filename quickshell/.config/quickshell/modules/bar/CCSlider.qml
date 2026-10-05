@@ -121,7 +121,7 @@ Column {
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "\uf054"
+            text: "\ueab6"
               font.family: SettingsState.nerdIconFont
             color: devChipMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
             font.pixelSize: SettingsState.px(15)

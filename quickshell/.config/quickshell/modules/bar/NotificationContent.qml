@@ -164,7 +164,7 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "✕"
+          text: "\uea76"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.accent
           font.pixelSize: SettingsState.px(12)
@@ -209,7 +209,7 @@ Item {
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "\uf054"
+            text: "\ueab6"
               font.family: SettingsState.nerdIconFont
             color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textSecondary
             font.pixelSize: SettingsState.px(13)

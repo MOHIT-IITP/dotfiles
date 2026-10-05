@@ -91,7 +91,7 @@ Column {
         }
 
         Text {
-          text: circle.fontDropdownOpen ? "\uf077" : "\uf054"
+          text: circle.fontDropdownOpen ? "\ueab7" : "\ueab6"
           color: SettingsState.textSecondary
           font.family: SettingsState.nerdIconFont
           font.pixelSize: SettingsState.px(13)
@@ -197,11 +197,11 @@ Column {
 
         Text {
           anchors.centerIn: parent
-          text: "−"
+          text: "\ueacc"
           color: fontMinusMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
           font.pixelSize: SettingsState.px(16)
           font.bold: true
-          font.family: SettingsState.fontFamily
+          font.family: SettingsState.nerdIconFont
         }
 
         MouseArea {
@@ -282,11 +282,11 @@ Column {
 
         Text {
           anchors.centerIn: parent
-          text: "+"
+          text: "\uea60"
           color: fontPlusMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
           font.pixelSize: SettingsState.px(16)
           font.bold: true
-          font.family: SettingsState.fontFamily
+          font.family: SettingsState.nerdIconFont
         }
 
         MouseArea {
@@ -322,7 +322,7 @@ Column {
 
         Text {
           anchors.verticalCenter: parent.verticalCenter
-          text: ""
+          text: "\uea6d"
           color: SettingsState.textMuted
           font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.nerdIconFont
@@ -366,7 +366,7 @@ Column {
         Text {
           anchors.verticalCenter: parent.verticalCenter
           visible: fSearchInput.text.length > 0
-          text: "✕"
+          text: "\uea76"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.textMuted
           font.pixelSize: SettingsState.px(13)

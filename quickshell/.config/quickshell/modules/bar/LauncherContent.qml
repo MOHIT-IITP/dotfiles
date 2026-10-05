@@ -304,10 +304,10 @@ Item {
       Text {
         anchors.verticalCenter: parent.verticalCenter
         visible: root.isFiles && root.fileSearching
-        text: "…"
+        text: "\uea7c"
         color: SettingsState.textMuted
         font.pixelSize: SettingsState.px(12)
-        font.family: SettingsState.fontFamily
+        font.family: SettingsState.nerdIconFont
       }
     }
 
@@ -331,11 +331,11 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "‹"
+          text: "\ueab5"
           color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(15)
           font.bold: true
-          font.family: SettingsState.fontFamily
+          font.family: SettingsState.nerdIconFont
         }
 
         MouseArea {

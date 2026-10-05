@@ -190,7 +190,7 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "\uf021"
+            text: "\ueb37"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
             font.pixelSize: SettingsState.px(16)
@@ -214,7 +214,7 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "✕"
+            text: "\uea76"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
             font.pixelSize: SettingsState.px(12)
@@ -265,7 +265,7 @@ Rectangle {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf053"
+          text: "\ueab5"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
           font.pixelSize: SettingsState.px(18)
@@ -294,7 +294,7 @@ Rectangle {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf054"
+          text: "\ueab6"
             font.family: SettingsState.nerdIconFont
           color: "#f2f2f2"
           font.pixelSize: SettingsState.px(18)

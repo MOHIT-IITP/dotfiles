@@ -527,7 +527,7 @@ Rectangle {
             visible: !(FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage)
             Text {
               anchors.centerIn: parent
-              text: "󰈙"
+              text: "󰧮"
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(10)
               color: SettingsState.accent
@@ -815,7 +815,7 @@ Rectangle {
             visible: !(FileTrayState.count > 0 && FileTrayState.files[0] && FileTrayState.files[0].isImage)
             Text {
               anchors.centerIn: parent
-              text: "󰈙"
+              text: "󰧮"
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(10)
               color: SettingsState.accent

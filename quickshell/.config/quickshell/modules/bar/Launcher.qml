@@ -204,7 +204,7 @@ Rectangle {
 
           Text {
             anchors.centerIn: parent
-            text: "✕"
+            text: "\uea76"
               font.family: SettingsState.nerdIconFont
             color: clearBtnMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
             font.pixelSize: SettingsState.px(11)

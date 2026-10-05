@@ -155,7 +155,7 @@ Item {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: root.resizeOpen ? "\uf077" : "\uf078"
+              text: root.resizeOpen ? "\ueab7" : "\ueab4"
               color: SettingsState.textMuted
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(9)
@@ -224,7 +224,7 @@ Item {
 
           Text {
             anchors.centerIn: parent
-            text: "\uf021"
+            text: "\ueb37"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
             font.pixelSize: SettingsState.px(16)
@@ -248,7 +248,7 @@ Item {
 
           Text {
             anchors.centerIn: parent
-            text: "✕"
+            text: "\uea76"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textSecondary
             font.pixelSize: SettingsState.px(12)
@@ -374,7 +374,7 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf053"
+          text: "\ueab5"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: SettingsState.px(18)
@@ -405,7 +405,7 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "\uf054"
+          text: "\ueab6"
             font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: SettingsState.px(18)

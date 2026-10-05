@@ -103,7 +103,7 @@ Rectangle {
     Text {
       anchors.centerIn: parent
       visible: !thumbClip.visible
-      text: "\uf001"
+      text: "\uec1b"
       font.family: SettingsState.nerdIconFont
       color: "#8f8f8f"
       font.pixelSize: SettingsState.px(11)
@@ -220,7 +220,7 @@ Rectangle {
           Text {
             anchors.centerIn: parent
             visible: (player?.trackArtUrl ?? "") === ""
-            text: "\uf001"
+            text: "\uec1b"
               font.family: SettingsState.nerdIconFont
             color: "#8f8f8f"
             font.pixelSize: SettingsState.px(16)
@@ -355,7 +355,7 @@ Rectangle {
             opacity: player?.canGoPrevious ? 1 : 0.3
             Text {
               anchors.centerIn: parent
-              text: "󰒮"
+              text: "󰼨"
               font.family: SettingsState.nerdIconFont
               color: "#e8e8e8"
               font.pixelSize: SettingsState.px(27)
@@ -431,7 +431,7 @@ Rectangle {
             opacity: player?.canGoNext ? 1 : 0.3
             Text {
               anchors.centerIn: parent
-              text: "󰒭"
+              text: "󰼧"
               font.family: SettingsState.nerdIconFont
               color: "#e8e8e8"
               font.pixelSize: SettingsState.px(27)

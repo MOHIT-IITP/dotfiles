@@ -39,7 +39,7 @@ Item {
 
           Text {
             anchors.centerIn: parent
-            text: "\uf053"
+            text: "\ueab5"
               font.family: SettingsState.nerdIconFont
             color: SettingsState.textMain
             font.pixelSize: SettingsState.px(22)

@@ -290,7 +290,7 @@ Item {
             Text {
               anchors.centerIn: parent
               visible: thumbImg.status !== Image.Ready
-              text: "\uf03e"
+              text: "\ueaea"
                 font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(14)
             }
@@ -332,7 +332,7 @@ Item {
 
             Text {
               anchors.centerIn: parent
-              text: "✕"
+              text: "\uea76"
                 font.family: SettingsState.nerdIconFont
               color: delMouse.containsMouse ? "#ef5350" : SettingsState.textSecondary
               font.pixelSize: SettingsState.px(11)

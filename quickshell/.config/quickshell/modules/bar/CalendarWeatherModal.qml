@@ -152,7 +152,7 @@ Rectangle {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: "\uf043"
+              text: "󰸊"
               color: SettingsState.textSecondary
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(10)
@@ -228,7 +228,7 @@ Rectangle {
 
                   Text {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "\uf043"
+                    text: "󰸊"
                     color: SettingsState.textMuted
                     font.family: SettingsState.nerdIconFont
                     font.pixelSize: SettingsState.px(9)
@@ -281,7 +281,7 @@ Rectangle {
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: "\uf073"
+              text: "\ueab0"
               color: SettingsState.textMain
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(16)
@@ -314,7 +314,7 @@ Rectangle {
 
               Text {
                 anchors.centerIn: parent
-                text: "\uf053"
+                text: "\ueab5"
                 color: prevMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
                 font.family: SettingsState.nerdIconFont
                 font.pixelSize: SettingsState.px(15)
@@ -341,7 +341,7 @@ Rectangle {
 
               Text {
                 anchors.centerIn: parent
-                text: "\uf054"
+                text: "\ueab6"
                 color: nextMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
                 font.family: SettingsState.nerdIconFont
                 font.pixelSize: SettingsState.px(15)

@@ -65,7 +65,7 @@ Item {
 
       Text {
         anchors.centerIn: parent
-        text: "\uf053"
+        text: "\ueab5"
           font.family: SettingsState.nerdIconFont
         color: SettingsState.textMain
         font.pixelSize: SettingsState.px(22)
@@ -190,7 +190,7 @@ Item {
 
               Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "\uf054"
+                text: "\ueab6"
                   font.family: SettingsState.nerdIconFont
                 color: SettingsState.textMuted
                 font.pixelSize: SettingsState.px(16)
@@ -526,7 +526,7 @@ Item {
           }
         }
 
-        // 7. UI scale: (scale) UI scale -> 90% | 100% | 110% | 125%
+        // 7. UI scale: (scale) UI scale -> 90% | 100% | 110% | 125% | 135%
         Item {
           width: parent.width
           height: 30
@@ -563,7 +563,8 @@ Item {
                 { label: "90%", val: 0.9 },
                 { label: "100%", val: 1.0 },
                 { label: "110%", val: 1.1 },
-                { label: "125%", val: 1.25 }
+                { label: "125%", val: 1.25 },
+                { label: "135%", val: 1.35 }
               ]
               delegate: Rectangle {
                 width: sText.implicitWidth + 12

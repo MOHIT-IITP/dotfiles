@@ -146,10 +146,10 @@ Item {
 
         Text {
           anchors.centerIn: parent
-          text: "▲"
+          text: "\ueab7"
           color: root.timerOrange
           font.pixelSize: 13
-          font.family: SettingsState.fontFamily
+          font.family: SettingsState.nerdIconFont
         }
       }
 
