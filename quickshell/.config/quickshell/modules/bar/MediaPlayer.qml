@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import "../services"
 import "../utils"
+import "WavySliderPaint.js" as WavyPaint
 
 // Left media player. Collapsed: art thumbnail circle.
 // Hovered: compact player card (rounded art, metadata, progress, controls).
@@ -66,7 +67,7 @@ Rectangle {
     Rectangle {
       anchors.fill: parent
       radius: width / 2
-      color: "#1c1c1c"
+      color: SettingsState.bgActivePill
     }
 
     // Artwork masked to a true circle (Item.clip is rectangular,
@@ -105,7 +106,7 @@ Rectangle {
       visible: !thumbClip.visible
       text: "\uec1b"
       font.family: SettingsState.nerdIconFont
-      color: "#8f8f8f"
+      color: SettingsState.textSecondary
       font.pixelSize: SettingsState.px(11)
     }
   }
@@ -185,7 +186,7 @@ Rectangle {
           Rectangle {
             anchors.fill: parent
             radius: 9
-            color: "#1c1c1c"
+            color: SettingsState.bgActivePill
           }
 
           Item {
@@ -222,7 +223,7 @@ Rectangle {
             visible: (player?.trackArtUrl ?? "") === ""
             text: "\uec1b"
               font.family: SettingsState.nerdIconFont
-            color: "#8f8f8f"
+            color: SettingsState.textSecondary
             font.pixelSize: SettingsState.px(16)
           }
         }
@@ -235,7 +236,7 @@ Rectangle {
           Text {
             width: parent.width
             text: player?.trackTitle || "Unknown Title"
-            color: "#f2f2f2"
+            color: SettingsState.textMain
             font.pixelSize: SettingsState.px(14)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -245,7 +246,7 @@ Rectangle {
           Text {
             width: parent.width
             text: player?.trackArtist || "Unknown Artist"
-            color: "#b9b9b9"
+            color: SettingsState.textSecondary
             font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -275,7 +276,7 @@ Rectangle {
               width: 3
               height: isPlaying ? (5 + 9 * (0.5 + 0.5 * Math.sin(eqRow.phase + index * 2.1))) : 4
               radius: 1.5
-              color: isPlaying ? "#7ee2a8" : "#5a5f5a"
+              color: isPlaying ? "#7ee2a8" : SettingsState.textMuted
             }
           }
         }
@@ -291,36 +292,65 @@ Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           width: 32
           text: player ? Format.fmtTime(player.position || 0) : "0:00"
-          color: "#8f8f8f"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
 
-        Rectangle {
+        Item {
           id: progTrack
           anchors.verticalCenter: parent.verticalCenter
           width: parent.width - 32 - 38 - 16
-          height: 6
-          radius: 3
-          color: "#3a3f3a"
+          height: 14
+          readonly property real shown: (player && player.length > 0) ? Math.min(1, Math.max(0, (player.position || 0) / player.length)) : 0
+          onShownChanged: progCanvas.requestPaint()
+          onWidthChanged: progCanvas.requestPaint()
 
-          Rectangle {
-            width: (player && player.length > 0) ? parent.width * Math.min(1, (player.position || 0) / player.length) : 0
-            height: parent.height
-            radius: parent.radius
-            color: "#d4d4d4"
+          Canvas {
+            id: progCanvas
+            anchors.fill: parent
+            antialiasing: true
+            renderStrategy: Canvas.Cooperative
+            onPaint: {
+              WavyPaint.paint(getContext("2d"), width, height, {
+                shown: progTrack.shown,
+                showTrack: true,
+                showHandle: true,
+                showRemaining: false,
+                waveColor: SettingsState.accent,
+                trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+                handleColor: SettingsState.accent,
+                trackH: 4,
+                waveW: 3,
+                waveAmp: 1.6,
+                waveLen: 36,
+                handleW: 5,
+                handleH: 12
+              });
+            }
+          }
+
+          Connections {
+            target: SettingsState
+            function onAccentChanged() { progCanvas.requestPaint(); }
+            function onIsDarkChanged() { progCanvas.requestPaint(); }
+          }
+
+          function seekAt(x) {
+            if (player && player.canSeek && player.length > 0) {
+              var r = Math.min(1, Math.max(0, x / progTrack.width));
+              player.position = r * player.length;
+              player.positionChanged();
+            }
           }
 
           MouseArea {
             anchors.fill: parent
             anchors.margins: -6
             cursorShape: Qt.PointingHandCursor
-            onClicked: function (ev) {
-              if (player && player.canSeek && player.length > 0) {
-                var r = ev.x / progTrack.width;
-                player.position = Math.max(0, Math.min(1, r)) * player.length;
-                player.positionChanged();
-              }
+            onPressed: function (ev) { progTrack.seekAt(ev.x); }
+            onPositionChanged: function (ev) {
+              if (pressed) progTrack.seekAt(ev.x);
             }
           }
         }
@@ -330,7 +360,7 @@ Rectangle {
           width: 38
           horizontalAlignment: Text.AlignRight
           text: (player && player.length > 0) ? ("-" + Format.fmtTime(Math.max(0, (player.length || 0) - (player.position || 0)))) : "-0:00"
-          color: "#8f8f8f"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
@@ -351,13 +381,23 @@ Rectangle {
             width: 40
             height: 40
             radius: 20
-            color: prevArea.containsMouse ? "#2e332e" : "transparent"
+            color: prevArea.containsMouse ? SettingsState.bgCardHover : "transparent"
             opacity: player?.canGoPrevious ? 1 : 0.3
             Text {
               anchors.centerIn: parent
+              visible: SettingsState.japaneseGlyphs
+              text: "前"
+              font.family: SettingsState.fontFamily
+              font.bold: true
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(22)
+            }
+            Text {
+              anchors.centerIn: parent
+              visible: !SettingsState.japaneseGlyphs
               text: "󰼨"
               font.family: SettingsState.nerdIconFont
-              color: "#e8e8e8"
+              color: SettingsState.textMain
               font.pixelSize: SettingsState.px(27)
             }
             MouseArea {
@@ -379,15 +419,34 @@ Rectangle {
             width: 42
             height: 42
             radius: 21
-            color: playArea.containsMouse ? "#3a403a" : "transparent"
+            color: playArea.containsMouse ? SettingsState.bgCardHover : "transparent"
+            Text {
+              anchors.centerIn: parent
+              visible: SettingsState.japaneseGlyphs && !isPlaying
+              text: "遊"
+              font.family: SettingsState.fontFamily
+              font.bold: true
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(24)
+            }
+            Text {
+              anchors.centerIn: parent
+              visible: SettingsState.japaneseGlyphs && isPlaying
+              text: "時"
+              font.family: SettingsState.fontFamily
+              font.bold: true
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(24)
+            }
             Canvas {
+              id: playGlyph
               anchors.centerIn: parent
               width: 22
               height: 22
-              visible: !isPlaying
+              visible: !SettingsState.japaneseGlyphs && !isPlaying
               onPaint: {
                 var ctx = getContext("2d");
-                ctx.fillStyle = "#f2f2f2";
+                ctx.fillStyle = SettingsState.textMain;
                 ctx.beginPath();
                 ctx.moveTo(5, 2.5);
                 ctx.lineTo(17, 11);
@@ -397,13 +456,14 @@ Rectangle {
               }
             }
             Canvas {
+              id: pauseGlyph
               anchors.centerIn: parent
               width: 22
               height: 22
-              visible: isPlaying
+              visible: !SettingsState.japaneseGlyphs && isPlaying
               onPaint: {
                 var ctx = getContext("2d");
-                ctx.fillStyle = "#f2f2f2";
+                ctx.fillStyle = SettingsState.textMain;
                 ctx.fillRect(4.5, 3, 5, 16);
                 ctx.fillRect(12.5, 3, 5, 16);
               }
@@ -419,6 +479,13 @@ Rectangle {
                   player.togglePlaying();
               }
             }
+            Connections {
+              target: SettingsState
+              function onTextMainChanged() {
+                playGlyph.requestPaint();
+                pauseGlyph.requestPaint();
+              }
+            }
           }
 
           // Next
@@ -427,13 +494,23 @@ Rectangle {
             width: 40
             height: 40
             radius: 20
-            color: nextArea.containsMouse ? "#2e332e" : "transparent"
+            color: nextArea.containsMouse ? SettingsState.bgCardHover : "transparent"
             opacity: player?.canGoNext ? 1 : 0.3
             Text {
               anchors.centerIn: parent
+              visible: SettingsState.japaneseGlyphs
+              text: "次"
+              font.family: SettingsState.fontFamily
+              font.bold: true
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(22)
+            }
+            Text {
+              anchors.centerIn: parent
+              visible: !SettingsState.japaneseGlyphs
               text: "󰼧"
               font.family: SettingsState.nerdIconFont
-              color: "#e8e8e8"
+              color: SettingsState.textMain
               font.pixelSize: SettingsState.px(27)
             }
             MouseArea {
@@ -456,7 +533,7 @@ Rectangle {
           width: 60
           horizontalAlignment: Text.AlignRight
           text: player?.identity ?? ""
-          color: "#5a5f5a"
+          color: SettingsState.textMuted
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
@@ -521,7 +598,7 @@ Rectangle {
         // Title
         Text {
           text: "RAM"
-          color: "#e0e0e0"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -530,7 +607,7 @@ Rectangle {
         // Value subtitle
         Text {
           text: SysStats.ready ? SysStats.ramText : "--"
-          color: "#8a8a8a"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
@@ -582,7 +659,7 @@ Rectangle {
         // Title
         Text {
           text: "Swap"
-          color: "#e0e0e0"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -591,7 +668,7 @@ Rectangle {
         // Value subtitle
         Text {
           text: SysStats.ready ? SysStats.swapText : "--"
-          color: "#8a8a8a"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
@@ -643,7 +720,7 @@ Rectangle {
         // Title
         Text {
           text: "CPU"
-          color: "#e0e0e0"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -652,7 +729,7 @@ Rectangle {
         // Value subtitle
         Text {
           text: SysStats.tempText
-          color: "#8a8a8a"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }
@@ -704,7 +781,7 @@ Rectangle {
         // Title
         Text {
           text: "Disk"
-          color: "#e0e0e0"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(13)
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -713,7 +790,7 @@ Rectangle {
         // Value subtitle
         Text {
           text: SysStats.ready ? SysStats.diskText : "--"
-          color: "#8a8a8a"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(11)
           font.family: SettingsState.fontFamily
         }

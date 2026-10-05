@@ -30,14 +30,14 @@ Column {
         width: 28
         height: 28
         radius: 14
-        color: soundBackMouse.containsMouse ? "#252b25" : "transparent"
+        color: soundBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
             font.family: SettingsState.nerdIconFont
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(22)
           font.bold: true
         }

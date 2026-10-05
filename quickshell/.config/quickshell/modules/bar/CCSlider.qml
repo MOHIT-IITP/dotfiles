@@ -14,6 +14,7 @@ Column {
   property bool muted: false
 
   property string currentDeviceName: ""
+  property real waveLen: 36 // ~10 waves across a full-width slider
 
   signal seeked(real v)
   signal iconClicked
@@ -181,13 +182,13 @@ Column {
           showTrack: true,
           showHandle: true,
           showRemaining: false,
-          waveColor: root.muted ? SettingsState.textMuted : (SettingsState.isDark ? "#FFFFFF" : "#1c1c22"),
+          waveColor: root.muted ? SettingsState.textMuted : SettingsState.accent,
           trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
           handleColor: root.muted ? SettingsState.textMuted : SettingsState.accent,
           trackH: 8,
           waveW: 5,
           waveAmp: 2.5,
-          waveLen: 18,
+          waveLen: root.waveLen,
           handleW: 7,
           handleH: 20
         });

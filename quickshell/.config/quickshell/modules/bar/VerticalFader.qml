@@ -76,7 +76,7 @@ Item {
         WavyPaint.paintVertical(getContext("2d"), width, height, {
           shown: root.shown,
           trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
-          waveColor: root.muted ? SettingsState.textMuted : (SettingsState.isDark ? "#FFFFFF" : "#1c1c22"),
+          waveColor: root.muted ? SettingsState.textMuted : root.activeColor,
           handleColor: root.muted ? "#666666" : root.activeColor,
           trackW: 7,
           waveW: 4.5,
@@ -97,6 +97,7 @@ Item {
     Connections {
       target: SettingsState
       function onIsDarkChanged() { waveCanvas.requestPaint(); }
+      function onAccentChanged() { waveCanvas.requestPaint(); }
     }
     onWidthChanged: waveCanvas.requestPaint()
     onHeightChanged: waveCanvas.requestPaint()
