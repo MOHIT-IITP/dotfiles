@@ -535,40 +535,14 @@ Rectangle {
           font.family: SettingsState.fontFamily
         }
 
-        // Sleek Capsule Slider
-        Item {
+        // Wavy stat slider
+        WavyStatSlider {
           width: parent.width
-          height: 12
-
-          Rectangle {
-            id: ramTrack
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: 6
-            radius: 3
-            color: "#2a2d24"
-            clip: true
-
-            Rectangle {
-              anchors.left: parent.left
-              anchors.top: parent.top
-              anchors.bottom: parent.bottom
-              width: parent.width * Math.max(0, Math.min(1, SysStats.ramPct / 100))
-              radius: 3
-              color: "#cddc39"
-            }
-          }
-
-          // Indicator tick at the current value
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.ramPct / 100)) - width / 2))
-            width: 3
-            height: 8
-            radius: 1.5
-            color: "#e6ee9c"
-            visible: SysStats.ramPct > 0
-          }
+          height: 18
+          fraction: SysStats.ramPct / 100
+          showTrack: false
+          showHandle: false
+          showRemaining: true
         }
       }
 
@@ -621,40 +595,14 @@ Rectangle {
           font.family: SettingsState.fontFamily
         }
 
-        // Sleek Capsule Slider
-        Item {
+        // Wavy stat slider
+        WavyStatSlider {
           width: parent.width
-          height: 12
-
-          Rectangle {
-            id: swapTrack
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: 6
-            radius: 3
-            color: "#2d2826"
-            clip: true
-
-            Rectangle {
-              anchors.left: parent.left
-              anchors.top: parent.top
-              anchors.bottom: parent.bottom
-              width: parent.width * Math.max(0, Math.min(1, SysStats.swapPct / 100))
-              radius: 3
-              color: "#a1887f"
-            }
-          }
-
-          // Indicator tick at the current value
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.swapPct / 100)) - width / 2))
-            width: 3
-            height: 8
-            radius: 1.5
-            color: "#d7ccc8"
-            visible: SysStats.swapPct > 0
-          }
+          height: 18
+          fraction: SysStats.swapPct / 100
+          showTrack: false
+          showHandle: false
+          showRemaining: true
         }
       }
 
@@ -707,40 +655,14 @@ Rectangle {
           font.family: SettingsState.fontFamily
         }
 
-        // Sleek Capsule Slider
-        Item {
+        // Wavy stat slider
+        WavyStatSlider {
           width: parent.width
-          height: 12
-
-          Rectangle {
-            id: cpuTrack
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: 6
-            radius: 3
-            color: "#352a1e"
-            clip: true
-
-            Rectangle {
-              anchors.left: parent.left
-              anchors.top: parent.top
-              anchors.bottom: parent.bottom
-              width: parent.width * Math.max(0, Math.min(1, SysStats.cpuPct / 100))
-              radius: 3
-              color: "#ffb74d"
-            }
-          }
-
-          // Indicator tick at the current value
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.cpuPct / 100)) - width / 2))
-            width: 3
-            height: 8
-            radius: 1.5
-            color: "#ffe0b2"
-            visible: SysStats.cpuPct > 0
-          }
+          height: 18
+          fraction: SysStats.cpuPct / 100
+          showTrack: false
+          showHandle: false
+          showRemaining: true
         }
       }
 
@@ -793,40 +715,14 @@ Rectangle {
           font.family: SettingsState.fontFamily
         }
 
-        // Sleek Capsule Slider
-        Item {
+        // Wavy stat slider
+        WavyStatSlider {
           width: parent.width
-          height: 12
-
-          Rectangle {
-            id: diskTrack
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: 6
-            radius: 3
-            color: "#2a2d24"
-            clip: true
-
-            Rectangle {
-              anchors.left: parent.left
-              anchors.top: parent.top
-              anchors.bottom: parent.bottom
-              width: parent.width * Math.max(0, Math.min(1, SysStats.diskPct / 100))
-              radius: 3
-              color: "#cddc39"
-            }
-          }
-
-          // Indicator tick at the current value
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            x: Math.max(0, Math.min(parent.width - width, parent.width * Math.max(0, Math.min(1, SysStats.diskPct / 100)) - width / 2))
-            width: 3
-            height: 8
-            radius: 1.5
-            color: "#e6ee9c"
-            visible: SysStats.diskPct > 0
-          }
+          height: 18
+          fraction: SysStats.diskPct / 100
+          showTrack: false
+          showHandle: false
+          showRemaining: true
         }
       }
     }

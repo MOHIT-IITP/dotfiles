@@ -2,8 +2,8 @@ import QtQuick
 import "../services"
 import "WavySliderPaint.js" as WavyPaint
 
-// Wavy stat slider matching reference: white sine-wave fill,
-// muted purple track, accent vertical pill handle.
+// Wavy stat slider matching reference: sine-wave active fill,
+// faint remaining line with a gap, no handle.
 Item {
   id: root
 
@@ -12,14 +12,14 @@ Item {
   property color trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3"
   property color handleColor: SettingsState.accent
   property color remainingColor: Qt.rgba(waveColor.r, waveColor.g, waveColor.b, 0.3)
-  property real remainingW: 3.5
+  property real remainingW: 4.5
   property real remainingGap: 8
-  property bool showTrack: true
-  property bool showHandle: true
-  property bool showRemaining: false
+  property bool showTrack: false
+  property bool showHandle: false
+  property bool showRemaining: true
 
-  property real trackH: 5
-  property real waveW: 3
+  property real trackH: 7
+  property real waveW: 4.5
   property real waveAmp: 2.5
   property real waveLen: 18
   property real handleW: 6
@@ -42,7 +42,7 @@ Item {
   onShowHandleChanged: waveCanvas.requestPaint()
   onShowRemainingChanged: waveCanvas.requestPaint()
 
-  implicitHeight: 14
+  implicitHeight: 18
 
   Canvas {
     id: waveCanvas
