@@ -1,8 +1,9 @@
 import QtQuick
 import "../services"
+import "WavySliderPaint.js" as WavyPaint
 
-// Sleek modern slider with a slim track, crystal-clear icon & header,
-// and prominent device selector dropdown.
+// Wavy interactive slider with handle: sine-wave active fill,
+// muted track, accent vertical pill handle.
 Column {
   id: root
 
@@ -160,47 +161,51 @@ Column {
     }
   }
 
-  // Slim modern slider track
+  // Wavy slider track with handle
   Item {
     width: parent.width
-    height: 20
+    height: 26
 
-    Rectangle {
-      id: track
+    Canvas {
+      id: waveCanvas
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      height: 6
-      radius: 3
-      color: Qt.rgba(SettingsState.accent.r, SettingsState.accent.g, SettingsState.accent.b, SettingsState.isDark ? 0.25 : 0.30)
+      height: 22
+      antialiasing: true
+      renderStrategy: Canvas.Cooperative
 
-      // Active fill bar
-      Rectangle {
-        id: fillBar
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: Math.max(0, parent.width * root.shown)
-        radius: 3
-        color: root.muted ? SettingsState.borderBase : SettingsState.accent
-
-        Behavior on width {
-          enabled: !root._drag
-          NumberAnimation { duration: 100 }
-        }
-      }
-
-      // Edge tick at the fill boundary
-      Rectangle {
-        x: Math.max(0, Math.min(parent.width - width, parent.width * root.shown - width / 2))
-        anchors.verticalCenter: parent.verticalCenter
-        width: 2
-        height: parent.height + 4
-        radius: 1
-        color: root.muted ? SettingsState.textMuted : Qt.lighter(SettingsState.accent, 1.35)
-        visible: root.shown > 0.02 && root.shown < 0.995
+      onPaint: {
+        WavyPaint.paint(getContext("2d"), width, height, {
+          shown: root.shown,
+          showTrack: true,
+          showHandle: true,
+          showRemaining: false,
+          waveColor: root.muted ? SettingsState.textMuted : (SettingsState.isDark ? "#FFFFFF" : "#1c1c22"),
+          trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+          handleColor: root.muted ? SettingsState.textMuted : SettingsState.accent,
+          trackH: 8,
+          waveW: 5,
+          waveAmp: 2.5,
+          waveLen: 18,
+          handleW: 7,
+          handleH: 20
+        });
       }
     }
+
+    Connections {
+      target: root
+      function onShownChanged() { waveCanvas.requestPaint(); }
+      function onMutedChanged() { waveCanvas.requestPaint(); }
+      function onAvailableChanged() { waveCanvas.requestPaint(); }
+    }
+    Connections {
+      target: SettingsState
+      function onIsDarkChanged() { waveCanvas.requestPaint(); }
+      function onAccentChanged() { waveCanvas.requestPaint(); }
+    }
+    onWidthChanged: waveCanvas.requestPaint()
 
     // Expanded interactive drag & click target for easy mouse grabbing
     MouseArea {

@@ -1,7 +1,9 @@
 import QtQuick
 import "../services"
+import "WavySliderPaint.js" as WavyPaint
 
-// Sleek hardware-style vertical mixer fader matching reference UI
+// Wavy vertical mixer fader with handle: sine-wave active fill
+// rising from the bottom, muted track, horizontal pill handle.
 Item {
   id: root
 
@@ -54,7 +56,7 @@ Item {
     }
   }
 
-  // Fader Track Area
+  // Fader Track Area (wavy slider with handle)
   Item {
     id: trackArea
     anchors.top: parent.top
@@ -64,69 +66,40 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter
     width: 28
 
-    // Background track groove
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: parent.top
-      anchors.bottom: parent.bottom
-      width: 3
-      radius: 1.5
-      color: "#2a2222"
-    }
+    Canvas {
+      id: waveCanvas
+      anchors.fill: parent
+      antialiasing: true
+      renderStrategy: Canvas.Cooperative
 
-    // Active bottom fill
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.bottom: parent.bottom
-      width: 3
-      height: parent.height * root.shown
-      radius: 1.5
-      color: root.muted ? "#444444" : root.activeColor
-
-      Behavior on height {
-        enabled: !root._drag
-        NumberAnimation { duration: 100 }
+      onPaint: {
+        WavyPaint.paintVertical(getContext("2d"), width, height, {
+          shown: root.shown,
+          trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+          waveColor: root.muted ? SettingsState.textMuted : (SettingsState.isDark ? "#FFFFFF" : "#1c1c22"),
+          handleColor: root.muted ? "#666666" : root.activeColor,
+          trackW: 7,
+          waveW: 4.5,
+          waveAmp: 2.5,
+          waveLen: 18,
+          handleW: 20,
+          handleH: 8
+        });
       }
     }
 
-    // Top indicator cap glow (shown at top of active track)
-    Rectangle {
-      visible: root.shown >= 0.95 && !root.muted
-      anchors.horizontalCenter: parent.horizontalCenter
-      y: 0
-      width: 12
-      height: 4
-      radius: 2
-      color: root.activeColor
-      opacity: 0.9
+    Connections {
+      target: root
+      function onShownChanged() { waveCanvas.requestPaint(); }
+      function onMutedChanged() { waveCanvas.requestPaint(); }
+      function onActiveColorChanged() { waveCanvas.requestPaint(); }
     }
-
-    // Fader Thumb / Knob (horizontal bar)
-    Rectangle {
-      id: thumb
-      anchors.horizontalCenter: parent.horizontalCenter
-      y: Math.max(0, Math.min(parent.height - height, parent.height * (1.0 - root.shown) - height / 2))
-      width: 22
-      height: 6
-      radius: 2
-      color: root.muted ? "#666666" : (faderMouse.containsMouse ? "#ffffff" : "#d8d8d8")
-      border.color: "#181818"
-      border.width: 1
-
-      Behavior on y {
-        enabled: !root._drag
-        NumberAnimation { duration: 100 }
-      }
-
-      // Small accent notch on thumb
-      Rectangle {
-        anchors.centerIn: parent
-        width: 6
-        height: 2
-        radius: 1
-        color: root.muted ? "#333333" : root.activeColor
-      }
+    Connections {
+      target: SettingsState
+      function onIsDarkChanged() { waveCanvas.requestPaint(); }
     }
+    onWidthChanged: waveCanvas.requestPaint()
+    onHeightChanged: waveCanvas.requestPaint()
   }
 
   // Footer: Percentage + Icon + Label
