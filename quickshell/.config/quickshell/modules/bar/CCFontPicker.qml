@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import "../services"
+import "WavySliderPaint.js" as WavyPaint
 
 // Font family picker: trigger + searchable dropdown list.
 // Extracted from SettingsPage.qml.
@@ -164,7 +165,8 @@ Column {
         Text {
           id: fontSizeValText
           anchors.centerIn: parent
-          text: (SettingsState.fontSizeDelta > 0 ? "+" + SettingsState.fontSizeDelta : "" + SettingsState.fontSizeDelta) + "px"
+          property int currentDelta: Math.round(fontSizeTrack.shown * 10 - 5)
+          text: (currentDelta > 0 ? "+" + currentDelta : "" + currentDelta) + "px"
           color: SettingsState.accent
           font.pixelSize: SettingsState.px(13)
           font.bold: true
@@ -213,59 +215,119 @@ Column {
         }
       }
 
-      // Slider track (-5 .. +5 mapped to 0 .. 1)
-      Rectangle {
+      // Wavy slider track with 5 waves and smooth seek animation (-5 .. +5 mapped to 0 .. 1)
+      Item {
         id: fontSizeTrack
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - 26 * 2 - 16
-        height: 10
-        radius: 5
-        color: SettingsState.bgCard
-        border.color: SettingsState.borderBase
-        border.width: 1
+        height: 24
 
-        // Filled portion
-        Rectangle {
-          anchors.left: parent.left
-          anchors.top: parent.top
-          anchors.bottom: parent.bottom
-          width: Math.max(8, Math.min(parent.width, ((SettingsState.fontSizeDelta + 5) / 10.0) * parent.width))
-          radius: 5
-          color: SettingsState.accent
+        readonly property real targetFraction: Math.min(1.0, Math.max(0.0, (SettingsState.fontSizeDelta + 5) / 10.0))
+        property real currentPos: targetFraction
+        readonly property real shown: Math.min(1.0, Math.max(0.0, currentPos))
+
+        onTargetFractionChanged: {
+          if (!fontSeekAnim.running && !fontSizeMouse.dragging) {
+            var startVal = currentPos;
+            fontSeekAnim.stop();
+            currentPos = startVal;
+            fontSeekAnim.from = startVal;
+            fontSeekAnim.to = targetFraction;
+            fontSeekAnim.restart();
+          }
         }
 
-        // Draggable thumb
-        Rectangle {
-          id: fontSizeThumb
-          width: 16
-          height: 16
-          radius: 8
-          anchors.verticalCenter: parent.verticalCenter
-          x: Math.max(0, Math.min(fontSizeTrack.width - width, ((SettingsState.fontSizeDelta + 5) / 10.0) * (fontSizeTrack.width - width)))
-          color: SettingsState.accent
-          border.color: "#ffffff"
-          border.width: 2
+        onShownChanged: fontCanvas.requestPaint()
+        onCurrentPosChanged: fontCanvas.requestPaint()
+        onWidthChanged: fontCanvas.requestPaint()
 
-          Behavior on x {
-            enabled: !fontSizeMouse.pressed
-            NumberAnimation { duration: 80 }
+        NumberAnimation {
+          id: fontSeekAnim
+          target: fontSizeTrack
+          property: "currentPos"
+          duration: 350
+          easing.type: Easing.InOutCubic
+          onRunningChanged: fontCanvas.requestPaint()
+          onFinished: {
+            if (!fontSizeMouse.dragging) {
+              currentPos = fontSizeTrack.targetFraction;
+              fontCanvas.requestPaint();
+            }
           }
+        }
+
+        Canvas {
+          id: fontCanvas
+          anchors.fill: parent
+          antialiasing: true
+          renderStrategy: Canvas.Immediate
+          onPaint: {
+            WavyPaint.paint(getContext("2d"), width, height, {
+              shown: fontSizeTrack.shown,
+              showTrack: true,
+              showHandle: true,
+              showRemaining: false,
+              waveColor: SettingsState.accent,
+              trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+              handleColor: SettingsState.accent,
+              trackH: 5,
+              waveW: 4.5,
+              waveAmp: 2.2,
+              waveLen: width / 5, // Exactly 5 waves across full width
+              handleW: 6,
+              handleH: 16
+            });
+          }
+        }
+
+        Connections {
+          target: SettingsState
+          function onAccentChanged() { fontCanvas.requestPaint(); }
+          function onIsDarkChanged() { fontCanvas.requestPaint(); }
         }
 
         MouseArea {
           id: fontSizeMouse
           anchors.fill: parent
-          anchors.margins: -6
           cursorShape: Qt.PointingHandCursor
+
+          property real startX: 0
+          property bool dragging: false
+
           onPressed: function(ev) {
+            if (fontSizeTrack.width <= 0) return;
+            fontSizeMouse.startX = ev.x;
+            fontSizeMouse.dragging = false;
+
+            var startVal = fontSizeTrack.currentPos;
             var r = Math.min(1.0, Math.max(0.0, ev.x / fontSizeTrack.width));
+
+            // Smoothly animate from exact current position to clicked target
+            fontSeekAnim.stop();
+            fontSizeTrack.currentPos = startVal;
+            fontSeekAnim.from = startVal;
+            fontSeekAnim.to = r;
+            fontSeekAnim.restart();
+
             SettingsState.setFontSizeDelta(Math.round(r * 10 - 5));
           }
+
           onPositionChanged: function(ev) {
-            if (pressed) {
+            if (!pressed || fontSizeTrack.width <= 0) return;
+            if (!fontSizeMouse.dragging && Math.abs(ev.x - fontSizeMouse.startX) > 4) {
+              fontSizeMouse.dragging = true;
+              fontSeekAnim.stop();
+            }
+            if (fontSizeMouse.dragging) {
               var r = Math.min(1.0, Math.max(0.0, ev.x / fontSizeTrack.width));
+              fontSizeTrack.currentPos = r;
+              fontCanvas.requestPaint();
               SettingsState.setFontSizeDelta(Math.round(r * 10 - 5));
             }
+          }
+
+          onReleased: function() {
+            fontSizeMouse.dragging = false;
           }
         }
       }

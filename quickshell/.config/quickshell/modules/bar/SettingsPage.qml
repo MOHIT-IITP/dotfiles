@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import "../services"
+import "WavySliderPaint.js" as WavyPaint
 
 // Settings / appearance expanded subview. Extracted from NetworkCircle.qml.
 // Top level shows three folders (General / UI / Theme); tapping one drills
@@ -693,7 +694,7 @@ Item {
               Text {
                 id: gapValText
                 anchors.centerIn: parent
-                text: SettingsState.barGap + "px"
+                text: Math.round(gapTrack.shown * 24) + "px"
                 color: SettingsState.accent
                 font.pixelSize: SettingsState.px(13)
                 font.bold: true
@@ -702,58 +703,113 @@ Item {
             }
           }
 
-          // Slider Track
-          Rectangle {
+          // Wavy Slider Track with 5 waves and smooth seek animation
+          Item {
             id: gapTrack
             width: parent.width
-            height: 10
-            radius: 5
-            color: SettingsState.bgCard
-            border.color: SettingsState.borderBase
-            border.width: 1
+            height: 24
 
-            // Filled portion
-            Rectangle {
-              anchors.left: parent.left
-              anchors.top: parent.top
-              anchors.bottom: parent.bottom
-              width: Math.max(8, Math.min(parent.width, (SettingsState.barGap / 24.0) * parent.width))
-              radius: 5
-              color: SettingsState.accent
+            readonly property real targetFraction: Math.min(1.0, Math.max(0.0, SettingsState.barGap / 24.0))
+            property real currentPos: targetFraction
+            readonly property real shown: Math.min(1.0, Math.max(0.0, currentPos))
+
+            onTargetFractionChanged: {
+              if (!seekAnim.running && !gapMouse.dragging) {
+                currentPos = targetFraction;
+              }
             }
 
-            // Draggable Thumb
-            Rectangle {
-              id: gapThumb
-              width: 16
-              height: 16
-              radius: 8
-              anchors.verticalCenter: parent.verticalCenter
-              x: Math.max(0, Math.min(gapTrack.width - width, (SettingsState.barGap / 24.0) * (gapTrack.width - width)))
-              color: SettingsState.accent
-              border.color: "#ffffff"
-              border.width: 2
+            onShownChanged: gapCanvas.requestPaint()
+            onCurrentPosChanged: gapCanvas.requestPaint()
+            onWidthChanged: gapCanvas.requestPaint()
 
-              Behavior on x {
-                enabled: !gapMouse.pressed
-                NumberAnimation { duration: 80 }
+            NumberAnimation {
+              id: seekAnim
+              target: gapTrack
+              property: "currentPos"
+              duration: 350
+              easing.type: Easing.InOutCubic
+              onRunningChanged: gapCanvas.requestPaint()
+              onFinished: {
+                if (!gapMouse.dragging) {
+                  currentPos = gapTrack.targetFraction;
+                  gapCanvas.requestPaint();
+                }
               }
+            }
+
+            Canvas {
+              id: gapCanvas
+              anchors.fill: parent
+              antialiasing: true
+              renderStrategy: Canvas.Immediate
+              onPaint: {
+                WavyPaint.paint(getContext("2d"), width, height, {
+                  shown: gapTrack.shown,
+                  showTrack: true,
+                  showHandle: true,
+                  showRemaining: false,
+                  waveColor: SettingsState.accent,
+                  trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+                  handleColor: SettingsState.accent,
+                  trackH: 5,
+                  waveW: 4.5,
+                  waveAmp: 2.2,
+                  waveLen: width / 5, // Exactly 5 waves across full width
+                  handleW: 6,
+                  handleH: 16
+                });
+              }
+            }
+
+            Connections {
+              target: SettingsState
+              function onAccentChanged() { gapCanvas.requestPaint(); }
+              function onIsDarkChanged() { gapCanvas.requestPaint(); }
             }
 
             MouseArea {
               id: gapMouse
               anchors.fill: parent
-              anchors.margins: -6
               cursorShape: Qt.PointingHandCursor
+
+              property real startX: 0
+              property bool dragging: false
+
               onPressed: function(ev) {
+                if (gapTrack.width <= 0) return;
+                gapMouse.startX = ev.x;
+                gapMouse.dragging = false;
+
+                var startVal = gapTrack.currentPos;
                 var r = Math.min(1.0, Math.max(0.0, ev.x / gapTrack.width));
+
+                // Smoothly animate from exact current position to clicked target
+                seekAnim.stop();
+                gapTrack.currentPos = startVal;
+                seekAnim.from = startVal;
+                seekAnim.to = r;
+                seekAnim.restart();
+
                 SettingsState.setBarGap(Math.round(r * 24));
               }
+
               onPositionChanged: function(ev) {
-                if (pressed) {
+                if (!pressed || gapTrack.width <= 0) return;
+                if (!gapMouse.dragging && Math.abs(ev.x - gapMouse.startX) > 4) {
+                  gapMouse.dragging = true;
+                  seekAnim.stop();
+                }
+                if (gapMouse.dragging) {
                   var r = Math.min(1.0, Math.max(0.0, ev.x / gapTrack.width));
+                  gapTrack.currentPos = r;
+                  gapCanvas.requestPaint();
                   SettingsState.setBarGap(Math.round(r * 24));
                 }
+              }
+
+              onReleased: function() {
+                gapMouse.dragging = false;
               }
             }
           }

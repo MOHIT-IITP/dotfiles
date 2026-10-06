@@ -17,10 +17,29 @@ Item {
   signal seeked(real v)
   signal iconClicked
 
-  property bool _drag: false
-  property real _v: 0
+  property real currentPos: value
+  readonly property real shown: Math.min(1, Math.max(0, currentPos))
 
-  readonly property real shown: Math.min(1, Math.max(0, _drag ? _v : value))
+  onValueChanged: {
+    if (!seekAnim.running && !faderMouse.dragging) {
+      currentPos = value;
+    }
+  }
+
+  NumberAnimation {
+    id: seekAnim
+    target: root
+    property: "currentPos"
+    duration: 350
+    easing.type: Easing.InOutCubic
+    onRunningChanged: waveCanvas.requestPaint()
+    onFinished: {
+      if (!faderMouse.dragging) {
+        currentPos = root.value;
+        waveCanvas.requestPaint();
+      }
+    }
+  }
 
   implicitWidth: 70
   implicitHeight: 240
@@ -34,25 +53,45 @@ Item {
     width: 44
     cursorShape: Qt.PointingHandCursor
 
+    property real startY: 0
+    property bool dragging: false
+
     onPressed: function (ev) {
-      root._drag = true;
+      faderMouse.startY = ev.y;
+      faderMouse.dragging = false;
+
       var h = trackArea.height;
-      var val = 1.0 - (ev.y / h);
-      root._v = Math.min(1, Math.max(0, val));
-      root.seeked(root._v);
+      if (h <= 0) return;
+      var val = Math.min(1, Math.max(0, 1.0 - (ev.y / h)));
+
+      var startVal = root.currentPos;
+      seekAnim.stop();
+      root.currentPos = startVal;
+      seekAnim.from = startVal;
+      seekAnim.to = val;
+      seekAnim.restart();
+
+      root.seeked(val);
     }
 
     onPositionChanged: function (ev) {
-      if (root._drag) {
+      if (!pressed) return;
+      if (!faderMouse.dragging && Math.abs(ev.y - faderMouse.startY) > 4) {
+        faderMouse.dragging = true;
+        seekAnim.stop();
+      }
+      if (faderMouse.dragging) {
         var h = trackArea.height;
-        var val = 1.0 - (ev.y / h);
-        root._v = Math.min(1, Math.max(0, val));
-        root.seeked(root._v);
+        if (h <= 0) return;
+        var val = Math.min(1, Math.max(0, 1.0 - (ev.y / h)));
+        root.currentPos = val;
+        waveCanvas.requestPaint();
+        root.seeked(val);
       }
     }
 
     onReleased: {
-      root._drag = false;
+      faderMouse.dragging = false;
     }
   }
 
@@ -70,7 +109,7 @@ Item {
       id: waveCanvas
       anchors.fill: parent
       antialiasing: true
-      renderStrategy: Canvas.Cooperative
+      renderStrategy: Canvas.Immediate
 
       onPaint: {
         WavyPaint.paintVertical(getContext("2d"), width, height, {
@@ -81,7 +120,7 @@ Item {
           trackW: 7,
           waveW: 4.5,
           waveAmp: 2.5,
-          waveLen: 18,
+          waveLen: height / 5, // Exactly 5 waves across full height
           handleW: 20,
           handleH: 8
         });
@@ -91,6 +130,7 @@ Item {
     Connections {
       target: root
       function onShownChanged() { waveCanvas.requestPaint(); }
+      function onCurrentPosChanged() { waveCanvas.requestPaint(); }
       function onMutedChanged() { waveCanvas.requestPaint(); }
       function onActiveColorChanged() { waveCanvas.requestPaint(); }
     }

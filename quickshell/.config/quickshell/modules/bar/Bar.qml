@@ -240,47 +240,47 @@ Scope {
                 NumberAnimation {
                   target: barContent
                   property: "y"
-                  duration: 320
-                  easing.type: Easing.OutCubic
+                  duration: 350
+                  easing.type: Easing.InOutCubic
                 }
                 NumberAnimation {
                   target: barContent
                   property: "opacity"
-                  duration: 250
-                  easing.type: Easing.OutCubic
+                  duration: 280
+                  easing.type: Easing.InOutCubic
                 }
               }
             },
             Transition {
               to: "hidden"
               SequentialAnimation {
-                // 1. First moves upward
+                // 1. First goes up partially (not fully hidden yet)
                 NumberAnimation {
                   target: barContent
                   property: "y"
-                  to: -(Math.round(18 * SettingsState.uiScale))
-                  duration: 220
-                  easing.type: Easing.OutQuad
+                  to: -(Math.round(20 * SettingsState.uiScale))
+                  duration: 260
+                  easing.type: Easing.InOutCubic
                 }
-                // 2. Slows down / pauses for a moment
+                // 2. Stops at that point for a while
                 PauseAnimation {
-                  duration: 180
+                  duration: 250
                 }
-                // 3. Smoothly glides away and hides completely
+                // 3. Completes the upward slide and hides fully
                 ParallelAnimation {
                   NumberAnimation {
                     target: barContent
                     property: "y"
                     to: -(Math.round(80 * SettingsState.uiScale))
-                    duration: 280
-                    easing.type: Easing.InQuad
+                    duration: 300
+                    easing.type: Easing.InOutCubic
                   }
                   NumberAnimation {
                     target: barContent
                     property: "opacity"
                     to: 0.0
-                    duration: 240
-                    easing.type: Easing.InQuad
+                    duration: 260
+                    easing.type: Easing.InOutCubic
                   }
                 }
               }

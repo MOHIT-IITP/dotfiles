@@ -14,16 +14,35 @@ Column {
   property bool muted: false
 
   property string currentDeviceName: ""
-  property real waveLen: 36 // ~10 waves across a full-width slider
+  property real waveLen: 0 // 0 = auto 5 waves across width
 
   signal seeked(real v)
   signal iconClicked
   signal openDevices
 
-  property bool _drag: false
-  property real _v: 0
+  property real currentPos: value
+  readonly property real shown: Math.min(1, Math.max(0, currentPos))
 
-  readonly property real shown: Math.min(1, Math.max(0, _drag ? _v : value))
+  onValueChanged: {
+    if (!seekAnim.running && !sliderMouse.dragging) {
+      currentPos = value;
+    }
+  }
+
+  NumberAnimation {
+    id: seekAnim
+    target: root
+    property: "currentPos"
+    duration: 350
+    easing.type: Easing.InOutCubic
+    onRunningChanged: waveCanvas.requestPaint()
+    onFinished: {
+      if (!sliderMouse.dragging) {
+        currentPos = root.value;
+        waveCanvas.requestPaint();
+      }
+    }
+  }
 
   spacing: 6
   opacity: available ? 1 : 0.4
@@ -174,7 +193,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       height: 22
       antialiasing: true
-      renderStrategy: Canvas.Cooperative
+      renderStrategy: Canvas.Immediate
 
       onPaint: {
         WavyPaint.paint(getContext("2d"), width, height, {
@@ -188,7 +207,7 @@ Column {
           trackH: 8,
           waveW: 5,
           waveAmp: 2.5,
-          waveLen: root.waveLen,
+          waveLen: root.waveLen > 0 ? root.waveLen : (width / 5),
           handleW: 7,
           handleH: 20
         });
@@ -198,6 +217,7 @@ Column {
     Connections {
       target: root
       function onShownChanged() { waveCanvas.requestPaint(); }
+      function onCurrentPosChanged() { waveCanvas.requestPaint(); }
       function onMutedChanged() { waveCanvas.requestPaint(); }
       function onAvailableChanged() { waveCanvas.requestPaint(); }
     }
@@ -216,19 +236,42 @@ Column {
       enabled: root.available
       cursorShape: Qt.PointingHandCursor
 
+      property real startX: 0
+      property bool dragging: false
+
       onPressed: function (ev) {
-        root._drag = true;
-        root._v = Math.min(1, Math.max(0, ev.x / width));
-        root.seeked(root._v);
+        sliderMouse.startX = ev.x;
+        sliderMouse.dragging = false;
+
+        var startVal = root.currentPos;
+        var r = Math.min(1, Math.max(0, ev.x / width));
+
+        // Smoothly animate from exact current position to clicked target
+        seekAnim.stop();
+        root.currentPos = startVal;
+        seekAnim.from = startVal;
+        seekAnim.to = r;
+        seekAnim.restart();
+
+        root.seeked(r);
       }
+
       onPositionChanged: function (ev) {
-        if (root._drag) {
-          root._v = Math.min(1, Math.max(0, ev.x / width));
-          root.seeked(root._v);
+        if (!pressed) return;
+        if (!sliderMouse.dragging && Math.abs(ev.x - sliderMouse.startX) > 4) {
+          sliderMouse.dragging = true;
+          seekAnim.stop();
+        }
+        if (sliderMouse.dragging) {
+          var r = Math.min(1, Math.max(0, ev.x / width));
+          root.currentPos = r;
+          waveCanvas.requestPaint();
+          root.seeked(r);
         }
       }
-      onReleased: {
-        root._drag = false;
+
+      onReleased: function () {
+        sliderMouse.dragging = false;
       }
     }
   }

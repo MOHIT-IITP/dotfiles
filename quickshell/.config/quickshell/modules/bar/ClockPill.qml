@@ -412,6 +412,8 @@ Rectangle {
       id: timeText
       anchors.verticalCenter: parent.verticalCenter
       visible: !RecorderState.isRecording
+      width: timeMetrics.implicitWidth
+      horizontalAlignment: Text.AlignHCenter
       text: {
         var fmt = "";
         if (SettingsState.timeFormat === "24h") {
@@ -422,6 +424,23 @@ Rectangle {
         return Qt.formatDateTime(root.date, fmt);
       }
       color: SettingsState.accent
+      font.pixelSize: SettingsState.px(17)
+      font.bold: true
+      font.family: SettingsState.fontFamily
+    }
+
+    // Invisible reserve for timeText: measures widest possible digits ("88:88[:88] [PM]")
+    // so character width differences never alter row width or shift the bar.
+    Text {
+      id: timeMetrics
+      visible: false
+      text: {
+        var s = "88:88";
+        if (SettingsState.clockSeconds) s += ":88";
+        if (SettingsState.timeFormat !== "24h") s += " PM";
+        return s;
+      }
+      color: "transparent"
       font.pixelSize: SettingsState.px(17)
       font.bold: true
       font.family: SettingsState.fontFamily
@@ -470,8 +489,20 @@ Rectangle {
       id: recTimeText
       anchors.verticalCenter: parent.verticalCenter
       visible: RecorderState.isRecording
+      width: recTimeMetrics.implicitWidth
+      horizontalAlignment: Text.AlignHCenter
       text: RecorderState.formattedTime
       color: "#ff8a8a"
+      font.pixelSize: SettingsState.px(14)
+      font.bold: true
+      font.family: SettingsState.fontFamily
+    }
+
+    Text {
+      id: recTimeMetrics
+      visible: false
+      text: "88:88:88"
+      color: "transparent"
       font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
