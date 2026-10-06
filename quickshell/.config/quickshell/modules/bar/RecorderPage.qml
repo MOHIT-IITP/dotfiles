@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import "../services"
+import "WavySliderPaint.js" as WavyPaint
 
 // Screen recorder subview. Extracted from NetworkCircle.qml.
 Column {
@@ -580,29 +581,118 @@ Column {
           }
         }
 
-        // Slider bar
-        Rectangle {
-          id: micBar
+        // Wavy slider bar with seek animation
+        Item {
+          id: micSliderTrack
           anchors.verticalCenter: parent.verticalCenter
           width: parent.width - 24 - 8 - rMicDevChip.width - 8 - 38 - 8
-          height: 10
-          radius: 5
-          color: SettingsState.bgCardHover
-          clip: true
+          height: 22
 
-          Rectangle {
-            height: parent.height
-            width: Math.max(parent.height, parent.width * (AudioState.inMuted ? 0 : AudioState.inVol))
-            radius: parent.radius
-            color: AudioState.inMuted ? SettingsState.borderBase : SettingsState.accent
+          property real currentPos: AudioState.inVol
+          readonly property real shown: Math.min(1, Math.max(0, currentPos))
+
+          onShownChanged: micWaveCanvas.requestPaint()
+          onCurrentPosChanged: micWaveCanvas.requestPaint()
+          onWidthChanged: micWaveCanvas.requestPaint()
+
+          Connections {
+            target: AudioState
+            function onInVolChanged() {
+              if (!micSeekAnim.running && !micSliderMouse.dragging) {
+                micSliderTrack.currentPos = AudioState.inVol;
+                micWaveCanvas.requestPaint();
+              }
+            }
+            function onInMutedChanged() { micWaveCanvas.requestPaint(); }
+          }
+
+          Connections {
+            target: SettingsState
+            function onAccentChanged() { micWaveCanvas.requestPaint(); }
+            function onIsDarkChanged() { micWaveCanvas.requestPaint(); }
+          }
+
+          NumberAnimation {
+            id: micSeekAnim
+            target: micSliderTrack
+            property: "currentPos"
+            duration: 350
+            easing.type: Easing.InOutCubic
+            onRunningChanged: micWaveCanvas.requestPaint()
+            onFinished: {
+              if (!micSliderMouse.dragging) {
+                micSliderTrack.currentPos = AudioState.inVol;
+                micWaveCanvas.requestPaint();
+              }
+            }
+          }
+
+          Canvas {
+            id: micWaveCanvas
+            anchors.fill: parent
+            antialiasing: true
+            renderStrategy: Canvas.Immediate
+
+            onPaint: {
+              WavyPaint.paint(getContext("2d"), width, height, {
+                shown: AudioState.inMuted ? 0 : micSliderTrack.shown,
+                showTrack: true,
+                showHandle: true,
+                showRemaining: false,
+                waveColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
+                trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+                handleColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
+                trackH: 5,
+                waveW: 4.5,
+                waveAmp: 2.2,
+                waveLen: width / 5,
+                handleW: 6,
+                handleH: 16
+              });
+            }
           }
 
           MouseArea {
+            id: micSliderMouse
             anchors.fill: parent
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onPressed: ev => AudioState.setInVol(Math.min(1, Math.max(0, ev.x / parent.width)))
-            onPositionChanged: ev => {
-              if (pressed) AudioState.setInVol(Math.min(1, Math.max(0, ev.x / parent.width)))
+
+            property real startX: 0
+            property bool dragging: false
+
+            onPressed: function(ev) {
+              micSliderMouse.startX = ev.x;
+              micSliderMouse.dragging = false;
+
+              var startVal = micSliderTrack.currentPos;
+              var r = Math.min(1, Math.max(0, ev.x / width));
+
+              micSeekAnim.stop();
+              micSliderTrack.currentPos = startVal;
+              micSeekAnim.from = startVal;
+              micSeekAnim.to = r;
+              micSeekAnim.restart();
+
+              AudioState.setInVol(r);
+            }
+
+            onPositionChanged: function(ev) {
+              if (!pressed) return;
+              if (!micSliderMouse.dragging && Math.abs(ev.x - micSliderMouse.startX) > 4) {
+                micSliderMouse.dragging = true;
+                micSeekAnim.stop();
+              }
+              if (micSliderMouse.dragging) {
+                var r = Math.min(1, Math.max(0, ev.x / width));
+                micSliderTrack.currentPos = r;
+                micWaveCanvas.requestPaint();
+                AudioState.setInVol(r);
+              }
+            }
+
+            onReleased: function() {
+              micSliderMouse.dragging = false;
             }
           }
         }
@@ -721,29 +811,118 @@ Column {
           elide: Text.ElideRight
         }
 
-        // Slider bar
-        Rectangle {
-          id: deskBar
+        // Wavy slider bar with seek animation
+        Item {
+          id: deskSliderTrack
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 152
-          height: 10
-          radius: 5
-          color: SettingsState.bgCardHover
-          clip: true
+          width: parent.width - 24 - 8 - 72 - 8 - 38 - 8
+          height: 22
 
-          Rectangle {
-            height: parent.height
-            width: Math.max(parent.height, parent.width * (AudioState.outMuted ? 0 : AudioState.outVol))
-            radius: parent.radius
-            color: AudioState.outMuted ? SettingsState.borderBase : SettingsState.accent
+          property real currentPos: AudioState.outVol
+          readonly property real shown: Math.min(1, Math.max(0, currentPos))
+
+          onShownChanged: deskWaveCanvas.requestPaint()
+          onCurrentPosChanged: deskWaveCanvas.requestPaint()
+          onWidthChanged: deskWaveCanvas.requestPaint()
+
+          Connections {
+            target: AudioState
+            function onOutVolChanged() {
+              if (!deskSeekAnim.running && !deskSliderMouse.dragging) {
+                deskSliderTrack.currentPos = AudioState.outVol;
+                deskWaveCanvas.requestPaint();
+              }
+            }
+            function onOutMutedChanged() { deskWaveCanvas.requestPaint(); }
+          }
+
+          Connections {
+            target: SettingsState
+            function onAccentChanged() { deskWaveCanvas.requestPaint(); }
+            function onIsDarkChanged() { deskWaveCanvas.requestPaint(); }
+          }
+
+          NumberAnimation {
+            id: deskSeekAnim
+            target: deskSliderTrack
+            property: "currentPos"
+            duration: 350
+            easing.type: Easing.InOutCubic
+            onRunningChanged: deskWaveCanvas.requestPaint()
+            onFinished: {
+              if (!deskSliderMouse.dragging) {
+                deskSliderTrack.currentPos = AudioState.outVol;
+                deskWaveCanvas.requestPaint();
+              }
+            }
+          }
+
+          Canvas {
+            id: deskWaveCanvas
+            anchors.fill: parent
+            antialiasing: true
+            renderStrategy: Canvas.Immediate
+
+            onPaint: {
+              WavyPaint.paint(getContext("2d"), width, height, {
+                shown: AudioState.outMuted ? 0 : deskSliderTrack.shown,
+                showTrack: true,
+                showHandle: true,
+                showRemaining: false,
+                waveColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
+                trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+                handleColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
+                trackH: 5,
+                waveW: 4.5,
+                waveAmp: 2.2,
+                waveLen: width / 5,
+                handleW: 6,
+                handleH: 16
+              });
+            }
           }
 
           MouseArea {
+            id: deskSliderMouse
             anchors.fill: parent
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onPressed: ev => AudioState.setOutVol(Math.min(1, Math.max(0, ev.x / parent.width)))
-            onPositionChanged: ev => {
-              if (pressed) AudioState.setOutVol(Math.min(1, Math.max(0, ev.x / parent.width)))
+
+            property real startX: 0
+            property bool dragging: false
+
+            onPressed: function(ev) {
+              deskSliderMouse.startX = ev.x;
+              deskSliderMouse.dragging = false;
+
+              var startVal = deskSliderTrack.currentPos;
+              var r = Math.min(1, Math.max(0, ev.x / width));
+
+              deskSeekAnim.stop();
+              deskSliderTrack.currentPos = startVal;
+              deskSeekAnim.from = startVal;
+              deskSeekAnim.to = r;
+              deskSeekAnim.restart();
+
+              AudioState.setOutVol(r);
+            }
+
+            onPositionChanged: function(ev) {
+              if (!pressed) return;
+              if (!deskSliderMouse.dragging && Math.abs(ev.x - deskSliderMouse.startX) > 4) {
+                deskSliderMouse.dragging = true;
+                deskSeekAnim.stop();
+              }
+              if (deskSliderMouse.dragging) {
+                var r = Math.min(1, Math.max(0, ev.x / width));
+                deskSliderTrack.currentPos = r;
+                deskWaveCanvas.requestPaint();
+                AudioState.setOutVol(r);
+              }
+            }
+
+            onReleased: function() {
+              deskSliderMouse.dragging = false;
             }
           }
         }

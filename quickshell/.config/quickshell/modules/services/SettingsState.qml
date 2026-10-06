@@ -92,12 +92,12 @@ Singleton {
 
   readonly property color bgActivePill: mixc(tint(0.30, 0.82, 1.0), cardDark(0.55, 0.28, Qt.rgba(0.16, 0.16, 0.16, 1.0)), themeBlend)
 
-  readonly property color borderBase: mixc(tint(0.15, 0.78, 1.0), cardDark(0.35, 0.22, Qt.rgba(0.17, 0.17, 0.17, 1.0)), themeBlend)
+  readonly property color borderBase: mixc(tint(0.18, 0.75, 1.0), cardDark(0.35, 0.30, Qt.rgba(0.22, 0.22, 0.22, 1.0)), themeBlend)
 
-  readonly property color borderActive: mixc(tint(0.45, 0.60, 1.0), cardDark(0.55, 0.38, Qt.rgba(0.28, 0.28, 0.28, 1.0)), themeBlend)
+  readonly property color borderActive: mixc(tint(0.45, 0.60, 1.0), cardDark(0.55, 0.38, Qt.rgba(0.32, 0.32, 0.32, 1.0)), themeBlend)
 
   // Lighter border for the top bar pills (clock, media, network) only.
-  readonly property color barBorder: mixc(tint(0.13, 0.82, 1.0), cardDark(0.30, 0.26, Qt.rgba(0.17, 0.17, 0.17, 1.0)), themeBlend)
+  readonly property color barBorder: mixc(tint(0.20, 0.75, 1.0), cardDark(0.30, 0.38, Qt.rgba(0.28, 0.28, 0.28, 1.0)), themeBlend)
 
   readonly property color textMain: mixc("#121612", "#f2f2f2", themeBlend)
   readonly property color textSecondary: mixc("#4c574c", "#9aa39a", themeBlend)

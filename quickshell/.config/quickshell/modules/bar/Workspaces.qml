@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Hyprland
 import QtQuick
+import "../services"
 
 // Workspaces pill: displays workspace indicators (dots for inactive, red bar for active workspace)
 Rectangle {
@@ -9,8 +10,8 @@ Rectangle {
   implicitHeight: 34
   implicitWidth: wsRow.implicitWidth + 24
   radius: implicitHeight / 2
-  color: "#101010"
-  border.color: "#3a2c23"
+  color: SettingsState.bgSurface
+  border.color: SettingsState.barBorder
   border.width: 1
 
   Behavior on implicitWidth {

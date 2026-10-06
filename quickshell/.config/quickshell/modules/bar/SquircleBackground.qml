@@ -10,7 +10,7 @@ Canvas {
   antialiasing: true
 
   property real radius: SettingsState.cardRadius
-  property real power: SettingsState.cardRoundingPower
+  property real power: 2.0
   property color fillColor: SettingsState.bgCard
   property color strokeColor: SettingsState.barBorder
   property real strokeWidth: 1.0

@@ -86,15 +86,17 @@ Rectangle {
   implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
 
   radius: isExpanded ? SettingsState.cardRadius : implicitHeight / 2
-  color: "transparent"
-  border.width: 0
+  color: isExpanded ? "transparent" : SettingsState.bgSurface
+  border.color: isExpanded ? "transparent" : SettingsState.barBorder
+  border.width: isExpanded ? 0 : 1
   clip: true
 
   SquircleBackground {
     id: squircleBg
-    radius: root.radius
-    power: root.isExpanded ? SettingsState.cardRoundingPower : 2.0
-    fillColor: root.isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
+    visible: root.isExpanded
+    radius: SettingsState.cardRadius
+    power: SettingsState.cardRoundingPower
+    fillColor: SettingsState.bgCard
     strokeColor: SettingsState.barBorder
     strokeWidth: 1
     z: -1

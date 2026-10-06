@@ -23,16 +23,17 @@ Rectangle {
   implicitWidth: playerMouse.containsMouse ? 328 : 34
   implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 34
   radius: playerMouse.containsMouse ? SettingsState.cardRadius : 17
+  color: playerMouse.containsMouse ? "transparent" : SettingsState.bgSurface
+  border.color: playerMouse.containsMouse ? "transparent" : SettingsState.barBorder
+  border.width: playerMouse.containsMouse ? 0 : 1
   clip: true
-
-  color: "transparent"
-  border.width: 0
 
   SquircleBackground {
     id: squircleBg
-    radius: root.radius
-    power: playerMouse.containsMouse ? SettingsState.cardRoundingPower : 2.0
-    fillColor: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
+    visible: playerMouse.containsMouse
+    radius: SettingsState.cardRadius
+    power: SettingsState.cardRoundingPower
+    fillColor: SettingsState.bgCard
     strokeColor: SettingsState.barBorder
     strokeWidth: 1
     z: -1

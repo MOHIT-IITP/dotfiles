@@ -91,15 +91,16 @@ Rectangle {
     return mainPage.implicitHeight + 36;
   }
   radius: netMouse.containsMouse ? SettingsState.cardRadius : 17
+  color: netMouse.containsMouse ? "transparent" : SettingsState.bgSurface
+  border.color: netMouse.containsMouse ? "transparent" : SettingsState.barBorder
+  border.width: netMouse.containsMouse ? 0 : 1
   clip: true
-
-  color: "transparent"
-  border.width: 0
 
   SquircleBackground {
     id: squircleBg
-    radius: root.radius
-    power: netMouse.containsMouse ? SettingsState.cardRoundingPower : 2.0
+    visible: netMouse.containsMouse
+    radius: SettingsState.cardRadius
+    power: SettingsState.cardRoundingPower
     fillColor: SettingsState.bgSurface
     strokeColor: SettingsState.barBorder
     strokeWidth: 1
