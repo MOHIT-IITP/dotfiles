@@ -1108,11 +1108,25 @@ Rectangle {
   TimerView {
     id: timerView
     anchors.fill: parent
+    clip: true
     opacity: (root.isExpanded && root.showTimer) ? 1 : 0
     visible: opacity > 0
 
+    transform: Translate {
+      y: (root.isExpanded && root.showTimer) ? 0 : 10
+      Behavior on y {
+        NumberAnimation {
+          duration: 300
+          easing.type: Easing.OutCubic
+        }
+      }
+    }
+
     Behavior on opacity {
-      NumberAnimation { duration: 220 }
+      NumberAnimation {
+        duration: 250
+        easing.type: Easing.OutCubic
+      }
     }
   }
 

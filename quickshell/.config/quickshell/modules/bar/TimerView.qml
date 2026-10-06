@@ -9,6 +9,7 @@ Item {
 
   implicitWidth: 360
   implicitHeight: 158
+  clip: true
 
   property bool timerHover: false
   readonly property bool isRunning: TimerState.running || TimerState.paused || TimerState.finished
@@ -21,19 +22,26 @@ Item {
     onHoveredChanged: root.timerHover = hovered
   }
 
-  Column {
+  Item {
+    id: timerContent
     anchors.fill: parent
-    anchors.topMargin: 12
-    anchors.bottomMargin: 14
-    anchors.leftMargin: 18
-    anchors.rightMargin: 18
-    spacing: 4
+    clip: true
+    opacity: Math.max(0, Math.min(1, (root.height - 65) / 75.0))
 
-    // ================= RULER / SLIDER BAR =================
-    Item {
-      id: rulerArea
-      width: parent.width
-      height: 72
+    Column {
+      anchors.fill: parent
+      anchors.topMargin: 12
+      anchors.bottomMargin: 14
+      anchors.leftMargin: 18
+      anchors.rightMargin: 18
+      spacing: 4
+
+      // ================= RULER / SLIDER BAR =================
+      Item {
+        id: rulerArea
+        width: parent.width
+        height: 72
+        clip: true
 
       property real tickGap: 9.5
       property int window: 16 // +/- 16 minutes shown around selection
@@ -286,4 +294,5 @@ Item {
       }
     }
   }
+}
 }
