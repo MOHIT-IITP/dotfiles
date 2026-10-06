@@ -82,14 +82,23 @@ Rectangle {
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 218 : (showWeather ? 265 : 162)))))))))))) : 34
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 158 : (showWeather ? 265 : 162)))))))))))) : 34
   implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
 
-  radius: isExpanded ? 38 : implicitHeight / 2
-  color: isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
-  border.color: SettingsState.barBorder
-  border.width: 1
+  radius: isExpanded ? SettingsState.cardRadius : implicitHeight / 2
+  color: "transparent"
+  border.width: 0
   clip: true
+
+  SquircleBackground {
+    id: squircleBg
+    radius: root.radius
+    power: root.isExpanded ? SettingsState.cardRoundingPower : 2.0
+    fillColor: root.isExpanded ? SettingsState.bgCard : SettingsState.bgSurface
+    strokeColor: SettingsState.barBorder
+    strokeWidth: 1
+    z: -1
+  }
 
   function forceFocusLauncher() {
     if (launcherContent) {
@@ -141,7 +150,7 @@ Rectangle {
 
   Behavior on implicitWidth {
     NumberAnimation {
-      duration: 280
+      duration: 300
       easing.type: Easing.OutCubic
     }
   }

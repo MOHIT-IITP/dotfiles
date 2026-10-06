@@ -69,12 +69,20 @@ Rectangle {
 
   implicitWidth: 460
   implicitHeight: open ? 420 : 0
-  radius: 20
+  radius: SettingsState.cardRadius
   clip: true
 
-  color: "#101210"
-  border.color: "#2e362e"
-  border.width: 1
+  color: "transparent"
+  border.width: 0
+
+  SquircleBackground {
+    radius: SettingsState.cardRadius
+    power: SettingsState.cardRoundingPower
+    fillColor: "#101210"
+    strokeColor: "#2e362e"
+    strokeWidth: 1
+    z: -1
+  }
 
   opacity: open ? 1 : 0
   visible: open || opacity > 0

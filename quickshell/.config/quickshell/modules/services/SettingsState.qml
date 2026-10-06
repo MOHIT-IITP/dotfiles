@@ -26,6 +26,10 @@ Singleton {
   // 3b. Font size offset applied on top of base pixel sizes (-5..+5 px)
   property int fontSizeDelta: 0
 
+  // 3c. Card Corner Styling (Border Radius & Rounding Power)
+  property real cardRadius: 68
+  property real cardRoundingPower: 4.0
+
   // 4. Theme & Accent Colors
   property string themeMode: "dark" // "light" | "dark" | "manual"
   property real accentHue: 0.52       // 0.0 - 1.0 (0.52 = #40AABF teal/cyan from reference)

@@ -22,12 +22,21 @@ Rectangle {
 
   implicitWidth: playerMouse.containsMouse ? 328 : 34
   implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 34
-  radius: playerMouse.containsMouse ? 34 : 17
+  radius: playerMouse.containsMouse ? SettingsState.cardRadius : 17
   clip: true
 
-  color: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
-  border.color: SettingsState.barBorder
-  border.width: 1
+  color: "transparent"
+  border.width: 0
+
+  SquircleBackground {
+    id: squircleBg
+    radius: root.radius
+    power: playerMouse.containsMouse ? SettingsState.cardRoundingPower : 2.0
+    fillColor: playerMouse.containsMouse ? SettingsState.bgCard : SettingsState.bgSurface
+    strokeColor: SettingsState.barBorder
+    strokeWidth: 1
+    z: -1
+  }
 
   Behavior on implicitWidth {
     NumberAnimation {

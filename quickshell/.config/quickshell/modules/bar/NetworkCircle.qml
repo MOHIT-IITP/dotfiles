@@ -90,12 +90,21 @@ Rectangle {
     }
     return mainPage.implicitHeight + 36;
   }
-  radius: netMouse.containsMouse ? 36 : 17
+  radius: netMouse.containsMouse ? SettingsState.cardRadius : 17
   clip: true
 
-  color: netMouse.containsMouse ? SettingsState.bgSurface : SettingsState.bgSurface
-  border.color: SettingsState.barBorder
-  border.width: 1
+  color: "transparent"
+  border.width: 0
+
+  SquircleBackground {
+    id: squircleBg
+    radius: root.radius
+    power: netMouse.containsMouse ? SettingsState.cardRoundingPower : 2.0
+    fillColor: SettingsState.bgSurface
+    strokeColor: SettingsState.barBorder
+    strokeWidth: 1
+    z: -1
+  }
 
   Behavior on implicitWidth {
     NumberAnimation {

@@ -297,10 +297,12 @@ Scope {
           // ==========================================
           // DEDICATED DROP SHADOWS (Rendered behind components)
           // ==========================================
-          Rectangle {
+          SquircleBackground {
             anchors.fill: clockPill
             radius: clockPill.radius
-            color: SettingsState.bgSurface
+            power: clockPill.isExpanded ? SettingsState.cardRoundingPower : 2.0
+            fillColor: SettingsState.bgSurface
+            strokeWidth: 0
             visible: clockPill.visible
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -312,10 +314,12 @@ Scope {
             }
           }
 
-          Rectangle {
+          SquircleBackground {
             anchors.fill: mediaPlayer
             radius: mediaPlayer.radius
-            color: SettingsState.bgSurface
+            power: mediaPlayer.hovered ? SettingsState.cardRoundingPower : 2.0
+            fillColor: SettingsState.bgSurface
+            strokeWidth: 0
             visible: mediaPlayer.visible
             layer.enabled: true
             layer.effect: MultiEffect {
@@ -327,10 +331,12 @@ Scope {
             }
           }
 
-          Rectangle {
+          SquircleBackground {
             anchors.fill: netCircle
             radius: netCircle.radius
-            color: SettingsState.bgSurface
+            power: netCircle.hovered ? SettingsState.cardRoundingPower : 2.0
+            fillColor: SettingsState.bgSurface
+            strokeWidth: 0
             visible: netCircle.visible
             layer.enabled: true
             layer.effect: MultiEffect {

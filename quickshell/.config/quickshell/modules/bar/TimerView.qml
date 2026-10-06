@@ -8,7 +8,7 @@ Item {
   id: root
 
   implicitWidth: 360
-  implicitHeight: 218
+  implicitHeight: 158
 
   property bool timerHover: false
   readonly property bool isRunning: TimerState.running || TimerState.paused || TimerState.finished
@@ -23,16 +23,19 @@ Item {
 
   Column {
     anchors.fill: parent
-    anchors.margins: 16
-    spacing: 8
+    anchors.topMargin: 12
+    anchors.bottomMargin: 14
+    anchors.leftMargin: 18
+    anchors.rightMargin: 18
+    spacing: 4
 
     // ================= RULER / SLIDER BAR =================
     Item {
       id: rulerArea
       width: parent.width
-      height: 110
+      height: 72
 
-      property real tickGap: 10
+      property real tickGap: 9.5
       property int window: 16 // +/- 16 minutes shown around selection
       property real pressX: 0
       property int pressMin: 15
@@ -49,7 +52,6 @@ Item {
         Row {
           id: labelRow
           anchors.top: parent.top
-          anchors.topMargin: 2
           anchors.horizontalCenter: parent.horizontalCenter
           spacing: 0
 
@@ -61,7 +63,7 @@ Item {
               property bool labeled: valid && minute % 5 === 0
               property bool active: (index - rulerArea.window) <= 0
               width: rulerArea.tickGap
-              height: 22
+              height: 18
 
               Text {
                 anchors.centerIn: parent
@@ -69,7 +71,7 @@ Item {
                 text: valid ? minute : ""
                 color: active ? root.timerOrange : root.textDim
                 opacity: active ? 1.0 : 0.6
-                font.pixelSize: 15
+                font.pixelSize: 14
                 font.bold: true
                 font.family: SettingsState.fontFamily
               }
@@ -81,7 +83,7 @@ Item {
         Row {
           id: ticksRow
           anchors.top: labelRow.bottom
-          anchors.topMargin: 6
+          anchors.topMargin: 4
           anchors.horizontalCenter: parent.horizontalCenter
           spacing: 0
 
@@ -92,13 +94,13 @@ Item {
               property bool valid: minute >= 0 && minute <= 120
               property bool active: (index - rulerArea.window) <= 0
               width: rulerArea.tickGap
-              height: 34
+              height: 28
 
               Rectangle {
                 anchors.centerIn: parent
-                width: 2.8
-                height: 32
-                radius: 1.4
+                width: 2.6
+                height: 26
+                radius: 1.3
                 visible: valid
                 color: active ? root.timerOrange : root.tickDim
                 opacity: active ? 1.0 : 0.65
@@ -113,7 +115,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: markerArea.top
-        width: 48
+        width: 44
         z: 2
         gradient: Gradient {
           orientation: Gradient.Horizontal
@@ -127,7 +129,7 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: markerArea.top
-        width: 48
+        width: 44
         z: 2
         gradient: Gradient {
           orientation: Gradient.Horizontal
@@ -136,19 +138,19 @@ Item {
         }
       }
 
-      // Center marker triangle area
+      // Center marker triangle area (matching screenshot)
       Item {
         id: markerArea
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 24
-        height: 18
+        width: 16
+        height: 14
 
         Text {
           anchors.centerIn: parent
           text: "\ueab7"
           color: root.timerOrange
-          font.pixelSize: 13
+          font.pixelSize: 11
           font.family: SettingsState.nerdIconFont
         }
       }
@@ -157,7 +159,6 @@ Item {
       Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
         width: 120 * TimerState.progress
         height: 2
         radius: 1
@@ -195,7 +196,7 @@ Item {
     // ================= BOTTOM ROW =================
     Item {
       width: parent.width
-      height: 60
+      height: 48
 
       // Left: Start / Cancel (+ pause when running)
       Row {
@@ -205,9 +206,9 @@ Item {
 
         Rectangle {
           id: mainBtn
-          width: (TimerState.running || TimerState.paused) ? 50 : 136
-          height: 48
-          radius: 24
+          width: (TimerState.running || TimerState.paused) ? 44 : 124
+          height: 40
+          radius: 20
           color: Qt.rgba(1.0, 0.62, 0.17, 0.16)
 
           Behavior on width {
@@ -218,7 +219,7 @@ Item {
             anchors.centerIn: parent
             text: TimerState.finished ? "Dismiss" : (TimerState.running || TimerState.paused ? "×" : "Start Timer")
             color: root.timerOrange
-            font.pixelSize: (TimerState.running || TimerState.paused) ? 22 : 16
+            font.pixelSize: (TimerState.running || TimerState.paused) ? 20 : 15
             font.bold: true
             font.family: SettingsState.fontFamily
           }
@@ -238,9 +239,9 @@ Item {
 
         // Pause / resume circle (only while running)
         Rectangle {
-          width: 48
-          height: 48
-          radius: 24
+          width: 40
+          height: 40
+          radius: 20
           visible: TimerState.running || TimerState.paused
           color: pauseMouse.containsMouse ? Qt.rgba(1.0, 0.62, 0.17, 0.28) : Qt.rgba(1.0, 0.62, 0.17, 0.16)
           border.color: Qt.rgba(1.0, 0.62, 0.17, 0.35)
@@ -249,7 +250,7 @@ Item {
             anchors.centerIn: parent
             text: TimerState.paused ? "▶" : "⏸"
             color: root.timerOrange
-            font.pixelSize: 16
+            font.pixelSize: 15
             font.family: SettingsState.fontFamily
           }
           MouseArea {
@@ -271,7 +272,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: TimerState.finished ? "00:00" : (TimerState.running || TimerState.paused ? TimerState.formatted : TimerState.selectedLabel)
         color: root.timerOrange
-        font.pixelSize: 50
+        font.pixelSize: 44
         font.bold: true
         font.family: SettingsState.fontFamily
 
