@@ -117,7 +117,7 @@ Item {
           trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
           waveColor: root.muted ? SettingsState.textMuted : root.activeColor,
           handleColor: root.muted ? "#666666" : root.activeColor,
-          trackW: 7,
+          trackW: 4.5,
           waveW: 4.5,
           waveAmp: 2.5,
           waveLen: height / 5, // Exactly 5 waves across full height

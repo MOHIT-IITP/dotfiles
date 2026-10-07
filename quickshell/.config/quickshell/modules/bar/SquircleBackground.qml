@@ -48,12 +48,12 @@ Canvas {
     var rx = r;
     var ry = r;
 
-    // Smoothly blend rounding power from 2.0 (pure circular capsule at 34px) to full target power
-    var blend = Math.min(1.0, Math.max(0.0, (h - 34) / 50.0));
+    // Smoothly blend rounding power from 2.0 (pure circular capsule at 30px) to full target power
+    var blend = Math.min(1.0, Math.max(0.0, (h - 30) / 50.0));
     var targetP = Math.max(1.0, power);
     var p = 2.0 + (targetP - 2.0) * blend;
     var invP = 2.0 / p;
-    var steps = 14;
+    var steps = 64;
 
     ctx.save();
     ctx.translate(inset, inset);

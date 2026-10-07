@@ -53,24 +53,46 @@ Column {
         }
       }
 
-      // Icon
-      CCIcon {
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        width: 18
-        height: 18
-        kind: "mic"
-        glyph: SettingsState.accent
-      }
+        width: micTitleGroup.implicitWidth + 4
+        height: 28
 
-      // Title
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "MICROPHONE INPUT"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 1.2
+        Row {
+          id: micTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Icon
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 18
+            height: 18
+            kind: "mic"
+            glyph: SettingsState.accent
+          }
+
+          // Title
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "MICROPHONE INPUT"
+            color: micTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(16)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 1.2
+          }
+        }
+
+        MouseArea {
+          id: micTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "main";
+          }
+        }
       }
     }
 

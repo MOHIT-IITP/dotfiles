@@ -64,24 +64,46 @@ Column {
         }
       }
 
-      // Kanji glyph
-      Text {
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        text: "電"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(18)
-        font.bold: true
-      }
+        width: powerTitleGroup.implicitWidth + 4
+        height: 26
 
-      // Title
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "POWER"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 1.5
+        Row {
+          id: powerTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Kanji glyph
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "電"
+            color: powerTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(18)
+            font.bold: true
+          }
+
+          // Title
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "POWER"
+            color: powerTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(16)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 1.5
+          }
+        }
+
+        MouseArea {
+          id: powerTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "main";
+          }
+        }
       }
     }
 

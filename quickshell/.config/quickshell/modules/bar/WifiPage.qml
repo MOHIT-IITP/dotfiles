@@ -55,24 +55,46 @@ Column {
         }
       }
 
-      // Kanji glyph
-      Text {
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        visible: SettingsState.japaneseGlyphs
-        text: "波"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(20)
-        font.bold: true
-      }
+        width: wifiTitleGroup.implicitWidth + 4
+        height: 28
 
-      // Title
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "WI-FI"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(17)
-        font.bold: true
-        font.family: SettingsState.fontFamily
+        Row {
+          id: wifiTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Kanji glyph
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: SettingsState.japaneseGlyphs
+            text: "波"
+            color: wifiTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(20)
+            font.bold: true
+          }
+
+          // Title
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "WI-FI"
+            color: wifiTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(17)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+        }
+
+        MouseArea {
+          id: wifiTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "main";
+          }
+        }
       }
     }
 

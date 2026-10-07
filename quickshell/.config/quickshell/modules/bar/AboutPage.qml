@@ -88,22 +88,45 @@ Column {
         }
       }
 
-      CCIcon {
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        width: 18
-        height: 18
-        kind: "about"
-        glyph: SettingsState.accent
-      }
+        width: aboutTitleGroup.implicitWidth + 4
+        height: 28
 
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "ABOUT"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 1.2
+        Row {
+          id: aboutTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 18
+            height: 18
+            kind: "about"
+            glyph: SettingsState.accent
+          }
+
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "ABOUT"
+            color: aboutTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(16)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 1.2
+          }
+        }
+
+        MouseArea {
+          id: aboutTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            page.adding = false;
+            circle.activePage = "main";
+          }
+        }
       }
     }
 
@@ -151,8 +174,7 @@ Column {
       radius: 14
       color: aboutRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
 
-      // Dashed outline (matches the hand-drawn sketch) — Qt Quick has no
-      // native dashed border, so it is stroked with Canvas over the fill.
+      // Dotted outline
       Canvas {
         anchors.fill: parent
         antialiasing: true
@@ -165,7 +187,7 @@ Column {
           ctx.reset();
           ctx.clearRect(0, 0, width, height);
           var r = 14;
-          var pad = 1;
+          var pad = 1.0;
           var x = pad, y = pad, w = width - pad * 2, h = height - pad * 2;
           ctx.beginPath();
           ctx.moveTo(x + r, y);
@@ -178,8 +200,9 @@ Column {
           ctx.lineTo(x, y + r);
           ctx.arcTo(x, y, x + r, y, r);
           ctx.closePath();
-          ctx.setLineDash([7, 5]);
-          ctx.lineWidth = 1.4;
+          ctx.lineCap = "round";
+          ctx.setLineDash([1.5, 4.5]);
+          ctx.lineWidth = 1.0;
           ctx.strokeStyle = dashHex;
           ctx.stroke();
         }

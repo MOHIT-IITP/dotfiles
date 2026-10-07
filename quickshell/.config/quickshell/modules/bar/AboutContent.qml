@@ -192,7 +192,7 @@ Item {
         radius: 14
         color: aboutRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
 
-        // Dashed outline (matches the hand-drawn sketch)
+        // Dotted outline
         Canvas {
           anchors.fill: parent
           antialiasing: true
@@ -205,7 +205,7 @@ Item {
             ctx.reset();
             ctx.clearRect(0, 0, width, height);
             var r = 14;
-            var pad = 1;
+            var pad = 1.0;
             var x = pad, y = pad, w = width - pad * 2, h = height - pad * 2;
             ctx.beginPath();
             ctx.moveTo(x + r, y);
@@ -218,8 +218,9 @@ Item {
             ctx.lineTo(x, y + r);
             ctx.arcTo(x, y, x + r, y, r);
             ctx.closePath();
-            try { ctx.setLineDash([7, 5]); } catch (e) {}
-            ctx.lineWidth = 1.4;
+            ctx.lineCap = "round";
+            try { ctx.setLineDash([1.5, 4.5]); } catch (e) {}
+            ctx.lineWidth = 1.0;
             ctx.strokeStyle = aboutRowMouse.containsMouse ? SettingsState.borderActive.toString() : SettingsState.textMuted.toString();
             ctx.stroke();
           }

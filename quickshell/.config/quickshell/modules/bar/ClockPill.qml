@@ -82,19 +82,19 @@ Rectangle {
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 158 : (showWeather ? 265 : 162)))))))))))) : 34
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 158 : (showWeather ? 265 : 162)))))))))))) : 30
   implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
 
-  radius: isExpanded ? SettingsState.cardRadius : implicitHeight / 2
-  color: isExpanded ? "transparent" : SettingsState.bgSurface
-  border.color: isExpanded ? "transparent" : SettingsState.barBorder
-  border.width: isExpanded ? 0 : 1
+  radius: isExpanded ? SettingsState.cardRadius : 15
+  color: (isExpanded || implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
+  border.color: (isExpanded || implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
+  border.width: (isExpanded || implicitHeight > 30.5) ? 0 : 1
   clip: true
 
   SquircleBackground {
     id: squircleBg
-    visible: root.isExpanded
-    radius: SettingsState.cardRadius
+    visible: root.isExpanded || root.implicitHeight > 30.5
+    radius: root.radius
     power: SettingsState.cardRoundingPower
     fillColor: SettingsState.bgCard
     strokeColor: SettingsState.barBorder
@@ -166,11 +166,6 @@ Rectangle {
     NumberAnimation {
       duration: 300
       easing.type: Easing.OutCubic
-    }
-  }
-  Behavior on color {
-    ColorAnimation {
-      duration: 180
     }
   }
 

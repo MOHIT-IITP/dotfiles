@@ -881,7 +881,7 @@ Column {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
       text: "Notifications"
-      color: "#d4dbd4"
+      color: SettingsState.textMain
       font.pixelSize: SettingsState.px(16)
       font.bold: true
       font.family: SettingsState.fontFamily
@@ -923,7 +923,7 @@ Column {
   Text {
     visible: NotifCenter.count === 0
     text: "No notifications"
-    color: "#6e756e"
+    color: SettingsState.textMuted
     font.pixelSize: SettingsState.px(15)
     font.family: SettingsState.fontFamily
   }

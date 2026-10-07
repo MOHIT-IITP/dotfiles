@@ -65,14 +65,14 @@ Rectangle {
   }
 
   implicitWidth: {
-    if (!netMouse.containsMouse) return 34;
+    if (!netMouse.containsMouse) return 30;
     if (root.activePage === "power") return 360;
     if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
     return 410;
   }
 
   implicitHeight: {
-    if (!netMouse.containsMouse) return 34;
+    if (!netMouse.containsMouse) return 30;
     if (root.activePage === "power") return 138;
     if (root.activePage === "settings") return settingsPage.implicitHeight + 76;
     if (root.activePage === "sound" || root.activePage === "mic") return 520;
@@ -90,16 +90,16 @@ Rectangle {
     }
     return mainPage.implicitHeight + 36;
   }
-  radius: netMouse.containsMouse ? SettingsState.cardRadius : 17
-  color: netMouse.containsMouse ? "transparent" : SettingsState.bgSurface
-  border.color: netMouse.containsMouse ? "transparent" : SettingsState.barBorder
-  border.width: netMouse.containsMouse ? 0 : 1
+  radius: netMouse.containsMouse ? SettingsState.cardRadius : 15
+  color: (netMouse.containsMouse || implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
+  border.color: (netMouse.containsMouse || implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
+  border.width: (netMouse.containsMouse || implicitHeight > 30.5) ? 0 : 1
   clip: true
 
   SquircleBackground {
     id: squircleBg
-    visible: netMouse.containsMouse
-    radius: SettingsState.cardRadius
+    visible: netMouse.containsMouse || root.implicitHeight > 30.5
+    radius: root.radius
     power: SettingsState.cardRoundingPower
     fillColor: SettingsState.bgCard
     strokeColor: SettingsState.barBorder

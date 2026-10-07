@@ -54,25 +54,47 @@ Column {
         }
       }
 
-      // Japanese Kanji Glyph "調" (Tune / Mix)
-      Text {
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        visible: SettingsState.japaneseGlyphs
-        text: "調"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(20)
-        font.bold: true
-      }
+        width: mixerTitleGroup.implicitWidth + 4
+        height: 28
 
-      // Title
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "MIXER"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 2
+        Row {
+          id: mixerTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Japanese Kanji Glyph "調" (Tune / Mix)
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: SettingsState.japaneseGlyphs
+            text: "調"
+            color: mixerTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(20)
+            font.bold: true
+          }
+
+          // Title
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "MIXER"
+            color: mixerTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(16)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 2
+          }
+        }
+
+        MouseArea {
+          id: mixerTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "main";
+          }
+        }
       }
     }
 

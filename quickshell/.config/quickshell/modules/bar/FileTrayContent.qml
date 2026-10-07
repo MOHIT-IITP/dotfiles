@@ -80,16 +80,18 @@ Item {
     // dashed overlay to mimic the mockup
     Canvas {
       anchors.fill: parent
+      antialiasing: true
+      renderStrategy: Canvas.Immediate
       onPaint: {
         var ctx = getContext("2d");
         ctx.reset();
         ctx.clearRect(0, 0, width, height);
-        try { ctx.setLineDash([7, 6]); } catch (e) {}
+        try { ctx.setLineDash([5, 4]); } catch (e) {}
         ctx.strokeStyle = root.dndActive ? SettingsState.accent.toString() : SettingsState.borderBase.toString();
-        ctx.lineWidth = root.dndActive ? 2 : 1.2;
-        var r = 30, lw = ctx.lineWidth;
+        ctx.lineWidth = root.dndActive ? 1.5 : 1.0;
+        var r = 24, pad = ctx.lineWidth / 2;
         ctx.beginPath();
-        var x = lw, y = lw, w = width - lw * 2, h = height - lw * 2;
+        var x = pad, y = pad, w = width - pad * 2, h = height - pad * 2;
         ctx.moveTo(x + r, y);
         ctx.arcTo(x + w, y, x + w, y + h, r);
         ctx.arcTo(x + w, y + h, x, y + h, r);
@@ -103,6 +105,11 @@ Item {
       Connections {
         target: root
         function onDndActiveChanged() { parent.requestPaint(); }
+      }
+      Connections {
+        target: SettingsState
+        function onIsDarkChanged() { parent.requestPaint(); }
+        function onAccentChanged() { parent.requestPaint(); }
       }
     }
 
@@ -258,6 +265,50 @@ Item {
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
+            MouseArea {
+              id: chipMouse
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+              acceptedButtons: Qt.LeftButton | Qt.RightButton
+              propagateComposedEvents: false
+              preventStealing: true
+              drag.target: dragProxy
+              drag.axis: Drag.XAndYAxis
+
+              property bool dragging: false
+
+              onPressed: function(ev) {
+                dragging = false;
+                chip.grabToImage(function(result) {
+                  chip.Drag.imageSource = result.url;
+                });
+              }
+              onPositionChanged: {
+                if (chipMouse.drag.active) dragging = true;
+              }
+              onClicked: function(ev) {
+                if (dragging) {
+                  dragging = false;
+                  return;
+                }
+                var p = cell.modelData ? cell.modelData.path : "";
+                if ((ev.modifiers & Qt.ShiftModifier) && ev.button === Qt.LeftButton) {
+                  root.toggleSelect(p);
+                  return;
+                }
+                root.clearSelection();
+                if (ev.button === Qt.LeftButton) {
+                  FileTrayState.openFile(cell.index);
+                } else if (ev.button === Qt.RightButton) {
+                  FileTrayState.removeAt(cell.index);
+                }
+              }
+              onPressAndHold: {
+                FileTrayState.revealFile(cell.index);
+              }
+            }
+
             Column {
               anchors.centerIn: parent
               spacing: 3
@@ -319,77 +370,38 @@ Item {
             }
 
             Rectangle {
+              z: 10
               anchors.top: parent.top
               anchors.right: parent.right
               anchors.margins: 4
-              width: 17
-              height: 17
-              radius: 8.5
+              width: 18
+              height: 18
+              radius: 9
               color: rmMouse.containsMouse ? "#e86a65" : SettingsState.bgCard
-              border.color: SettingsState.borderBase
+              border.color: rmMouse.containsMouse ? "#e86a65" : SettingsState.borderBase
               border.width: 1
-              visible: chipMouse.containsMouse
+              visible: chipMouse.containsMouse || rmMouse.containsMouse
+
               Text {
                 anchors.centerIn: parent
                 text: "\uea76"
-                font.pixelSize: SettingsState.px(8)
+                font.pixelSize: SettingsState.px(9)
                 font.bold: true
                 color: rmMouse.containsMouse ? "#fff" : SettingsState.textMuted
                 font.family: SettingsState.nerdIconFont
               }
+
               MouseArea {
                 id: rmMouse
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton
+                preventStealing: true
                 onClicked: function(ev) {
                   FileTrayState.removeAt(cell.index);
                   ev.accepted = true;
                 }
-              }
-            }
-
-            MouseArea {
-              id: chipMouse
-              anchors.fill: parent
-              hoverEnabled: true
-              cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
-              acceptedButtons: Qt.LeftButton | Qt.RightButton
-              propagateComposedEvents: false
-              preventStealing: true
-              drag.target: dragProxy
-              drag.axis: Drag.XAndYAxis
-
-              property bool dragging: false
-
-              onPressed: function(ev) {
-                dragging = false;
-                chip.grabToImage(function(result) {
-                  chip.Drag.imageSource = result.url;
-                });
-              }
-              onPositionChanged: {
-                if (chipMouse.drag.active) dragging = true;
-              }
-              onClicked: function(ev) {
-                if (dragging) {
-                  dragging = false;
-                  return;
-                }
-                var p = cell.modelData ? cell.modelData.path : "";
-                if ((ev.modifiers & Qt.ShiftModifier) && ev.button === Qt.LeftButton) {
-                  root.toggleSelect(p);
-                  return;
-                }
-                root.clearSelection();
-                if (ev.button === Qt.LeftButton) {
-                  FileTrayState.openFile(cell.index);
-                } else if (ev.button === Qt.RightButton) {
-                  FileTrayState.removeAt(cell.index);
-                }
-              }
-              onPressAndHold: {
-                FileTrayState.revealFile(cell.index);
               }
             }
           }

@@ -204,7 +204,7 @@ Column {
           waveColor: root.muted ? SettingsState.textMuted : SettingsState.accent,
           trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
           handleColor: root.muted ? SettingsState.textMuted : SettingsState.accent,
-          trackH: 8,
+          trackH: 5,
           waveW: 5,
           waveAmp: 2.5,
           waveLen: root.waveLen > 0 ? root.waveLen : (width / 5),

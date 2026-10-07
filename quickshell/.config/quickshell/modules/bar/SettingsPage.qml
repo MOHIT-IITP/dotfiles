@@ -31,28 +31,52 @@ Item {
     height: 32
     z: 10
 
-    Row {
+    Item {
       anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      width: titleRow.implicitWidth + 8
 
-      Text {
+      Row {
+        id: titleRow
+        anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        visible: SettingsState.japaneseGlyphs
-        text: circle.settingsSub === "general" ? "般" : (circle.settingsSub === "ui" ? "面" : (circle.settingsSub === "theme" ? "色" : "相"))
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(20)
-        font.bold: true
+        spacing: 10
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          visible: SettingsState.japaneseGlyphs
+          text: circle.settingsSub === "general" ? "般" : (circle.settingsSub === "ui" ? "面" : (circle.settingsSub === "theme" ? "色" : "相"))
+          color: titleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+          font.pixelSize: SettingsState.px(20)
+          font.bold: true
+        }
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          text: circle.settingsSub === "general" ? "GENERAL" : (circle.settingsSub === "ui" ? "UI" : (circle.settingsSub === "theme" ? "THEME" : "CONFIG"))
+          color: titleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+          font.pixelSize: SettingsState.px(16)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+          font.letterSpacing: 1.5
+        }
       }
 
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: circle.settingsSub === "general" ? "GENERAL" : (circle.settingsSub === "ui" ? "UI" : (circle.settingsSub === "theme" ? "THEME" : "CONFIG"))
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 1.5
+      MouseArea {
+        id: titleMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+          if (circle.settingsSub !== "") {
+            circle.fontDropdownOpen = false;
+            circle.settingsSub = "";
+          } else {
+            circle.fontDropdownOpen = false;
+            circle.activePage = "main";
+          }
+        }
       }
     }
 
@@ -583,7 +607,7 @@ Item {
           }
         }
 
-        // 7. UI scale: (scale) UI scale -> 90% | 100% | 110% | 125% | 135%
+        // 7. UI scale: labels 90% | 100% | 110% | 125% | 135% map to 1.35x effective (100% -> 1.35 look)
         Item {
           width: parent.width
           height: 30
@@ -617,11 +641,11 @@ Item {
 
             Repeater {
               model: [
-                { label: "90%", val: 0.9 },
-                { label: "100%", val: 1.0 },
-                { label: "110%", val: 1.1 },
-                { label: "125%", val: 1.25 },
-                { label: "135%", val: 1.35 }
+                { label: "90%", val: 0.9 * 1.35 },
+                { label: "100%", val: 1.0 * 1.35 },
+                { label: "110%", val: 1.1 * 1.35 },
+                { label: "125%", val: 1.25 * 1.35 },
+                { label: "135%", val: 1.35 * 1.35 }
               ]
               delegate: Rectangle {
                 width: sText.implicitWidth + 12

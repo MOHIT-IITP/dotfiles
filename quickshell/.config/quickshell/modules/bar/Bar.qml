@@ -134,7 +134,7 @@ Scope {
         visible: !RecorderState.selectingArea
         // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap.
         // While auto-hide is enabled, exclusiveZone stays 0 so windows don't jump/resize on hover.
-        exclusiveZone: (!SettingsState.barAutoHide && screenScope.barRevealed) ? Math.round((34 + 6 + SettingsState.barGap) * SettingsState.uiScale) : 0
+        exclusiveZone: (!SettingsState.barAutoHide && screenScope.barRevealed) ? Math.round((30 + 6 + SettingsState.barGap) * SettingsState.uiScale) : 0
 
         readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || (netCircle && (netCircle.fontDropdownOpen || netCircle.aboutInputOpen))
 
@@ -300,20 +300,19 @@ Scope {
           Rectangle {
             anchors.fill: clockPill
             radius: clockPill.radius
-            color: clockPill.isExpanded ? "transparent" : SettingsState.bgSurface
+            color: "transparent"
             visible: clockPill.visible
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
               shadowColor: SettingsState.shadowColor
               shadowBlur: 0.4
-              shadowVerticalOffset: 2
+              shadowVerticalOffset: 0
               shadowHorizontalOffset: 0
             }
 
             SquircleBackground {
-              visible: clockPill.isExpanded
-              radius: SettingsState.cardRadius
+              radius: clockPill.radius
               power: SettingsState.cardRoundingPower
               fillColor: SettingsState.bgCard
               strokeColor: "transparent"
@@ -324,20 +323,19 @@ Scope {
           Rectangle {
             anchors.fill: mediaPlayer
             radius: mediaPlayer.radius
-            color: mediaPlayer.hovered ? "transparent" : SettingsState.bgSurface
+            color: "transparent"
             visible: mediaPlayer.visible
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
               shadowColor: SettingsState.shadowColor
               shadowBlur: 0.4
-              shadowVerticalOffset: 2
+              shadowVerticalOffset: 0
               shadowHorizontalOffset: 0
             }
 
             SquircleBackground {
-              visible: mediaPlayer.hovered
-              radius: SettingsState.cardRadius
+              radius: mediaPlayer.radius
               power: SettingsState.cardRoundingPower
               fillColor: SettingsState.bgCard
               strokeColor: "transparent"
@@ -348,20 +346,19 @@ Scope {
           Rectangle {
             anchors.fill: netCircle
             radius: netCircle.radius
-            color: netCircle.hovered ? "transparent" : SettingsState.bgSurface
+            color: "transparent"
             visible: netCircle.visible
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
               shadowColor: SettingsState.shadowColor
               shadowBlur: 0.4
-              shadowVerticalOffset: 2
+              shadowVerticalOffset: 0
               shadowHorizontalOffset: 0
             }
 
             SquircleBackground {
-              visible: netCircle.hovered
-              radius: SettingsState.cardRadius
+              radius: netCircle.radius
               power: SettingsState.cardRoundingPower
               fillColor: SettingsState.bgCard
               strokeColor: "transparent"

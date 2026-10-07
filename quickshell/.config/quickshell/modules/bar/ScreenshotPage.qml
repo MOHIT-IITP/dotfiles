@@ -57,23 +57,40 @@ Item {
           }
         }
 
-        Column {
+        Item {
           anchors.verticalCenter: parent.verticalCenter
-          spacing: 1
+          width: shotTitleCol.implicitWidth + 4
+          height: 32
 
-          Text {
-            text: "Capture"
-            color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(18)
-            font.bold: true
-            font.family: SettingsState.fontFamily
+          Column {
+            id: shotTitleCol
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 1
+
+            Text {
+              text: "Capture"
+              color: shotTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+              font.pixelSize: SettingsState.px(18)
+              font.bold: true
+              font.family: SettingsState.fontFamily
+            }
+
+            Text {
+              text: "Screen capture"
+              color: shotTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMuted
+              font.pixelSize: SettingsState.px(13)
+              font.family: SettingsState.fontFamily
+            }
           }
 
-          Text {
-            text: "Screen capture"
-            color: SettingsState.textMuted
-            font.pixelSize: SettingsState.px(13)
-            font.family: SettingsState.fontFamily
+          MouseArea {
+            id: shotTitleMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+              circle.activePage = "main";
+            }
           }
         }
       }

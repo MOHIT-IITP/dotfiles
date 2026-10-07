@@ -55,24 +55,46 @@ Column {
         }
       }
 
-      // Kanji glyph
-      Text {
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        visible: SettingsState.japaneseGlyphs
-        text: "歯"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(20)
-        font.bold: true
-      }
+        width: btTitleGroup.implicitWidth + 4
+        height: 28
 
-      // Title
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "BLUETOOTH"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(17)
-        font.bold: true
-        font.family: SettingsState.fontFamily
+        Row {
+          id: btTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Kanji glyph
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: SettingsState.japaneseGlyphs
+            text: "歯"
+            color: btTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(20)
+            font.bold: true
+          }
+
+          // Title
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "BLUETOOTH"
+            color: btTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(17)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+        }
+
+        MouseArea {
+          id: btTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "main";
+          }
+        }
       }
     }
 

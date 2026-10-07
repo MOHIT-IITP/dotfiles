@@ -31,14 +31,14 @@ Column {
         width: 26
         height: 26
         radius: 13
-        color: recBackMouse.containsMouse ? "#252b25" : "transparent"
+        color: recBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
-            font.family: SettingsState.nerdIconFont
-          color: "#f2f2f2"
+          font.family: SettingsState.nerdIconFont
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
@@ -54,25 +54,48 @@ Column {
         }
       }
 
-      // Japanese Kanji Glyph "録" (Record)
-      Text {
+      // Title + Kanji clickable as back button
+      Item {
         anchors.verticalCenter: parent.verticalCenter
-        visible: SettingsState.japaneseGlyphs
-        text: "録"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(20)
-        font.bold: true
-      }
+        width: recTitleGroup.implicitWidth + 4
+        height: 28
 
-      // Title
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "RECORD"
-        color: "#f2f2f2"
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 2
+        Row {
+          id: recTitleGroup
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 6
+
+          // Japanese Kanji Glyph "録" (Record)
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: SettingsState.japaneseGlyphs
+            text: "録"
+            color: recTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(20)
+            font.bold: true
+          }
+
+          // Title
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "RECORD"
+            color: recTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
+            font.pixelSize: SettingsState.px(16)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 2
+          }
+        }
+
+        MouseArea {
+          id: recTitleMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "main";
+          }
+        }
       }
     }
 
@@ -130,8 +153,8 @@ Column {
         height: 24
         width: recStatusRow.implicitWidth + 16
         radius: 12
-        color: RecorderState.isRecording ? "#3a1b1b" : "#171c17"
-        border.color: RecorderState.isRecording ? "#662c2c" : "#283028"
+        color: RecorderState.isRecording ? (SettingsState.isDark ? "#3a1b1b" : "#ffe5e5") : SettingsState.bgCard
+        border.color: RecorderState.isRecording ? (SettingsState.isDark ? "#662c2c" : "#ffb3b3") : SettingsState.borderBase
         border.width: 1
 
         Row {
@@ -144,7 +167,7 @@ Column {
             width: 8
             height: 8
             radius: 4
-            color: RecorderState.isRecording ? "#ff5252" : "#7ee2a8"
+            color: RecorderState.isRecording ? "#e05f65" : (SettingsState.isDark ? "#7ee2a8" : "#2e7d32")
 
             SequentialAnimation on opacity {
               running: RecorderState.isRecording
@@ -157,7 +180,7 @@ Column {
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: RecorderState.isRecording ? ("REC " + RecorderState.formattedTime) : "IDLE"
-            color: RecorderState.isRecording ? "#ff8a8a" : "#7ee2a8"
+            color: RecorderState.isRecording ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : (SettingsState.isDark ? "#7ee2a8" : "#2e7d32")
             font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -172,7 +195,7 @@ Column {
   Rectangle {
     width: parent.width
     height: 1
-    color: "#252b25"
+    color: SettingsState.borderBase
   }
 
   // 2. Preset Frame Card with Corner Brackets
@@ -180,8 +203,8 @@ Column {
     width: parent.width
     height: 60
     radius: 12
-    color: "#161b16"
-    border.color: "#252c25"
+    color: SettingsState.bgCard
+    border.color: SettingsState.borderBase
     border.width: 1
 
     // Top-Left bracket: ⌜
@@ -190,7 +213,7 @@ Column {
       anchors.top: parent.top
       anchors.margins: 4
       text: "⌜"
-      color: "#e05f65"
+      color: SettingsState.accent
       font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
@@ -200,7 +223,7 @@ Column {
       anchors.top: parent.top
       anchors.margins: 4
       text: "⌝"
-      color: "#e05f65"
+      color: SettingsState.accent
       font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
@@ -210,7 +233,7 @@ Column {
       anchors.bottom: parent.bottom
       anchors.margins: 4
       text: "⌞"
-      color: "#e05f65"
+      color: SettingsState.accent
       font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
@@ -220,7 +243,7 @@ Column {
       anchors.bottom: parent.bottom
       anchors.margins: 4
       text: "⌟"
-      color: "#e05f65"
+      color: SettingsState.accent
       font.pixelSize: SettingsState.px(16)
       font.bold: true
     }
@@ -240,7 +263,7 @@ Column {
           spacing: 6
           Text {
             text: "Screen recorder"
-            color: "#f2f2f2"
+            color: SettingsState.textMain
             font.pixelSize: SettingsState.px(15)
             font.bold: true
             font.family: SettingsState.fontFamily
@@ -249,7 +272,7 @@ Column {
 
         Text {
           text: RecorderState.mode === "area" ? (RecorderState.areaGeometry !== "" ? ("• 60 fps • High quality • " + RecorderState.areaGeometry) : "• 60 fps • High quality • Select an area") : "• 60 fps • High quality • Fullscreen"
-          color: "#8e998e"
+          color: SettingsState.textSecondary
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
@@ -268,8 +291,8 @@ Column {
       width: (parent.width - 8) / 2
       height: 40
       radius: 12
-      color: (RecorderState.mode === "fullscreen") ? "#223022" : (fullMouse.containsMouse ? "#1d241d" : "#161b16")
-      border.color: (RecorderState.mode === "fullscreen") ? "#4a6b4a" : (fullMouse.containsMouse ? "#425842" : "#252c25")
+      color: (RecorderState.mode === "fullscreen") ? SettingsState.bgActivePill : (fullMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+      border.color: (RecorderState.mode === "fullscreen") ? SettingsState.borderActive : (fullMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
       border.width: 1
 
       Row {
@@ -280,12 +303,12 @@ Column {
           width: 15
           height: 15
           kind: "display"
-          glyph: (RecorderState.mode === "fullscreen") ? "#7ee2a8" : SettingsState.textSecondary
+          glyph: (RecorderState.mode === "fullscreen") ? SettingsState.accent : SettingsState.textSecondary
         }
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "Fullscreen"
-          color: (RecorderState.mode === "fullscreen") ? "#f2f2f2" : SettingsState.textMain
+          color: (RecorderState.mode === "fullscreen") ? SettingsState.textActive : SettingsState.textMain
           font.pixelSize: SettingsState.px(14)
           font.bold: RecorderState.mode === "fullscreen"
           font.family: SettingsState.fontFamily
@@ -307,8 +330,8 @@ Column {
       width: (parent.width - 8) / 2
       height: 40
       radius: 12
-      color: (RecorderState.mode === "area") ? "#223022" : (areaRecMouse.containsMouse ? "#1d241d" : "#161b16")
-      border.color: (RecorderState.mode === "area") ? "#4a6b4a" : (areaRecMouse.containsMouse ? "#425842" : "#252c25")
+      color: (RecorderState.mode === "area") ? SettingsState.bgActivePill : (areaRecMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+      border.color: (RecorderState.mode === "area") ? SettingsState.borderActive : (areaRecMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
       border.width: 1
 
       Row {
@@ -319,12 +342,12 @@ Column {
           width: 15
           height: 15
           kind: "area"
-          glyph: (RecorderState.mode === "area") ? "#7ee2a8" : SettingsState.textSecondary
+          glyph: (RecorderState.mode === "area") ? SettingsState.accent : SettingsState.textSecondary
         }
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "Record area"
-          color: (RecorderState.mode === "area") ? "#f2f2f2" : SettingsState.textMain
+          color: (RecorderState.mode === "area") ? SettingsState.textActive : SettingsState.textMain
           font.pixelSize: SettingsState.px(14)
           font.bold: RecorderState.mode === "area"
           font.family: SettingsState.fontFamily
@@ -353,8 +376,8 @@ Column {
     width: parent.width
     height: RecorderState.mode === "area" ? 36 : 0
     radius: 12
-    color: "#161b16"
-    border.color: "#252c25"
+    color: SettingsState.bgCard
+    border.color: SettingsState.borderBase
     border.width: 1
     clip: true
 
@@ -370,7 +393,7 @@ Column {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - selectAreaBtn.width - (clearAreaBtn.visible ? clearAreaBtn.width + 8 : 0) - 24
         text: RecorderState.selectingArea ? "Drag to select area..." : (RecorderState.areaGeometry !== "" ? ("◈ " + RecorderState.areaGeometry) : "No area selected")
-        color: RecorderState.areaGeometry !== "" ? "#7ee2a8" : "#8e998e"
+        color: RecorderState.areaGeometry !== "" ? SettingsState.accent : SettingsState.textMuted
         font.pixelSize: SettingsState.px(13)
         font.family: "monospace"
         elide: Text.ElideRight
@@ -383,15 +406,15 @@ Column {
         height: 24
         width: clearAreaTxt.implicitWidth + 14
         radius: 12
-        color: clearAreaMouse.containsMouse ? "#322222" : "#221a1a"
-        border.color: "#382525"
+        color: clearAreaMouse.containsMouse ? (SettingsState.isDark ? "#322222" : "#ffe0e0") : (SettingsState.isDark ? "#221a1a" : "#fff0f0")
+        border.color: SettingsState.isDark ? "#382525" : "#ffcccc"
         border.width: 1
 
         Text {
           id: clearAreaTxt
           anchors.centerIn: parent
           text: "\uea76"
-          color: "#ff8a8a"
+          color: SettingsState.isDark ? "#ff8a8a" : "#d32f2f"
           font.family: SettingsState.nerdIconFont
           font.pixelSize: SettingsState.px(12)
           font.bold: true
@@ -412,15 +435,15 @@ Column {
         height: 24
         width: selectAreaTxt.implicitWidth + 16
         radius: 12
-        color: RecorderState.selectingArea ? "#223022" : (selAreaMouse.containsMouse ? "#2a3a2a" : "#1e2a1e")
-        border.color: "#4a6b4a"
+        color: RecorderState.selectingArea ? SettingsState.bgActivePill : (selAreaMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+        border.color: SettingsState.borderActive
         border.width: 1
 
         Text {
           id: selectAreaTxt
           anchors.centerIn: parent
           text: RecorderState.selectingArea ? "..." : (RecorderState.areaGeometry !== "" ? "RESELECT" : "SELECT")
-          color: "#7ee2a8"
+          color: SettingsState.accent
           font.pixelSize: SettingsState.px(12)
           font.bold: true
           font.family: SettingsState.fontFamily
@@ -443,8 +466,8 @@ Column {
     width: parent.width
     height: 48
     radius: 24
-    color: RecorderState.isRecording ? "#3d1818" : (recBtnMouse.containsMouse ? "#242e24" : "#1b231b")
-    border.color: RecorderState.isRecording ? "#ff5252" : (recBtnMouse.containsMouse ? "#425842" : "#2d382d")
+    color: RecorderState.isRecording ? (SettingsState.isDark ? "#3d1818" : "#ffe0e0") : (recBtnMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+    border.color: RecorderState.isRecording ? "#e05f65" : (recBtnMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
     border.width: 1.5
 
     Behavior on color { ColorAnimation { duration: 150 } }
@@ -459,7 +482,7 @@ Column {
         width: 24
         height: 24
         radius: 12
-        color: RecorderState.isRecording ? "#ff5252" : "#e05f65"
+        color: "#e05f65"
 
         Rectangle {
           anchors.centerIn: parent
@@ -473,7 +496,7 @@ Column {
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: RecorderState.isRecording ? ("Stop recording (" + RecorderState.formattedTime + ")") : (RecorderState.selectingArea ? "Select area on screen..." : ((RecorderState.mode === "area" && RecorderState.areaGeometry === "") ? "Select area & record" : "Start recording"))
-        color: RecorderState.isRecording ? "#ff8a8a" : "#f2f2f2"
+        color: RecorderState.isRecording ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.textMain
         font.pixelSize: SettingsState.px(16)
         font.bold: true
         font.family: SettingsState.fontFamily
@@ -494,8 +517,8 @@ Column {
     width: parent.width
     height: 84 + (circle.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0)
     radius: 14
-    color: "#161b16"
-    border.color: "#252c25"
+    color: SettingsState.bgCard
+    border.color: SettingsState.borderBase
     border.width: 1
     clip: true
 
@@ -519,13 +542,16 @@ Column {
           width: 24
           height: 24
           radius: 12
-          color: AudioState.inMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgCard
+          color: AudioState.inMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgSurface
+          border.color: SettingsState.borderBase
+          border.width: 1
+
           CCIcon {
             anchors.centerIn: parent
             width: 12
             height: 12
             kind: "mic"
-            glyph: AudioState.inMuted ? "#ff8a8a" : SettingsState.accent
+            glyph: AudioState.inMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.accent
           }
           MouseArea {
             anchors.fill: parent
@@ -541,7 +567,7 @@ Column {
           height: 24
           width: Math.min(150, rMicDevRow.implicitWidth + 16)
           radius: 12
-          color: circle.recMicDropdownOpen ? SettingsState.bgActivePill : (rMicDevMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+          color: circle.recMicDropdownOpen ? SettingsState.bgActivePill : (rMicDevMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
           border.color: circle.recMicDropdownOpen ? SettingsState.borderActive : (rMicDevMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
           border.width: 1
           clip: true
@@ -642,7 +668,7 @@ Column {
                 waveColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
                 trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
                 handleColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
-                trackH: 5,
+                trackH: 4.5,
                 waveW: 4.5,
                 waveAmp: 2.2,
                 waveLen: width / 5,
@@ -701,7 +727,7 @@ Column {
           anchors.verticalCenter: parent.verticalCenter
           width: 38
           text: AudioState.inMuted ? "Mute" : (Math.round(AudioState.inVol * 100) + "%")
-          color: AudioState.inMuted ? "#ff8a8a" : SettingsState.textSecondary
+          color: AudioState.inMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.textSecondary
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           horizontalAlignment: Text.AlignRight
@@ -754,8 +780,8 @@ Column {
               anchors.verticalCenter: parent.verticalCenter
               visible: modelData.isDefault
               text: "\ueab2"
-                font.family: SettingsState.nerdIconFont
-              color: SettingsState.isDark ? "#121612" : "#ffffff"
+              font.family: SettingsState.nerdIconFont
+              color: SettingsState.accent
               font.pixelSize: SettingsState.px(14)
               font.bold: true
             }
@@ -785,13 +811,16 @@ Column {
           width: 24
           height: 24
           radius: 12
-          color: AudioState.outMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgCard
+          color: AudioState.outMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgSurface
+          border.color: SettingsState.borderBase
+          border.width: 1
+
           CCIcon {
             anchors.centerIn: parent
             width: 12
             height: 12
             kind: "sound"
-            glyph: AudioState.outMuted ? "#ff8a8a" : SettingsState.accent
+            glyph: AudioState.outMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.accent
           }
           MouseArea {
             anchors.fill: parent
@@ -872,7 +901,7 @@ Column {
                 waveColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
                 trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
                 handleColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
-                trackH: 5,
+                trackH: 4.5,
                 waveW: 4.5,
                 waveAmp: 2.2,
                 waveLen: width / 5,
@@ -931,7 +960,7 @@ Column {
           anchors.verticalCenter: parent.verticalCenter
           width: 38
           text: AudioState.outMuted ? "Mute" : (Math.round(AudioState.outVol * 100) + "%")
-          color: AudioState.outMuted ? "#ff8a8a" : SettingsState.textSecondary
+          color: AudioState.outMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.textSecondary
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
           horizontalAlignment: Text.AlignRight
@@ -1049,15 +1078,15 @@ Column {
       width: clearRecText.implicitWidth + 12
       radius: 10
       visible: RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0
-      color: clearRecMouse.containsMouse ? "#322222" : "#221a1a"
-      border.color: clearRecMouse.containsMouse ? "#553030" : "#382525"
+      color: clearRecMouse.containsMouse ? (SettingsState.isDark ? "#322222" : "#ffe0e0") : (SettingsState.isDark ? "#221a1a" : "#fff0f0")
+      border.color: clearRecMouse.containsMouse ? (SettingsState.isDark ? "#553030" : "#ffb3b3") : (SettingsState.isDark ? "#382525" : "#ffcccc")
       border.width: 1
 
       Text {
         id: clearRecText
         anchors.centerIn: parent
         text: "払 CLEAR"
-        color: "#ff8a8a"
+        color: SettingsState.isDark ? "#ff8a8a" : "#d32f2f"
         font.pixelSize: SettingsState.px(12)
         font.bold: true
         font.family: SettingsState.fontFamily

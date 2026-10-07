@@ -18,8 +18,8 @@ Rectangle {
   }
   width: ListView.view.width
   radius: 18
-  color: "#181d18"
-  border.color: "#252c25"
+  color: SettingsState.bgCardHover
+  border.color: SettingsState.borderBase
   border.width: 1
   implicitHeight: nrow.implicitHeight + 12
 
@@ -39,7 +39,7 @@ Rectangle {
       width: 24
       height: 24
       radius: 12
-      color: "#2c302c"
+      color: SettingsState.bgActivePill
       Image {
         id: nicon
         anchors.centerIn: parent
@@ -61,7 +61,7 @@ Rectangle {
         height: 14
         visible: nicon.status !== Image.Ready
         kind: NotifCenter.iconKindFor(entry)
-        glyph: "#9aa39a"
+        glyph: SettingsState.textSecondary
       }
     }
 
@@ -71,7 +71,7 @@ Rectangle {
       spacing: 0
       Text {
         text: (entry && entry.appName) ? entry.appName : ""
-        color: "#9aa39a"
+        color: SettingsState.textSecondary
         font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
@@ -81,7 +81,7 @@ Rectangle {
         width: parent.width
         text: (entry && entry.summary) ? entry.summary : ""
         textFormat: Text.PlainText
-        color: "#f2f2f2"
+        color: SettingsState.textMain
         font.pixelSize: SettingsState.px(13)
         font.bold: true
         elide: Text.ElideRight
@@ -92,7 +92,7 @@ Rectangle {
         visible: entry && entry.body !== ""
         text: (entry && entry.body) ? entry.body : ""
         textFormat: Text.PlainText
-        color: "#9aa39a"
+        color: SettingsState.textSecondary
         font.pixelSize: SettingsState.px(12)
         elide: Text.ElideRight
         maximumLineCount: 1
@@ -107,7 +107,7 @@ Rectangle {
         var ctx = getContext("2d");
         ctx.reset();
         ctx.clearRect(0, 0, width, height);
-        ctx.strokeStyle = "#6e756e";
+        ctx.strokeStyle = SettingsState.textMuted;
         ctx.lineWidth = 1.6;
         ctx.lineCap = "round";
         ctx.beginPath();

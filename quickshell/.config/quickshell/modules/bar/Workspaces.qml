@@ -7,7 +7,7 @@ import "../services"
 Rectangle {
   id: root
 
-  implicitHeight: 34
+  implicitHeight: 30
   implicitWidth: wsRow.implicitWidth + 24
   radius: implicitHeight / 2
   color: SettingsState.bgSurface

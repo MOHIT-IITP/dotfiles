@@ -18,8 +18,8 @@ Singleton {
   property string wallpaperFolder: "~/Pictures/Wallpapers"
   property string wallpaperResizeMode: "crop" // "crop" (Fill) | "fit" | "stretch" | "no" (Center)
 
-  // 3. UI scale & Bar Gap
-  property real uiScale: 1.0
+  // 3. UI scale & Bar Gap (100% label = 1.35 effective)
+  property real uiScale: 1.35
   property int barGap: 2 // Extra gap below bar in pixels (0 - 24px)
   property bool barAutoHide: false // slide the bar away until the cursor hits the top edge
 
@@ -84,7 +84,7 @@ Singleton {
 
   // Reactive Theme Palettes (blend light -> dark via themeBlend).
   // Dark end is pure black / neutral grays so Dark gives a true black bar.
-  readonly property color bgSurface: mixc(tint(0.06, 0.95, 0.96), Qt.rgba(0, 0, 0, 0.96), themeBlend)
+  readonly property color bgSurface: mixc(tint(0.08, 0.89, 1.0), Qt.rgba(0, 0, 0, 1.0), themeBlend)
 
   readonly property color bgCard: mixc(tint(0.08, 0.89, 1.0), cardDark(0.50, 0.20, Qt.rgba(0, 0, 0, 1.0)), themeBlend)
 
@@ -92,12 +92,12 @@ Singleton {
 
   readonly property color bgActivePill: mixc(tint(0.30, 0.82, 1.0), cardDark(0.55, 0.28, Qt.rgba(0.16, 0.16, 0.16, 1.0)), themeBlend)
 
-  readonly property color borderBase: mixc(tint(0.18, 0.75, 1.0), cardDark(0.35, 0.30, Qt.rgba(0.22, 0.22, 0.22, 1.0)), themeBlend)
+  readonly property color borderBase: mixc(tint(0.18, 0.75, 1.0), cardDark(0.25, 0.16, Qt.rgba(0.13, 0.13, 0.13, 1.0)), themeBlend)
 
-  readonly property color borderActive: mixc(tint(0.45, 0.60, 1.0), cardDark(0.55, 0.38, Qt.rgba(0.32, 0.32, 0.32, 1.0)), themeBlend)
+  readonly property color borderActive: mixc(tint(0.45, 0.60, 1.0), cardDark(0.45, 0.28, Qt.rgba(0.24, 0.24, 0.24, 1.0)), themeBlend)
 
-  // Lighter border for the top bar pills (clock, media, network) only.
-  readonly property color barBorder: mixc(tint(0.20, 0.75, 1.0), cardDark(0.30, 0.38, Qt.rgba(0.28, 0.28, 0.28, 1.0)), themeBlend)
+  // Lighter border for the top bar pills (clock, media, network).
+  readonly property color barBorder: mixc(tint(0.18, 0.78, 1.0), cardDark(0.30, 0.38, Qt.rgba(0.30, 0.30, 0.30, 1.0)), themeBlend)
 
   readonly property color textMain: mixc("#121612", "#f2f2f2", themeBlend)
   readonly property color textSecondary: mixc("#4c574c", "#9aa39a", themeBlend)

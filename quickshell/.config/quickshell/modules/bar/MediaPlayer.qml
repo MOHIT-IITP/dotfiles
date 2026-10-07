@@ -20,18 +20,18 @@ Rectangle {
   property bool showStats: false
   readonly property bool statsVisible: root.showStats || !root.hasTrack
 
-  implicitWidth: playerMouse.containsMouse ? 328 : 34
-  implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 34
-  radius: playerMouse.containsMouse ? SettingsState.cardRadius : 17
-  color: playerMouse.containsMouse ? "transparent" : SettingsState.bgSurface
-  border.color: playerMouse.containsMouse ? "transparent" : SettingsState.barBorder
-  border.width: playerMouse.containsMouse ? 0 : 1
+  implicitWidth: playerMouse.containsMouse ? 328 : 30
+  implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 30
+  radius: playerMouse.containsMouse ? SettingsState.cardRadius : 15
+  color: (playerMouse.containsMouse || implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
+  border.color: (playerMouse.containsMouse || implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
+  border.width: (playerMouse.containsMouse || implicitHeight > 30.5) ? 0 : 1
   clip: true
 
   SquircleBackground {
     id: squircleBg
-    visible: playerMouse.containsMouse
-    radius: SettingsState.cardRadius
+    visible: playerMouse.containsMouse || root.implicitHeight > 30.5
+    radius: root.radius
     power: SettingsState.cardRoundingPower
     fillColor: SettingsState.bgCard
     strokeColor: SettingsState.barBorder
@@ -55,11 +55,6 @@ Rectangle {
     NumberAnimation {
       duration: 320
       easing.type: Easing.OutCubic
-    }
-  }
-  Behavior on color {
-    ColorAnimation {
-      duration: 200
     }
   }
 
