@@ -300,45 +300,72 @@ Scope {
           Rectangle {
             anchors.fill: clockPill
             radius: clockPill.radius
-            color: SettingsState.bgSurface
+            color: clockPill.isExpanded ? "transparent" : SettingsState.bgSurface
             visible: clockPill.visible
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
               shadowColor: SettingsState.shadowColor
-              shadowBlur: 0.55
-              shadowVerticalOffset: 3
+              shadowBlur: 0.4
+              shadowVerticalOffset: 2
               shadowHorizontalOffset: 0
+            }
+
+            SquircleBackground {
+              visible: clockPill.isExpanded
+              radius: SettingsState.cardRadius
+              power: SettingsState.cardRoundingPower
+              fillColor: SettingsState.bgCard
+              strokeColor: "transparent"
+              strokeWidth: 0
             }
           }
 
           Rectangle {
             anchors.fill: mediaPlayer
             radius: mediaPlayer.radius
-            color: SettingsState.bgSurface
+            color: mediaPlayer.hovered ? "transparent" : SettingsState.bgSurface
             visible: mediaPlayer.visible
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
               shadowColor: SettingsState.shadowColor
-              shadowBlur: 0.55
-              shadowVerticalOffset: 3
+              shadowBlur: 0.4
+              shadowVerticalOffset: 2
               shadowHorizontalOffset: 0
+            }
+
+            SquircleBackground {
+              visible: mediaPlayer.hovered
+              radius: SettingsState.cardRadius
+              power: SettingsState.cardRoundingPower
+              fillColor: SettingsState.bgCard
+              strokeColor: "transparent"
+              strokeWidth: 0
             }
           }
 
           Rectangle {
             anchors.fill: netCircle
             radius: netCircle.radius
-            color: SettingsState.bgSurface
+            color: netCircle.hovered ? "transparent" : SettingsState.bgSurface
             visible: netCircle.visible
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
               shadowColor: SettingsState.shadowColor
-              shadowBlur: 0.55
-              shadowVerticalOffset: 3
+              shadowBlur: 0.4
+              shadowVerticalOffset: 2
               shadowHorizontalOffset: 0
+            }
+
+            SquircleBackground {
+              visible: netCircle.hovered
+              radius: SettingsState.cardRadius
+              power: SettingsState.cardRoundingPower
+              fillColor: SettingsState.bgCard
+              strokeColor: "transparent"
+              strokeWidth: 0
             }
           }
 

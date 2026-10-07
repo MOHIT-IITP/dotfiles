@@ -91,7 +91,7 @@ Rectangle {
   SquircleBackground {
     radius: SettingsState.cardRadius
     power: SettingsState.cardRoundingPower
-    fillColor: SettingsState.bgSurface
+    fillColor: SettingsState.bgCard
     strokeColor: SettingsState.borderBase
     strokeWidth: 1
     z: -1

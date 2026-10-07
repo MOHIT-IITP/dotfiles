@@ -101,7 +101,7 @@ Rectangle {
     visible: netMouse.containsMouse
     radius: SettingsState.cardRadius
     power: SettingsState.cardRoundingPower
-    fillColor: SettingsState.bgSurface
+    fillColor: SettingsState.bgCard
     strokeColor: SettingsState.barBorder
     strokeWidth: 1
     z: -1

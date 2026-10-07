@@ -379,7 +379,7 @@ Item {
                   width: 18
                   height: 18
                   radius: 9
-                  color: "#281b1b"
+                  color: SettingsState.isDark ? "#281b1b" : "#ffebee"
                   opacity: 0.6
                 }
               }

@@ -27,8 +27,8 @@ Singleton {
   property int fontSizeDelta: 0
 
   // 3c. Card Corner Styling (Border Radius & Rounding Power)
-  property real cardRadius: 68
-  property real cardRoundingPower: 4.0
+  property real cardRadius: 47
+  property real cardRoundingPower: 3.0
 
   // 4. Theme & Accent Colors
   property string themeMode: "dark" // "light" | "dark" | "manual"
@@ -105,8 +105,8 @@ Singleton {
   readonly property color textActive: mixc(tint(0.85, 0.25, 1.0), Qt.hsva(accentHue, 0.28, 0.92, 1.0), themeBlend)
 
   // 4b. Drop Shadow Properties
-  readonly property color shadowColor: mixc("#30000000", "#70000000", themeBlend)
-  readonly property color shadowColorDeep: mixc("#45000000", "#99000000", themeBlend)
+  readonly property color shadowColor: mixc("#0f000000", "#70000000", themeBlend)
+  readonly property color shadowColorDeep: mixc("#15000000", "#99000000", themeBlend)
 
   // 5. System & nerd fonts
   readonly property var availableFonts: {
