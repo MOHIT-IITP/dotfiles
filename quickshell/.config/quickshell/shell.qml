@@ -84,6 +84,10 @@ Scope {
       TimerState.toggle();
     }
 
+    function reminder(): void {
+      ReminderState.togglePrompt();
+    }
+
     function screenshot(): void {
       ScreenshotState.capture(ScreenshotState.mode);
     }

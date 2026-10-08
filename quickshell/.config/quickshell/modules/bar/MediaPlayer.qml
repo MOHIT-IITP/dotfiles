@@ -15,13 +15,47 @@ Rectangle {
   readonly property bool hasPlayer: MediaState.hasPlayer
   readonly property bool hasTrack: MediaState.hasTrack
   readonly property bool isPlaying: MediaState.isPlaying
-  // Right-swipe on the expanded card flips to system stats.
+  // Swipe carousel on the expanded card:
+  // 0 = now playing, 1 = system stats, 2 = reminders.
+  // Right swipe -> next, left swipe -> previous (wraps).
   // When nothing is playing, stats show automatically on hover.
-  property bool showStats: false
-  readonly property bool statsVisible: root.showStats || !root.hasTrack
+  // Left swipe from now playing lands on the reminder card.
+  property int cardIndex: 0
+  readonly property bool reminderVisible: root.cardIndex === 2
+  readonly property bool statsVisible: root.cardIndex === 1 || (!root.hasTrack && root.cardIndex === 0)
+
+  function nextCard() {
+    if (!root.hasTrack) {
+      root.cardIndex = (root.cardIndex === 1) ? 2 : 1;
+    } else {
+      root.cardIndex = (root.cardIndex + 1) % 3;
+    }
+  }
+
+  function prevCard() {
+    if (!root.hasTrack) {
+      root.cardIndex = (root.cardIndex === 1) ? 2 : 1;
+    } else {
+      root.cardIndex = (root.cardIndex + 2) % 3;
+    }
+  }
+
+  function resetCard() {
+    if (ReminderState.editing) return;
+    if (ReminderState.count > 0 && (!root.hasTrack || !root.isPlaying)) {
+      root.cardIndex = 2;
+    } else {
+      root.cardIndex = root.hasTrack ? 0 : 1;
+    }
+  }
+
+  onCardIndexChanged: {
+    if (root.cardIndex !== 2 && ReminderState.editing)
+      ReminderState.editing = false;
+  }
 
   implicitWidth: playerMouse.containsMouse ? 328 : 30
-  implicitHeight: playerMouse.containsMouse ? (root.statsVisible ? 206 : 148) : 30
+  implicitHeight: playerMouse.containsMouse ? (root.reminderVisible ? (60 + (ReminderState.count > 0 ? Math.min(102, ReminderState.count * 34) : 36)) : (root.statsVisible ? 206 : 148)) : 30
   radius: playerMouse.containsMouse ? SettingsState.cardRadius : 15
   color: (playerMouse.containsMouse || implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
   border.color: (playerMouse.containsMouse || implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
@@ -58,12 +92,13 @@ Rectangle {
     }
   }
 
-  // ---- Collapsed: art thumbnail circle ----
+  // ---- Collapsed: art thumbnail / icon circle ----
   Item {
+    id: collapsedThumb
     anchors.centerIn: parent
-    width: 20
-    height: 20
-    opacity: playerMouse.containsMouse ? 0 : 1
+    width: (ReminderState.count > 0 && root.hasTrack) ? 17 : 20
+    height: (ReminderState.count > 0 && root.hasTrack) ? 17 : 20
+    opacity: !playerMouse.containsMouse ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -71,11 +106,14 @@ Rectangle {
         duration: playerMouse.containsMouse ? 100 : 180
       }
     }
+    Behavior on width { NumberAnimation { duration: 180 } }
+    Behavior on height { NumberAnimation { duration: 180 } }
 
     Rectangle {
       anchors.fill: parent
       radius: width / 2
       color: SettingsState.bgActivePill
+      visible: root.hasTrack || ReminderState.count === 0
     }
 
     // Artwork masked to a true circle (Item.clip is rectangular,
@@ -111,7 +149,7 @@ Rectangle {
     }
     Text {
       anchors.centerIn: parent
-      visible: !thumbClip.visible
+      visible: !thumbClip.visible && (ReminderState.count === 0 || root.hasTrack)
       text: "\uec1b"
       font.family: SettingsState.nerdIconFont
       color: SettingsState.textSecondary
@@ -119,8 +157,108 @@ Rectangle {
     }
   }
 
-  // Swipe layer over the expanded card: right swipe -> stats, left swipe -> player.
-  // Sits below the controls so buttons and progress bar keep their clicks.
+  // ---- Collapsed: animated orange countdown circle ring ----
+  Item {
+    id: remindRingContainer
+    anchors.centerIn: parent
+    width: 26
+    height: 26
+    opacity: (!playerMouse.containsMouse && ReminderState.count > 0) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      enabled: !ReminderState.hasFinished
+      NumberAnimation { duration: 180 }
+    }
+
+    SequentialAnimation on opacity {
+      running: !playerMouse.containsMouse && ReminderState.hasFinished
+      loops: Animation.Infinite
+      NumberAnimation { from: 1.0; to: 0.25; duration: 500; easing.type: Easing.InOutSine }
+      NumberAnimation { from: 0.25; to: 1.0; duration: 500; easing.type: Easing.InOutSine }
+    }
+
+    Canvas {
+      id: remindRingCanvas
+      anchors.fill: parent
+      antialiasing: true
+      renderStrategy: Canvas.Immediate
+
+      property real fraction: ReminderState.soonestRemaining
+
+      Behavior on fraction {
+        NumberAnimation {
+          duration: 950
+          easing.type: Easing.Linear
+        }
+      }
+
+      onFractionChanged: requestPaint()
+      Component.onCompleted: requestPaint()
+
+      onPaint: {
+        var ctx = getContext("2d");
+        ctx.reset();
+        ctx.clearRect(0, 0, width, height);
+        var cx = 13, cy = 13, r = 10;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+
+        // Muted background track
+        ctx.strokeStyle = "#4a3826";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Active Orange Arc reducing with remaining time (or full circle if finished/time up)
+        var rem = ReminderState.soonestFinished ? 1.0 : Math.min(1, Math.max(0, fraction));
+        if (rem > 0.005) {
+          var a0 = -Math.PI / 2;
+          var a1 = a0 + Math.PI * 2 * rem;
+          ctx.strokeStyle = "#FF9E2C";
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, a0, a1);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  Connections {
+    target: ReminderState
+    function onSoonestRemainingChanged() {
+      remindRingCanvas.requestPaint();
+      if (typeof remindBadgeCanvas !== "undefined") remindBadgeCanvas.requestPaint();
+    }
+    function onSoonestRemainingSecondsChanged() {
+      remindRingCanvas.requestPaint();
+      if (typeof remindBadgeCanvas !== "undefined") remindBadgeCanvas.requestPaint();
+    }
+    function onSoonestFinishedChanged() {
+      remindRingCanvas.requestPaint();
+      if (typeof remindBadgeCanvas !== "undefined") remindBadgeCanvas.requestPaint();
+    }
+    function onHasFinishedChanged() {
+      remindRingCanvas.requestPaint();
+      if (typeof remindBadgeCanvas !== "undefined") remindBadgeCanvas.requestPaint();
+    }
+    function onCountChanged() {
+      remindRingCanvas.requestPaint();
+      if (typeof remindBadgeCanvas !== "undefined") remindBadgeCanvas.requestPaint();
+      if (!playerMouse.containsMouse) root.resetCard();
+    }
+  }
+
+  Connections {
+    target: SettingsState
+    function onIsDarkChanged() {
+      remindRingCanvas.requestPaint();
+      if (typeof remindBadgeCanvas !== "undefined") remindBadgeCanvas.requestPaint();
+    }
+  }
+
+  // Swipe layer over player/stats/reminder cards: right swipe -> next card,
+  // left swipe -> previous. Sits below the controls so buttons keep their clicks.
   MouseArea {
     id: statsGesture
     anchors.fill: parent
@@ -141,21 +279,18 @@ Rectangle {
       var dx = ev.x - statsGesture._pressX;
       if (dx > 24) {
         statsGesture._moved = true;
-        root.showStats = true;
+        root.nextCard();
       } else if (dx < -24) {
         statsGesture._moved = true;
-        // Keep stats when there is no player to go back to.
-        if (root.hasTrack)
-          root.showStats = false;
+        root.prevCard();
       }
     }
 
     onWheel: wheel => {
       if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0)
-        root.showStats = true;
+        root.nextCard();
       else if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
-        if (root.hasTrack)
-          root.showStats = false;
+        root.prevCard();
       }
     }
   }
@@ -177,7 +312,7 @@ Rectangle {
     Column {
       anchors.fill: parent
       spacing: 8
-      visible: hasTrack && !root.statsVisible
+      visible: hasTrack && root.cardIndex === 0
 
       // Top row: rounded art + title/artist + live EQ
       Row {
@@ -238,7 +373,7 @@ Rectangle {
 
         Column {
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 48 - 14 - 20
+          width: parent.width - 48 - 14 - (ReminderState.count > 0 ? (remindNowPlayingBadge.width + 8) : 0) - (isPlaying ? 20 : 0)
           spacing: 3
 
           Text {
@@ -259,6 +394,87 @@ Rectangle {
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
             maximumLineCount: 1
+          }
+        }
+
+        // Active Reminder Badge in Current Playing section (animated circular countdown)
+        Rectangle {
+          id: remindNowPlayingBadge
+          anchors.verticalCenter: parent.verticalCenter
+          height: 26
+          width: 26
+          radius: 13
+          visible: ReminderState.count > 0
+          color: remBadgeMouse.containsMouse ? Qt.rgba(1.0, 0.62, 0.17, 0.25) : Qt.rgba(1.0, 0.62, 0.17, 0.12)
+          border.color: "transparent"
+
+          Behavior on color { ColorAnimation { duration: 150 } }
+
+          SequentialAnimation on opacity {
+            running: ReminderState.hasFinished
+            loops: Animation.Infinite
+            NumberAnimation { from: 1.0; to: 0.3; duration: 500; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 0.3; to: 1.0; duration: 500; easing.type: Easing.InOutSine }
+          }
+
+          Canvas {
+            id: remindBadgeCanvas
+            anchors.fill: parent
+            antialiasing: true
+            renderStrategy: Canvas.Immediate
+
+            property real animRemaining: ReminderState.soonestRemaining
+
+            Behavior on animRemaining {
+              NumberAnimation {
+                duration: 950
+                easing.type: Easing.Linear
+              }
+            }
+
+            onAnimRemainingChanged: requestPaint()
+
+            onPaint: {
+              var ctx = getContext("2d");
+              ctx.reset();
+              ctx.clearRect(0, 0, width, height);
+              var cx = width / 2, cy = height / 2, r = 10;
+              ctx.lineWidth = 2.5;
+              ctx.lineCap = "round";
+
+              // Muted Track
+              ctx.strokeStyle = "#4a3826";
+              ctx.beginPath();
+              ctx.arc(cx, cy, r, 0, Math.PI * 2);
+              ctx.stroke();
+
+              // Active Orange Remaining Arc (or full ring if finished)
+              var rem = ReminderState.soonestFinished ? 1.0 : Math.min(1, Math.max(0, animRemaining));
+              if (rem > 0.005) {
+                var a0 = -Math.PI / 2;
+                var a1 = a0 + Math.PI * 2 * rem;
+                ctx.strokeStyle = "#FF9E2C";
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, a0, a1);
+                ctx.stroke();
+              }
+            }
+          }
+
+          CCIcon {
+            anchors.centerIn: parent
+            width: 10
+            height: 10
+            kind: "bell"
+            glyph: "#FF9E2C"
+          }
+
+          MouseArea {
+            id: remBadgeMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.cardIndex = 2
           }
         }
 
@@ -614,7 +830,7 @@ Rectangle {
     }
   }
 
-  // ---- Expanded: system stats (right-swipe from now playing) ----
+  // ---- Expanded: system stats (middle card) ----
   Item {
     id: statsView
     anchors.fill: parent
@@ -881,11 +1097,45 @@ Rectangle {
   }
 
 
+  // ---- Expanded: reminders (left-swipe from now playing) ----
+  Item {
+    id: reminderPage
+    anchors.fill: parent
+    anchors.margins: 14
+    opacity: (playerMouse.containsMouse && root.reminderVisible) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 200 }
+    }
+
+    ReminderView {
+      anchors.fill: parent
+    }
+  }
+
+
   Connections {
     target: playerMouse
     function onContainsMouseChanged() {
       if (!playerMouse.containsMouse)
-        root.showStats = false;
+        root.resetCard();
+    }
+  }
+
+  Connections {
+    target: ReminderState
+    function onEditingChanged() {
+      if (!ReminderState.editing && !playerMouse.containsMouse)
+        root.resetCard();
+    }
+  }
+
+  Connections {
+    target: root
+    function onHasTrackChanged() {
+      if (!root.hasTrack && root.cardIndex === 0)
+        root.cardIndex = 1;
     }
   }
 

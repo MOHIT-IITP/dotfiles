@@ -70,30 +70,31 @@ Rectangle {
   readonly property bool showNotif: NotifCenter.showNotificationPill && !showInbox && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth
   readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
   readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
-  readonly property bool showTimer: isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isWeatherView
+  readonly property bool showReminderPrompt: ReminderState.promptOpen && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
+  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !showReminderPrompt
+  readonly property bool showTimer: isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isWeatherView && !showReminderPrompt
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: wxView.visible && wxView.calHover
   readonly property bool timerHovering: timerView.visible && timerView.timerHover
-  readonly property bool isExpanded: mouse.containsMouse || calHovering || timerHovering || root.isWeatherView || root.isTimerView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover
+  readonly property bool isExpanded: mouse.containsMouse || calHovering || timerHovering || root.isWeatherView || root.isTimerView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showTimer ? 158 : (showWeather ? 265 : 162)))))))))))) : 30
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showTimer ? 360 : (showWeather ? 520 : 300)))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 36) : (showCapture ? Math.max(captureRow.implicitWidth + 36, 80) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 36, 80) : collapsedRow.implicitWidth + 36)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showWeather ? 265 : 162))))))))))))) : 30
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showWeather ? 520 : 280))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 24)))
 
-  radius: isExpanded ? SettingsState.cardRadius : 15
-  color: (isExpanded || implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
-  border.color: (isExpanded || implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
-  border.width: (isExpanded || implicitHeight > 30.5) ? 0 : 1
+  radius: (isExpanded && implicitHeight > 30.5) ? SettingsState.cardRadius : 15
+  color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
+  border.color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
+  border.width: (isExpanded && implicitHeight > 30.5) ? 0 : 1
   clip: true
 
   SquircleBackground {
     id: squircleBg
-    visible: root.isExpanded || root.implicitHeight > 30.5
+    visible: root.isExpanded && root.implicitHeight > 30.5
     radius: root.radius
     power: SettingsState.cardRoundingPower
     fillColor: SettingsState.bgCard
@@ -147,6 +148,12 @@ Rectangle {
   function forceFocusNotifInbox() {
     if (notifInboxContent) {
       notifInboxContent.forceFocus();
+    }
+  }
+
+  function forceFocusReminder() {
+    if (reminderPromptContent) {
+      reminderPromptContent.forceFocus();
     }
   }
 
@@ -313,6 +320,20 @@ Rectangle {
         root.isTimerView = false;
         forceFocusNotifInbox();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+        root.isWeatherView = false;
+        root.isTimerView = false;
+      }
+    }
+  }
+
+  Connections {
+    target: ReminderState
+    function onPromptOpenChanged() {
+      if (ReminderState.promptOpen) {
+        root.isWeatherView = false;
+        root.isTimerView = false;
+        forceFocusReminder();
+      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !NotifCenter.inboxOpen) {
         root.isWeatherView = false;
         root.isTimerView = false;
       }
@@ -950,7 +971,7 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showTimer && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
+    opacity: (root.isExpanded && !root.showWeather && !root.showTimer && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showReminderPrompt) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1264,6 +1285,20 @@ Rectangle {
     }
   }
 
+  // ========================================================
+  // 14. EMBEDDED REMINDER PROMPT VIEW (keybind / IPC)
+  // ========================================================
+  ReminderPromptContent {
+    id: reminderPromptContent
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showReminderPrompt && !root.showInbox) ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 180 }
+    }
+  }
+
   // Close the calendar shortly after the pointer fully leaves the pill
   // (both the gesture layer and the calendar buttons). The delay avoids
   // flicker when moving between the background and the day/chevron buttons.
@@ -1305,7 +1340,7 @@ Rectangle {
     id: mouse
     anchors.fill: parent
     z: -1
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showFileTray && !root.showAbout
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showFileTray && !root.showAbout && !root.showReminderPrompt
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton

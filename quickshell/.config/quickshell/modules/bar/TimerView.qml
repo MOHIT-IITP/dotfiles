@@ -214,10 +214,12 @@ Item {
 
         Rectangle {
           id: mainBtn
-          width: (TimerState.running || TimerState.paused) ? 44 : 124
+          width: (TimerState.running || TimerState.paused) ? 40 : 124
           height: 40
           radius: 20
-          color: Qt.rgba(1.0, 0.62, 0.17, 0.16)
+          color: startBtnMouse.containsMouse ? Qt.rgba(1.0, 0.62, 0.17, 0.28) : Qt.rgba(1.0, 0.62, 0.17, 0.16)
+          border.color: Qt.rgba(1.0, 0.62, 0.17, 0.35)
+          border.width: 1
 
           Behavior on width {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -225,11 +227,21 @@ Item {
 
           Text {
             anchors.centerIn: parent
-            text: TimerState.finished ? "Dismiss" : (TimerState.running || TimerState.paused ? "×" : "Start Timer")
+            visible: !TimerState.running && !TimerState.paused
+            text: TimerState.finished ? "Dismiss" : "Start Timer"
             color: root.timerOrange
-            font.pixelSize: (TimerState.running || TimerState.paused) ? 20 : 15
+            font.pixelSize: 15
             font.bold: true
             font.family: SettingsState.fontFamily
+          }
+
+          CCIcon {
+            anchors.centerIn: parent
+            width: 16
+            height: 16
+            visible: TimerState.running || TimerState.paused
+            kind: "close"
+            glyph: root.timerOrange
           }
 
           MouseArea {

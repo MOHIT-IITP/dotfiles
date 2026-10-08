@@ -77,6 +77,9 @@ Item {
     if (k === "linkedin" || k === "in") return ""; // brand (no outline)
     if (k === "plus" || k === "add") return ""; // nf-cod-add
     if (k === "trash" || k === "delete" || k === "remove") return ""; // nf-cod-trash
+    if (k === "close" || k === "cancel" || k === "cross" || k === "x") return "\uea76"; // nf-cod-close
+    if (k === "check" || k === "tick" || k === "confirm" || k === "done" || k === "accept") return "\ueab2"; // nf-cod-check
+    if (k === "arrow-right" || k === "right" || k === "next") return "\uea9c"; // nf-cod-arrow_right
     if (k === "external" || k === "open") return ""; // nf-cod-link_external
     if (k === "copy") return ""; // nf-cod-copy
     if (k === "wave" || k === "motion") return "󰥛"; // nf-md-sine_wave
