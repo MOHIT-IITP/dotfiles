@@ -519,7 +519,7 @@ Rectangle {
       width: recTimeMetrics.implicitWidth
       horizontalAlignment: Text.AlignHCenter
       text: RecorderState.formattedTime
-      color: "#ff8a8a"
+      color: "#ff453a"
       font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
