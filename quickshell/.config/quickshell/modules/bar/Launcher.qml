@@ -278,10 +278,13 @@ Rectangle {
             height: 24
 
             Image {
+              id: appIcon
               anchors.centerIn: parent
               width: 22
               height: 22
-              visible: modelData && modelData.icon !== ""
+              sourceSize.width: 48
+              sourceSize.height: 48
+              visible: modelData && modelData.icon !== "" && status !== Image.Error
               source: (modelData && modelData.icon !== "") ? Quickshell.iconPath(modelData.icon, "application-x-executable") : ""
               smooth: true
               asynchronous: true
@@ -289,7 +292,7 @@ Rectangle {
 
             Text {
               anchors.centerIn: parent
-              visible: !modelData || modelData.icon === ""
+              visible: !modelData || modelData.icon === "" || appIcon.status === Image.Error
               text: (modelData && modelData.name) ? modelData.name.substring(0, 1).toUpperCase() : "?"
               color: isSelected ? SettingsState.textActive : SettingsState.textSecondary
               font.pixelSize: SettingsState.px(12)

@@ -2,7 +2,7 @@ import Quickshell
 import QtQuick
 import "../services"
 
-// Main control-center page (pills, sliders, notifications). Extracted from NetworkCircle.qml.
+// Main control-center page (pills). Extracted from NetworkCircle.qml.
 Column {
   id: mainPage
   required property var circle
@@ -508,6 +508,123 @@ Column {
         }
       }
     }
+
+    // Calendar Pill (weather + monthly calendar sub-page)
+    Rectangle {
+      width: (parent.width - 16) / 3
+      height: 48
+      radius: 24
+      color: (circle.activePage === "calendar") ? SettingsState.bgActivePill : (calMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+      border.color: (circle.activePage === "calendar") ? SettingsState.borderActive : (calMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+      border.width: 1
+
+      Behavior on color {
+        ColorAnimation { duration: 150 }
+      }
+
+      Row {
+        anchors.fill: parent
+        anchors.leftMargin: 6
+        anchors.rightMargin: 8
+        spacing: 6
+
+        Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 34
+          height: 34
+          radius: 17
+          color: (circle.activePage === "calendar") ? SettingsState.accent : (calMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
+
+          CCIcon {
+            anchors.centerIn: parent
+            width: 16
+            height: 16
+            kind: "calendar"
+            glyph: (circle.activePage === "calendar") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (calMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+          }
+        }
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 46
+          text: "Cal"
+          color: (circle.activePage === "calendar") ? SettingsState.textActive : SettingsState.textMain
+          font.pixelSize: SettingsState.px(14)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+          elide: Text.ElideRight
+        }
+      }
+
+      MouseArea {
+        id: calMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+          CalendarState.refreshWeather();
+          circle.activePage = "calendar";
+        }
+      }
+    }
+
+    // Stats Pill (CPU / RAM / Swap / Disk sub-page)
+    Rectangle {
+      width: (parent.width - 16) / 3
+      height: 48
+      radius: 24
+      color: (circle.activePage === "stats") ? SettingsState.bgActivePill : (statsMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+      border.color: (circle.activePage === "stats") ? SettingsState.borderActive : (statsMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+      border.width: 1
+
+      Behavior on color {
+        ColorAnimation { duration: 150 }
+      }
+
+      Row {
+        anchors.fill: parent
+        anchors.leftMargin: 6
+        anchors.rightMargin: 8
+        spacing: 6
+
+        Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 34
+          height: 34
+          radius: 17
+          color: (circle.activePage === "stats") ? SettingsState.accent : (statsMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
+
+          CCIcon {
+            anchors.centerIn: parent
+            width: 16
+            height: 16
+            kind: "cpu"
+            glyph: (circle.activePage === "stats") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (statsMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+          }
+        }
+
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 46
+          text: "Stats"
+          color: (circle.activePage === "stats") ? SettingsState.textActive : SettingsState.textMain
+          font.pixelSize: SettingsState.px(14)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+          elide: Text.ElideRight
+        }
+      }
+
+      MouseArea {
+        id: statsMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+          circle.activePage = "stats";
+        }
+      }
+    }
   }
 
   // Expand/collapse dash handle for the hidden pills (Apps, Wall, Clip, Mixer, Power)
@@ -833,110 +950,4 @@ Column {
     }
   }
 
-  // Sound + microphone sliders
-  CCSlider {
-    id: soundSlider
-    width: parent.width
-    label: "Sound"
-    icon: "sound"
-    value: circle.outVol
-    muted: circle.outMuted
-    available: AudioState.sink !== null && AudioState.sink !== undefined
-    currentDeviceName: AudioState.sinkName
-    onOpenDevices: {
-      AudioState.refreshDevices();
-      circle.activePage = "sound";
-    }
-    onSeeked: function (v) {
-      AudioState.setOutVol(v);
-    }
-    onIconClicked: AudioState.toggleOutMute()
-  }
-
-  CCSlider {
-    id: micSlider
-    width: parent.width
-    label: "Microphone"
-    icon: "mic"
-    value: circle.inVol
-    muted: circle.inMuted
-    available: AudioState.source !== null && AudioState.source !== undefined
-    currentDeviceName: AudioState.sourceName
-    onOpenDevices: {
-      AudioState.refreshDevices();
-      circle.activePage = "mic";
-    }
-    onSeeked: function (v) {
-      AudioState.setInVol(v);
-    }
-    onIconClicked: AudioState.toggleInMute()
-  }
-
-  // Notifications header
-  Item {
-    width: parent.width
-    height: 24
-
-    Text {
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-      text: "Notifications"
-      color: SettingsState.textMain
-      font.pixelSize: SettingsState.px(16)
-      font.bold: true
-      font.family: SettingsState.fontFamily
-    }
-
-    // Clear all pill button
-    Rectangle {
-      anchors.right: parent.right
-      anchors.verticalCenter: parent.verticalCenter
-      height: 24
-      width: clearAllText.implicitWidth + 16
-      radius: 12
-      color: NotifCenter.count > 0 ? (clearMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard) : "transparent"
-      border.color: NotifCenter.count > 0 ? SettingsState.borderBase : "transparent"
-      border.width: 1
-
-      Text {
-        id: clearAllText
-        anchors.centerIn: parent
-        text: "Clear all"
-        color: NotifCenter.count > 0 ? SettingsState.accent : SettingsState.textMuted
-        font.pixelSize: SettingsState.px(14)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-
-      MouseArea {
-        id: clearMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        enabled: NotifCenter.count > 0
-        onClicked: NotifCenter.clearAll()
-      }
-    }
-  }
-
-  // Notifications list (wheel-scrollable)
-  Text {
-    visible: NotifCenter.count === 0
-    text: "No notifications"
-    color: SettingsState.textMuted
-    font.pixelSize: SettingsState.px(15)
-    font.family: SettingsState.fontFamily
-  }
-
-  ListView {
-    id: notifList
-    width: parent.width
-    height: NotifCenter.count > 0 ? Math.min(180, NotifCenter.count * 68) : 0
-    spacing: 8
-    clip: true
-    visible: NotifCenter.count > 0
-    model: NotifCenter.trackedList
-    delegate: CCNotifCard {
-    }
-  }
 }

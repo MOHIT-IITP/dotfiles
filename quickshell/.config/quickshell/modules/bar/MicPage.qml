@@ -48,7 +48,7 @@ Column {
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
           onClicked: {
-            circle.activePage = "main";
+            circle.activePage = "mixer";
           }
         }
       }
@@ -90,7 +90,7 @@ Column {
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
           onClicked: {
-            circle.activePage = "main";
+            circle.activePage = "mixer";
           }
         }
       }
@@ -191,12 +191,29 @@ Column {
   }
 
   // Input Device List
+  Text {
+    visible: (AudioState.sources.length || 0) === 0
+    text: "No input devices found"
+    color: SettingsState.textMuted
+    font.pixelSize: SettingsState.px(14)
+    font.family: SettingsState.fontFamily
+    anchors.horizontalCenter: parent.horizontalCenter
+  }
+
   ListView {
     width: parent.width
-    height: 260
+    height: visible ? Math.min(260, (AudioState.sources.length || 0) * 60 - 8) : 0
+    visible: (AudioState.sources.length || 0) > 0
     spacing: 8
     clip: true
     model: AudioState.sources
+
+    Behavior on height {
+      NumberAnimation {
+        duration: 250
+        easing.type: Easing.OutCubic
+      }
+    }
 
     delegate: Rectangle {
       required property var modelData

@@ -53,6 +53,7 @@ Item {
     if (k === "reboot" || k === "restart") return ""; // nf-cod-refresh
     if (k === "power" || k === "shutdown") return "󰐥"; // nf-md-power
     if (k === "time" || k === "clock") return "󰅐"; // nf-md-clock_outline
+    if (k === "calendar" || k === "cal" || k === "date") return "󰃭"; // nf-md-calendar_blank_outline
     if (k === "stopwatch") return "󰔛"; // nf-md-timer_outline
     if (k === "music" || k === "note") return ""; // nf-cod-music
     if (k === "palette" || k === "theme") return "󰸌"; // nf-md-palette_outline

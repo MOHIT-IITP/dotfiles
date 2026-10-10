@@ -1,7 +1,7 @@
 import QtQuick
 import "../services"
 
-// Reminder list card inside MediaPlayer (left-swipe from now playing).
+// Reminder list card (unused while now-playing lives in the center pill).
 // Displays active countdowns with cancel/dismiss actions.
 Column {
   id: root

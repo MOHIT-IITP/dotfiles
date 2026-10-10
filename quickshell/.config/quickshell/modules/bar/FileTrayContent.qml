@@ -79,6 +79,7 @@ Item {
 
     // dashed overlay to mimic the mockup
     Canvas {
+      id: dashCanvas
       anchors.fill: parent
       antialiasing: true
       renderStrategy: Canvas.Immediate
@@ -104,12 +105,12 @@ Item {
       onHeightChanged: requestPaint()
       Connections {
         target: root
-        function onDndActiveChanged() { parent.requestPaint(); }
+        function onDndActiveChanged() { dashCanvas.requestPaint(); }
       }
       Connections {
         target: SettingsState
-        function onIsDarkChanged() { parent.requestPaint(); }
-        function onAccentChanged() { parent.requestPaint(); }
+        function onIsDarkChanged() { dashCanvas.requestPaint(); }
+        function onAccentChanged() { dashCanvas.requestPaint(); }
       }
     }
 

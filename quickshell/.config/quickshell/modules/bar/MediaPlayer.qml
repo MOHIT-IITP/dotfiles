@@ -550,7 +550,7 @@ Rectangle {
             onRunningChanged: progCanvas.requestPaint()
             onFinished: {
               if (!trackMouse.pressed) {
-                currentPos = progTrack.liveFraction;
+                progTrack.currentPos = progTrack.liveFraction;
                 progCanvas.requestPaint();
               }
             }
@@ -566,6 +566,7 @@ Rectangle {
                 shown: progTrack.shown,
                 showTrack: true,
                 showHandle: false,
+                trackGap: 8,
                 showRemaining: false,
                 waveColor: SettingsState.accent,
                 trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",

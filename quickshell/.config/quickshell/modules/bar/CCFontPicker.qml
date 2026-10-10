@@ -250,7 +250,7 @@ Column {
           onRunningChanged: fontCanvas.requestPaint()
           onFinished: {
             if (!fontSizeMouse.dragging) {
-              currentPos = fontSizeTrack.targetFraction;
+              fontSizeTrack.currentPos = fontSizeTrack.targetFraction;
               fontCanvas.requestPaint();
             }
           }

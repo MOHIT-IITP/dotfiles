@@ -756,7 +756,7 @@ Item {
               onRunningChanged: gapCanvas.requestPaint()
               onFinished: {
                 if (!gapMouse.dragging) {
-                  currentPos = gapTrack.targetFraction;
+                  gapTrack.currentPos = gapTrack.targetFraction;
                   gapCanvas.requestPaint();
                 }
               }

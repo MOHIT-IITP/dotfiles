@@ -35,7 +35,7 @@ Item {
     onRunningChanged: waveCanvas.requestPaint()
     onFinished: {
       if (!faderMouse.dragging) {
-        currentPos = root.value;
+        root.currentPos = root.value;
         waveCanvas.requestPaint();
       }
     }

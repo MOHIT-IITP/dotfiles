@@ -38,7 +38,7 @@ Column {
     onRunningChanged: waveCanvas.requestPaint()
     onFinished: {
       if (!sliderMouse.dragging) {
-        currentPos = root.value;
+        root.currentPos = root.value;
         waveCanvas.requestPaint();
       }
     }

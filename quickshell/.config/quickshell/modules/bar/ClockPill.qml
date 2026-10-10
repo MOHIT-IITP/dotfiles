@@ -3,12 +3,15 @@ import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Effects
 import "../services"
+import "../utils"
+import "WavySliderPaint.js" as WavyPaint
 
 // Center Date & Time pill.
 // Normal state: configurable time format (24h/12h, seconds, font) + Cava visualizer.
 // Workspace switch: temporarily reveals workspace dots + active bar.
 // Hovered: big clock + 7-day strip.
-// Right swipe on hover: seamlessly morphs the center bar itself into the Weather & Calendar dual-pane widget!
+// Right swipe on hover: seamlessly morphs the center bar itself into the Control Center!
+// Left swipe: timer. Calendar lives as a pill inside the control center.
 Rectangle {
   id: root
 
@@ -17,8 +20,9 @@ Rectangle {
   // Track workspace changes
   readonly property int currentWsId: Hyprland.focusedWorkspace?.id ?? 1
   property bool showWorkspaces: false
-  property bool isWeatherView: false
+  property bool isControlCenterView: false
   property bool isTimerView: false
+  property bool isReminderView: false
 
   onCurrentWsIdChanged: {
     showWorkspaces = true;
@@ -71,20 +75,24 @@ Rectangle {
   readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
   readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray
   readonly property bool showReminderPrompt: ReminderState.promptOpen && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
-  readonly property bool showWeather: (isWeatherView || CalendarState.open) && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !showReminderPrompt
-  readonly property bool showTimer: isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isWeatherView && !showReminderPrompt
+  readonly property bool showCC: (isControlCenterView || CalendarState.open) && !isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !showReminderPrompt
+  readonly property bool showTimer: isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isControlCenterView && !showReminderPrompt
+  readonly property bool showReminders: isReminderView && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isControlCenterView && !showReminderPrompt
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
-  readonly property bool calHovering: wxView.visible && wxView.calHover
+  readonly property bool calHovering: ccView.visible && ccView.ccHover
   readonly property bool timerHovering: timerView.visible && timerView.timerHover
-  readonly property bool isExpanded: mouse.containsMouse || calHovering || timerHovering || root.isWeatherView || root.isTimerView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
+  readonly property bool remHovering: reminderWrap.visible && reminderWrap.remHover
+  property bool mediaHover: false
+  readonly property bool isHovered: (mouse.containsMouse || calHovering || timerHovering || remHovering || root.mediaHover) && !root.dismissLock
+  readonly property bool isExpanded: isHovered || root.isControlCenterView || root.isTimerView || root.isReminderView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showWeather ? 265 : 162))))))))))))) : 30
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showWeather ? 520 : 280))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 24)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (root.dismissLock ? 30 : 132))))))))))))))) : 30
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (MediaState.hasTrack ? (root.dismissLock ? (collapsedRow.implicitWidth + 44) : 492) : (root.dismissLock ? (collapsedRow.implicitWidth + 44) : 280)))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
 
   radius: (isExpanded && implicitHeight > 30.5) ? SettingsState.cardRadius : 15
   color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
@@ -157,6 +165,100 @@ Rectangle {
     }
   }
 
+  function forceFocusCCFontSearch() {
+    if (ccView) {
+      ccView.forceFocusFontSearch();
+    }
+  }
+
+  // Jump from the embedded mixer into the control center's
+  // sound / mic device-selection page.
+  function openCCPage(page) {
+    MixerState.close();
+    TimerState.open = false;
+    CalendarState.close();
+    root.isTimerView = false;
+    root.isReminderView = false;
+    if (ReminderState.editing) ReminderState.editing = false;
+    root.isControlCenterView = true;
+    AudioState.refreshDevices();
+    if (ccView) ccView.activePage = page;
+  }
+
+  readonly property bool ccFontDropdownOpen: ccView ? ccView.fontDropdownOpen : false
+  readonly property bool ccAboutInputOpen: ccView ? ccView.aboutInputOpen : false
+  // Sticky swipe views (control center / timer / reminders) persist after the
+  // pointer leaves until dismissed via Esc, click-outside, click on the pill,
+  // or the leave timer.
+  readonly property bool swipeOpen: isControlCenterView || isTimerView || isReminderView
+  // Any tall expanded state (hover card, swipe views, modals). Used to take
+  // keyboard focus + focus grab so Esc and click-outside can always dismiss,
+  // even when a hover flag latches stuck (see collapseAll).
+  readonly property bool pillOpen: isExpanded && implicitHeight > 30.5
+  // Momentary kill-switch for the gesture layer: flipping it drops a latched
+  // containsMouse so a stuck pill can collapse. Re-armed on the next frame.
+  property bool hoverReset: false
+  // Holds the hover card shut after an Esc / click-outside dismiss while the
+  // cursor is still over the pill. Without it, re-arming the gesture layer
+  // snaps a parked cursor straight back to expanded, making Esc look dead.
+  // Released on full pointer exit (pokeLeaveTimer) or a fresh press.
+  property bool dismissLock: false
+
+  focus: pillOpen
+  Keys.onEscapePressed: function(ev) {
+    // Also answer while dismissLock holds the pill shut but tallness is
+    // gone (pillOpen false): otherwise the first Esc blanks the pill and
+    // every later Esc is rejected as "nothing to do".
+    if (root.pillOpen || root.dismissLock || root.swipeOpen) {
+      root.collapseAll();
+      ev.accepted = true;
+    }
+  }
+
+  function collapseSwipe(): void {
+    root.isControlCenterView = false;
+    root.isTimerView = false;
+    root.isReminderView = false;
+    CalendarState.close();
+    if (ccView) ccView.resetToMain();
+  }
+
+  function openReminders(): void {
+    root.collapseSwipe();
+    root.isReminderView = true;
+  }
+
+  function toggleReminders(): void {
+    if (root.isReminderView) {
+      root.collapseAll();
+    } else {
+      root.collapseSwipe();
+      root.isReminderView = true;
+    }
+  }
+
+  // Dismiss everything stuck open: swipe views plus latched hover flags.
+  // Hover is re-synced after the collapse animation settles (300ms): the
+  // pill shrinking under a stationary cursor never delivers an exit event,
+  // so without this the hover latches true and the pill blanks permanently.
+  Timer {
+    id: hoverResync
+    interval: 350
+    repeat: false
+    onTriggered: root.hoverReset = false
+  }
+
+  function collapseAll(): void {
+    var hovered = mouse.containsMouse || root.mediaHover || root.calHovering || root.timerHovering || root.remHovering;
+    root.collapseSwipe();
+    root.mediaHover = false;
+    reminderWrap.remHover = false;
+    leaveTimer.stop();
+    root.dismissLock = hovered;
+    root.hoverReset = true;
+    hoverResync.restart();
+  }
+
   Behavior on implicitWidth {
     NumberAnimation {
       duration: 300
@@ -182,10 +284,12 @@ Rectangle {
     function onOpenChanged() {
       if (TimerState.open) {
         root.isTimerView = true;
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
+        root.isReminderView = false;
         CalendarState.close();
       } else if (!mouse.containsMouse) {
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -194,12 +298,16 @@ Rectangle {
     target: CalendarState
     function onOpenChanged() {
       if (CalendarState.open) {
-        root.isWeatherView = true;
+        root.isControlCenterView = true;
         root.isTimerView = false;
+        root.isReminderView = false;
+        if (ccView) ccView.activePage = "calendar";
         CalendarState.refreshWeather();
       } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
+        if (ccView) ccView.resetToMain();
       }
     }
   }
@@ -208,12 +316,14 @@ Rectangle {
     target: LauncherState
     function onOpenChanged() {
       if (LauncherState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusLauncher();
       } else if (!mouse.containsMouse && !CalendarState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -222,12 +332,14 @@ Rectangle {
     target: WallpaperState
     function onOpenChanged() {
       if (WallpaperState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusWallpaper();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -236,12 +348,14 @@ Rectangle {
     target: PowerState
     function onOpenChanged() {
       if (PowerState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusPower();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -250,12 +364,14 @@ Rectangle {
     target: ClipboardState
     function onOpenChanged() {
       if (ClipboardState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusClipboard();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -264,12 +380,14 @@ Rectangle {
     target: MixerState
     function onOpenChanged() {
       if (MixerState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusMixer();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -278,12 +396,14 @@ Rectangle {
     target: AuthState
     function onOpenChanged() {
       if (AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusAuth();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -292,8 +412,9 @@ Rectangle {
     target: FileTrayState
     function onOpenChanged() {
       if (FileTrayState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -302,12 +423,14 @@ Rectangle {
     target: AboutState
     function onOpenChanged() {
       if (AboutState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusAbout();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -316,12 +439,14 @@ Rectangle {
     target: NotifCenter
     function onInboxOpenChanged() {
       if (NotifCenter.inboxOpen) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusNotifInbox();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -330,12 +455,14 @@ Rectangle {
     target: ReminderState
     function onPromptOpenChanged() {
       if (ReminderState.promptOpen) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
         forceFocusReminder();
       } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !NotifCenter.inboxOpen) {
-        root.isWeatherView = false;
+        root.isControlCenterView = false;
         root.isTimerView = false;
+        root.isReminderView = false;
       }
     }
   }
@@ -368,7 +495,7 @@ Rectangle {
     id: collapsedRow
     anchors.centerIn: parent
     spacing: RecorderState.isRecording ? 14 : 7
-    opacity: (!root.isExpanded && !root.showWorkspaces && !root.showCapture && !root.showTimerCollapsed) ? 1 : 0
+    opacity: ((!root.isExpanded || root.dismissLock) && !root.showWorkspaces && !root.showCapture && !root.showTimerCollapsed) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -403,6 +530,8 @@ Rectangle {
         }
       }
     }
+
+
 
     Row {
       id: visualizerRow
@@ -451,7 +580,7 @@ Rectangle {
         return Qt.formatDateTime(root.date, fmt);
       }
       color: SettingsState.accent
-      font.pixelSize: SettingsState.px(17)
+      font.pixelSize: SettingsState.px(15)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -468,7 +597,7 @@ Rectangle {
         return s;
       }
       color: "transparent"
-      font.pixelSize: SettingsState.px(17)
+      font.pixelSize: SettingsState.px(15)
       font.bold: true
       font.family: SettingsState.fontFamily
     }
@@ -971,16 +1100,338 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showWeather && !root.showTimer && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showReminderPrompt) ? 1 : 0
+    opacity: (root.isExpanded && !root.showCC && !root.showTimer && !root.showReminders && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showReminderPrompt && !root.dismissLock) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
       NumberAnimation { duration: 200 }
     }
 
-    Column {
+    HoverHandler {
+      id: hoverMediaHandler
+      onHoveredChanged: root.mediaHover = hovered
+    }
+
+    // Safety: if hover sticks while this view hides, force it back so the
+    // pill can collapse (Esc / click-outside rely on isExpanded going false).
+    onVisibleChanged: {
+      if (!visible) root.mediaHover = false;
+    }
+
+    Row {
       anchors.centerIn: parent
-      spacing: 6
+      spacing: 20
+
+      // LEFT: Now playing (only when a track is active)
+      Item {
+        id: hoverMedia
+        anchors.verticalCenter: parent.verticalCenter
+        visible: MediaState.hasTrack
+        width: visible ? 248 : 0
+        height: Math.max(mediaCol.height, clockCol.height)
+
+        readonly property var player: MediaState.activePlayer
+        readonly property bool playing: MediaState.isPlaying
+        readonly property real frac: (player && player.length > 0) ? Math.min(1, Math.max(0, (player.position || 0) / player.length)) : 0
+
+        Column {
+          id: mediaCol
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width
+          spacing: 6
+          visible: hoverMedia.visible
+
+          Row {
+            width: parent.width
+            spacing: 10
+
+            Item {
+              width: 104
+              height: 104
+              anchors.verticalCenter: parent.verticalCenter
+
+              Rectangle {
+                id: hoverArtMask
+                anchors.fill: parent
+                radius: 18
+                color: SettingsState.bgActivePill
+                visible: false
+                layer.enabled: true
+              }
+
+              Rectangle {
+                anchors.fill: parent
+                radius: 18
+                color: SettingsState.bgActivePill
+              }
+
+              Item {
+                anchors.fill: parent
+                visible: (hoverMedia.player?.trackArtUrl ?? "") !== ""
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                  maskEnabled: true
+                  maskSource: hoverArtMask
+                  maskThresholdMin: 0.5
+                  maskSpreadAtMin: 1.0
+                }
+
+                Image {
+                  anchors.fill: parent
+                  source: (hoverMedia.player?.trackArtUrl ?? "")
+                  fillMode: Image.PreserveAspectCrop
+                  smooth: true
+                  asynchronous: true
+                  visible: (hoverMedia.player?.trackArtUrl ?? "") !== ""
+                }
+              }
+
+              Text {
+                anchors.centerIn: parent
+                visible: (hoverMedia.player?.trackArtUrl ?? "") === ""
+                text: ""
+                font.family: SettingsState.nerdIconFont
+                color: SettingsState.textSecondary
+                font.pixelSize: SettingsState.px(18)
+              }
+            }
+
+            Column {
+              anchors.verticalCenter: parent.verticalCenter
+              width: parent.width - 114
+              spacing: 1
+
+              Text {
+                width: parent.width
+                text: hoverMedia.player?.trackTitle || "Unknown Title"
+                color: SettingsState.textMain
+                font.pixelSize: SettingsState.px(14)
+                font.bold: true
+                font.family: SettingsState.fontFamily
+                elide: Text.ElideRight
+                maximumLineCount: 1
+              }
+
+              Text {
+                width: parent.width
+                text: hoverMedia.player?.trackAlbum || hoverMedia.player?.identity || ""
+                color: SettingsState.textSecondary
+                font.pixelSize: SettingsState.px(12)
+                font.family: SettingsState.fontFamily
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                visible: text !== ""
+              }
+
+              Text {
+                width: parent.width
+                text: hoverMedia.player?.trackArtist || ""
+                color: SettingsState.textSecondary
+                font.pixelSize: SettingsState.px(12)
+                font.family: SettingsState.fontFamily
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                visible: text !== ""
+              }
+
+              // Progress: thin wavy slider (above controls)
+              Item {
+                id: hoverProgTrack
+                width: parent.width
+                height: 24
+
+                readonly property real liveFraction: hoverMedia.frac
+                property real currentPos: liveFraction
+                readonly property real shown: Math.min(1, Math.max(0, currentPos))
+
+                onLiveFractionChanged: {
+                  if (!hoverSeekAnim.running && !hoverSeekMouse.pressed) {
+                    currentPos = liveFraction;
+                  }
+                }
+                onShownChanged: hoverProgCanvas.requestPaint()
+                onCurrentPosChanged: hoverProgCanvas.requestPaint()
+                onWidthChanged: hoverProgCanvas.requestPaint()
+
+                NumberAnimation {
+                  id: hoverSeekAnim
+                  target: hoverProgTrack
+                  property: "currentPos"
+                  duration: 350
+                  easing.type: Easing.InOutCubic
+                  onRunningChanged: hoverProgCanvas.requestPaint()
+                  onFinished: {
+                    if (!hoverSeekMouse.pressed) {
+                      hoverProgTrack.currentPos = hoverProgTrack.liveFraction;
+                      hoverProgCanvas.requestPaint();
+                    }
+                  }
+                }
+
+                Canvas {
+                  id: hoverProgCanvas
+                  anchors.fill: parent
+                  antialiasing: true
+                  renderStrategy: Canvas.Immediate
+                  onPaint: {
+                    WavyPaint.paint(getContext("2d"), width, height, {
+                      shown: hoverProgTrack.shown,
+                      showTrack: true,
+                      showHandle: false,
+                      trackGap: 8,
+                      showRemaining: false,
+                      waveColor: SettingsState.accent,
+                      trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
+                      handleColor: SettingsState.accent,
+                      trackH: 3,
+                      waveW: 3,
+                      waveAmp: 2,
+                      waveLen: width / 2,
+                      handleW: 5,
+                      handleH: 14
+                    });
+                  }
+                }
+
+                Connections {
+                  target: SettingsState
+                  function onAccentChanged() { hoverProgCanvas.requestPaint(); }
+                  function onIsDarkChanged() { hoverProgCanvas.requestPaint(); }
+                }
+
+                function applySeek(fraction) {
+                  var p = hoverMedia.player;
+                  if (p && p.canSeek && p.length > 0) {
+                    p.position = fraction * p.length;
+                  }
+                }
+
+                MouseArea {
+                  id: hoverSeekMouse
+                  anchors.fill: parent
+                  cursorShape: Qt.PointingHandCursor
+                  property real startX: 0
+                  property bool dragging: false
+                  onPressed: function (ev) {
+                    if (hoverProgTrack.width <= 0) return;
+                    hoverSeekMouse.startX = ev.x;
+                    hoverSeekMouse.dragging = false;
+                    var startVal = hoverProgTrack.currentPos;
+                    var r = Math.min(1, Math.max(0, ev.x / hoverProgTrack.width));
+                    hoverSeekAnim.stop();
+                    hoverProgTrack.currentPos = startVal;
+                    hoverSeekAnim.from = startVal;
+                    hoverSeekAnim.to = r;
+                    hoverSeekAnim.restart();
+                    hoverProgTrack.applySeek(r);
+                  }
+                  onPositionChanged: function (ev) {
+                    if (!pressed || hoverProgTrack.width <= 0) return;
+                    if (!hoverSeekMouse.dragging && Math.abs(ev.x - hoverSeekMouse.startX) > 4) {
+                      hoverSeekMouse.dragging = true;
+                      hoverSeekAnim.stop();
+                    }
+                    if (hoverSeekMouse.dragging) {
+                      var r = Math.min(1, Math.max(0, ev.x / hoverProgTrack.width));
+                      hoverProgTrack.currentPos = r;
+                      hoverProgCanvas.requestPaint();
+                      hoverProgTrack.applySeek(r);
+                    }
+                  }
+                  onReleased: function () {
+                    hoverSeekMouse.dragging = false;
+                  }
+                }
+              }
+
+              // Controls: small icon-only prev / play-pause / next
+              Row {
+                spacing: 10
+
+                Item {
+                  width: 28
+                  height: 26
+                  opacity: hoverMedia.player?.canGoPrevious ? 1 : 0.3
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: "󰼨"
+                    font.family: SettingsState.nerdIconFont
+                    color: hoverPrev.containsMouse ? SettingsState.accent : SettingsState.textMain
+                    font.pixelSize: SettingsState.px(16)
+                  }
+
+                  MouseArea {
+                    id: hoverPrev
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: Boolean(hoverMedia.player?.canGoPrevious)
+                    onClicked: {
+                      if (hoverMedia.player) hoverMedia.player.previous();
+                    }
+                  }
+                }
+
+                Item {
+                  width: 28
+                  height: 26
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: hoverMedia.playing ? "󰏤" : "󰐊"
+                    font.family: SettingsState.nerdIconFont
+                    color: hoverPlay.containsMouse ? SettingsState.accent : SettingsState.textMain
+                    font.pixelSize: SettingsState.px(17)
+                  }
+
+                  MouseArea {
+                    id: hoverPlay
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: Boolean(hoverMedia.player?.canTogglePlaying)
+                    onClicked: {
+                      if (hoverMedia.player) hoverMedia.player.togglePlaying();
+                    }
+                  }
+                }
+
+                Item {
+                  width: 28
+                  height: 26
+                  opacity: hoverMedia.player?.canGoNext ? 1 : 0.3
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: "󰼧"
+                    font.family: SettingsState.nerdIconFont
+                    color: hoverNext.containsMouse ? SettingsState.accent : SettingsState.textMain
+                    font.pixelSize: SettingsState.px(16)
+                  }
+
+                  MouseArea {
+                    id: hoverNext
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: Boolean(hoverMedia.player?.canGoNext)
+                    onClicked: {
+                      if (hoverMedia.player) hoverMedia.player.next();
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+            Column {
+      id: clockCol
+      anchors.verticalCenter: parent.verticalCenter
+      width: MediaState.hasTrack ? 196 : 180
+      spacing: 2
 
       // Big time - centered, AM/PM as small superscript
       Item {
@@ -1030,8 +1481,6 @@ Rectangle {
             if (SettingsState.timeFormat === "24h") {
               return pad(h) + ":" + pad(m) + (SettingsState.clockSeconds ? ":" + pad(s) : "");
             }
-            // NOTE: Qt's "hh" only yields 1-12 when the format string also
-            // contains an AP marker, so compute 12-hour digits explicitly.
             var h12 = h % 12;
             if (h12 === 0) {
               h12 = 12;
@@ -1039,7 +1488,7 @@ Rectangle {
             return pad(h12) + ":" + pad(m) + (SettingsState.clockSeconds ? ":" + pad(s) : "");
           }
           color: RecorderState.isRecording ? "#ff453a" : SettingsState.accent
-          font.pixelSize: SettingsState.px(34)
+          font.pixelSize: SettingsState.px(30)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
@@ -1059,7 +1508,7 @@ Rectangle {
         }
       }
 
-      // 5-day strip centered on today (today-2 .. today+2)
+      // 5-day strip centered on today (today-2 .. today+2), today full name + big date
       Row {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 4
@@ -1069,9 +1518,9 @@ Rectangle {
 
           delegate: Column {
             property int dist: Math.abs(index - 2)
-            width: dist === 0 ? 34 : (dist === 1 ? 28 : 24)
+            width: dist === 0 ? 38 : (dist === 1 ? 30 : 26)
             spacing: 3
-            // Current date biggest + brightest, ±1 medium, ±2 smallest + dimmest.
+            // Today biggest + brightest, ±1 medium, ±2 smallest + dimmest.
             opacity: dist === 0 ? 1.0 : (dist === 1 ? 0.7 : 0.38)
 
             property var dayDate: {
@@ -1094,23 +1543,25 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: Qt.formatDateTime(dayDate, "d")
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textSecondary)
-              font.pixelSize: SettingsState.px(parent.dist === 0 ? 23 : (parent.dist === 1 ? 17 : 13))
+              font.pixelSize: SettingsState.px(parent.dist === 0 ? 26 : (parent.dist === 1 ? 18 : 14))
               font.bold: isToday
               font.family: SettingsState.fontFamily
             }
           }
         }
       }
+      }
+
     }
   }
 
   // ========================================================
-  // 4. WEATHER & CALENDAR VIEW (Directly inside Center Bar)
+  // 4. CONTROL CENTER VIEW (right swipe in center bar; calendar is a pill inside)
   // ========================================================
-  WeatherCalendarView {
-    id: wxView
+  CenterCC {
+    id: ccView
     anchors.fill: parent
-    opacity: (root.isExpanded && root.showWeather && !root.showTimer && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox) ? 1 : 0
+    opacity: (root.isExpanded && root.showCC && !root.showTimer && !root.showReminders && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showReminderPrompt && !root.showAbout) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1119,7 +1570,7 @@ Rectangle {
   }
 
   // ========================================================
-  // 4b. TIMER VIEW (1st left-swipe: Clock -> Timer -> Weather)
+  // 4b. TIMER VIEW (left swipe: Clock -> Timer -> Reminders)
   // ========================================================
   TimerView {
     id: timerView
@@ -1142,6 +1593,39 @@ Rectangle {
       NumberAnimation {
         duration: 250
         easing.type: Easing.OutCubic
+      }
+    }
+  }
+
+  // ========================================================
+  // 4c. REMINDER LIST VIEW (2nd left-swipe: Clock -> Timer -> Reminders)
+  // ========================================================
+  Item {
+    id: reminderWrap
+    anchors.fill: parent
+    opacity: (root.isExpanded && root.showReminders) ? 1 : 0
+    visible: opacity > 0
+
+    property bool remHover: false
+
+    HoverHandler {
+      id: remHoverHandler
+      onHoveredChanged: reminderWrap.remHover = hovered
+    }
+
+    onVisibleChanged: {
+      if (!visible) reminderWrap.remHover = false;
+    }
+
+    ReminderView {
+      id: reminderListView
+      anchors.fill: parent
+      anchors.margins: 18
+    }
+
+    Behavior on opacity {
+      NumberAnimation {
+        duration: 220
       }
     }
   }
@@ -1210,6 +1694,8 @@ Rectangle {
     anchors.fill: parent
     opacity: (root.isExpanded && root.showMixer) ? 1 : 0
     visible: opacity > 0
+    onOpenSoundSettings: root.openCCPage("sound")
+    onOpenMicSettings: root.openCCPage("mic")
 
     Behavior on opacity {
       NumberAnimation { duration: 180 }
@@ -1299,24 +1785,25 @@ Rectangle {
     }
   }
 
-  // Close the calendar shortly after the pointer fully leaves the pill
-  // (both the gesture layer and the calendar buttons). The delay avoids
-  // flicker when moving between the background and the day/chevron buttons.
+  // Close the control center / timer shortly after the pointer fully leaves
+  // the pill (both the gesture layer and inner buttons). The delay avoids
+  // flicker when moving between the background and inner buttons.
   Timer {
     id: leaveTimer
     interval: 350
     repeat: false
     onTriggered: {
-      if (!mouse.containsMouse && !root.calHovering && !root.timerHovering) {
-        root.isWeatherView = false;
-        root.isTimerView = false;
-        CalendarState.close();
+      if (!mouse.containsMouse && !root.calHovering && !root.timerHovering && !root.remHovering && !root.mediaHover && !ReminderState.editing) {
+        root.collapseSwipe();
       }
     }
   }
 
   function pokeLeaveTimer(): void {
-    if (mouse.containsMouse || root.calHovering || root.timerHovering) {
+    if (!mouse.containsMouse && !root.calHovering && !root.timerHovering && !root.remHovering && !root.mediaHover) {
+      root.dismissLock = false;
+    }
+    if (mouse.containsMouse || root.calHovering || root.timerHovering || root.remHovering || root.mediaHover) {
       leaveTimer.stop();
     } else {
       leaveTimer.restart();
@@ -1325,6 +1812,8 @@ Rectangle {
 
   onCalHoveringChanged: pokeLeaveTimer()
   onTimerHoveringChanged: pokeLeaveTimer()
+  onRemHoveringChanged: pokeLeaveTimer()
+  onMediaHoverChanged: pokeLeaveTimer()
   onIsTimerViewChanged: {
     if (TimerState.open !== root.isTimerView)
       TimerState.open = root.isTimerView;
@@ -1340,70 +1829,114 @@ Rectangle {
     id: mouse
     anchors.fill: parent
     z: -1
-    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showFileTray && !root.showAbout && !root.showReminderPrompt
+    enabled: !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showFileTray && !root.showAbout && !root.showReminderPrompt && !root.hoverReset
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
     onPressed: function(ev) {
+      root.dismissLock = false;
       root._pressX = ev.x;
       root._pressY = ev.y;
       root._swiped = false;
     }
 
+    // Plain click on the pill background dismisses sticky swipe views.
+    // (A real swipe drag never triggers onClicked, so gestures are unaffected.)
+    onClicked: function(ev) {
+      // A swipe drag also ends with a release inside the pill: ignore that
+      // release, otherwise every small swipe would be instantly undone and
+      // only drags ending outside the card would stick. Plain taps dismiss.
+      if (root._swiped) {
+        root._swiped = false;
+        return;
+      }
+      if (root.swipeOpen) {
+        root.collapseAll();
+        ev.accepted = true;
+      }
+    }
+
     onPositionChanged: function(ev) {
       // Swipe = press + drag. Ignore pure hover moves, otherwise merely
-      // moving the mouse across the pill would open/close the calendar.
+      // moving the mouse across the pill would open/close views.
       if (!mouse.pressed || root._swiped) {
         return;
       }
       var dx = ev.x - root._pressX;
       var dy = Math.abs(ev.y - root._pressY);
 
-      // Left swipe -> Weather | Right swipe -> Timer (from clock)
-      // Opposite swipe returns to clock.
-      if (dx < -18 && dy < 45) {
+      // Left swipe: Clock -> Timer -> Reminders -> Clock
+      // (ControlCenter -> Clock)
+      if (dx < -14 && dy < 45) {
         root._swiped = true;
-        if (root.isTimerView) {
+        if (root.isControlCenterView || CalendarState.open) {
+          root.isControlCenterView = false;
+          CalendarState.close();
+          if (ccView) ccView.resetToMain();
+        } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
-        } else if (!root.isWeatherView && !CalendarState.open) {
-          root.isWeatherView = true;
-          CalendarState.refreshWeather();
-        }
-      }
-      // Right swipe -> Timer (or back to clock from Weather)
-      else if (dx > 18 && dy < 45) {
-        root._swiped = true;
-        if (root.isWeatherView || CalendarState.open) {
-          root.isWeatherView = false;
-          CalendarState.close();
-        } else if (!root.isTimerView) {
+          root.isReminderView = true;
+        } else if (root.isReminderView) {
+          root.isReminderView = false;
+          if (ReminderState.editing) ReminderState.editing = false;
+        } else {
           root.isTimerView = true;
           TimerState.open = true;
+        }
+      }
+      // Right swipe: Reminders -> Timer -> Clock -> Control Center
+      // (calendar lives as a pill inside the control center)
+      else if (dx > 14 && dy < 45) {
+        root._swiped = true;
+        if (root.isReminderView) {
+          root.isReminderView = false;
+          if (ReminderState.editing) ReminderState.editing = false;
+          root.isTimerView = true;
+          TimerState.open = true;
+        } else if (root.isTimerView) {
+          root.isTimerView = false;
+          TimerState.open = false;
+        } else if (!root.isControlCenterView && !CalendarState.open) {
+          root.isControlCenterView = true;
+          if (ccView) ccView.activePage = "main";
         }
       }
     }
 
     onWheel: wheel => {
-      // Touchpad horizontal swipe left -> Weather, right -> Timer
+      // Touchpad horizontal swipe left: CC -> Clock, Clock -> Timer -> Reminders -> Clock
       if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
-        if (root.isTimerView) {
+        if (root.isControlCenterView || CalendarState.open) {
+          root.isControlCenterView = false;
+          CalendarState.close();
+          if (ccView) ccView.resetToMain();
+        } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
-        } else if (!root.isWeatherView && !CalendarState.open) {
-          root.isWeatherView = true;
-          CalendarState.refreshWeather();
-        }
-      }
-      // Touchpad horizontal swipe right -> Timer (or back to clock from Weather)
-      else if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
-        if (root.isWeatherView || CalendarState.open) {
-          root.isWeatherView = false;
-          CalendarState.close();
-        } else if (!root.isTimerView) {
+          root.isReminderView = true;
+        } else if (root.isReminderView) {
+          root.isReminderView = false;
+          if (ReminderState.editing) ReminderState.editing = false;
+        } else {
           root.isTimerView = true;
           TimerState.open = true;
+        }
+      }
+      // Touchpad horizontal swipe right: Reminders -> Timer -> Clock -> Control Center
+      else if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
+        if (root.isReminderView) {
+          root.isReminderView = false;
+          if (ReminderState.editing) ReminderState.editing = false;
+          root.isTimerView = true;
+          TimerState.open = true;
+        } else if (root.isTimerView) {
+          root.isTimerView = false;
+          TimerState.open = false;
+        } else if (!root.isControlCenterView && !CalendarState.open) {
+          root.isControlCenterView = true;
+          if (ccView) ccView.activePage = "main";
         }
       }
       // Vertical scroll -> Workspace switch

@@ -119,6 +119,49 @@ Singleton {
   property string _lastSig: ""
   property int _lastTime: 0
 
+  // Ids of notifications already closed (externally or by us). Calling
+  // dismiss() on a destroyed object logs an uncatchable C++ error
+  // ("Cannot close destroyed notification"), so those are skipped.
+  property var _goneIds: ({})
+  property int _goneCount: 0
+
+  function markGone(n): void {
+    try {
+      var id = n ? n.id : undefined;
+      if (id === undefined || id === null) return;
+      if (!root._goneIds[id]) {
+        var g = root._goneIds;
+        g[id] = true;
+        root._goneCount++;
+        if (root._goneCount > 2000) {
+          root._goneIds = {};
+          root._goneCount = 0;
+        }
+      }
+    } catch (e) {}
+  }
+
+  function isGone(n): bool {
+    try {
+      var id = n ? n.id : undefined;
+      if (id === undefined || id === null) return false;
+      return !!root._goneIds[id];
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Dismiss first, untrack after. Reversing the order can destroy the object
+  // (dropping server ownership) before dismiss() runs, which is exactly what
+  // produced "Cannot close destroyed notification".
+  function safeDismiss(n): void {
+    if (!n) return;
+    if (!root.isGone(n)) {
+      try { n.dismiss(); } catch (e) {}
+    }
+    try { n.tracked = false; } catch (e) {}
+  }
+
   function notifSig(n) {
     try {
       return (n.appName || "") + "|" + (n.summary || "") + "|" + (n.body || "");
@@ -153,12 +196,7 @@ Singleton {
       // These render as empty cards in toasts + center pill.
       if (isEmptyNotif(n)) {
         console.log("[NotifCenter] dropping empty notification from:", n.appName);
-        try {
-          n.tracked = false;
-        } catch (e) {}
-        try {
-          n.dismiss();
-        } catch (e) {}
+        root.safeDismiss(n);
         return;
       }
       // Drop instant duplicates (same app+summary+body within 1.5s)
@@ -166,12 +204,7 @@ Singleton {
       var now = Date.now();
       if (sig && sig === root._lastSig && (now - root._lastTime) < 1500) {
         console.log("[NotifCenter] dropping duplicate notification:", sig);
-        try {
-          n.tracked = false;
-        } catch (e) {}
-        try {
-          n.dismiss();
-        } catch (e) {}
+        root.safeDismiss(n);
         return;
       }
       root._lastSig = sig;
@@ -179,6 +212,7 @@ Singleton {
       n.tracked = true;
       // When notification is closed externally or dismissed
       n.closed.connect(function () {
+        root.markGone(n);
         hidePopup(n);
         if (root.currentNotification === n) {
           root.nextNotification();
@@ -270,8 +304,7 @@ Singleton {
     if (currentNotification) {
       var n = currentNotification;
       hidePopup(n);
-      try { n.tracked = false; } catch (e) {}
-      try { n.dismiss(); } catch (e) {}
+      root.safeDismiss(n);
     } else {
       nextNotification();
     }
@@ -288,8 +321,7 @@ Singleton {
           else if (typeof a.trigger === "function") a.trigger();
         }
       } catch (e) {}
-      try { n.tracked = false; } catch (e) {}
-      try { n.dismiss(); } catch (e) {}
+      root.safeDismiss(n);
     } else {
       nextNotification();
     }
@@ -327,8 +359,7 @@ Singleton {
   function dismissNotification(n) {
     if (!n) return;
     hidePopup(n);
-    try { n.tracked = false; } catch (e) {}
-    try { n.dismiss(); } catch (e) {}
+    root.safeDismiss(n);
   }
 
   function clearAll() {
@@ -341,11 +372,12 @@ Singleton {
     for (var j = 0; j < list.length; ++j) {
       if (list[j]) ns.push(list[j]);
     }
+    root._goneIds = {};
+    root._goneCount = 0;
     for (var i = 0; i < ns.length; ++i) {
       var n = ns[i];
       if (n) {
-        try { n.dismiss(); } catch (e) {}
-        try { n.tracked = false; } catch (e) {}
+        root.safeDismiss(n);
       }
     }
   }

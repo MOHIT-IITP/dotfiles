@@ -12,7 +12,7 @@ import "../services"
 Rectangle {
   id: root
 
-  property string activePage: "main" // "main" | "wifi" | "bluetooth" | "power" | "about"
+  property string activePage: "main" // "main" | "wifi" | "bluetooth" | "power" | "about" | "calendar" | "stats"
 
   readonly property string activeType: NetworkState.activeType
   readonly property bool wifiUp: NetworkState.wifiUp
@@ -66,6 +66,7 @@ Rectangle {
 
   implicitWidth: {
     if (!netMouse.containsMouse) return 30;
+    if (root.activePage === "calendar") return 560;
     if (root.activePage === "power") return 360;
     if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
     return 410;
@@ -75,12 +76,15 @@ Rectangle {
     if (!netMouse.containsMouse) return 30;
     if (root.activePage === "power") return 138;
     if (root.activePage === "settings") return settingsPage.implicitHeight + 76;
-    if (root.activePage === "sound" || root.activePage === "mic") return 520;
+    if (root.activePage === "sound") return soundPage.implicitHeight + 36;
+    if (root.activePage === "mic") return micPage.implicitHeight + 36;
     if (root.activePage === "mixer") return 380;
     if (root.activePage === "screenshot") return 254;
     if (root.activePage === "bluetooth") return btPage.implicitHeight + 36;
     if (root.activePage === "wifi") return wifiPage.implicitHeight + 36;
     if (root.activePage === "about") return aboutPage.implicitHeight + 36;
+    if (root.activePage === "calendar") return calPage.implicitHeight + 36;
+    if (root.activePage === "stats") return statsPage.implicitHeight + 36;
     if (root.activePage === "recorder") {
       var extraMic = root.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0;
       var extraList = (RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(180, RecorderState.recentRecordings.length * 60) : 30;
@@ -201,9 +205,8 @@ Rectangle {
       anchors.centerIn: parent
       width: 18
       height: 18
-      opacity: activeType === "wired" ? 0.75 : 1.0
-      kind: activeType === "wired" ? "ethernet" : (wifiUp ? "wifi" : (activeType === "none" ? "wifi-off" : "wifi"))
-      glyph: activeType === "none" ? SettingsState.textMuted : (activeType === "wired" ? SettingsState.textSecondary : SettingsState.textMain)
+      kind: wifiUp ? "wifi" : "wifi-off"
+      glyph: wifiUp ? SettingsState.textMain : SettingsState.textMuted
     }
   }
 
@@ -306,6 +309,28 @@ Rectangle {
   // ---- About / profile-links subview. (see AboutPage.qml) ----
   AboutPage {
     id: aboutPage
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.margins: 18
+    circle: root
+    hovered: netMouse.containsMouse
+  }
+
+  // ---- Calendar (weather + month) subview. (see CCCalendarPage.qml) ----
+  CCCalendarPage {
+    id: calPage
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.margins: 18
+    circle: root
+    hovered: netMouse.containsMouse
+  }
+
+  // ---- System stats subview. (see CCStatsPage.qml) ----
+  CCStatsPage {
+    id: statsPage
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right

@@ -1,0 +1,239 @@
+import Quickshell
+import QtQuick
+import "../services"
+
+// Embedded Dynamic Island-style Notification card directly inside ClockPill.
+// Taller height, generous internal padding, and compact width.
+Item {
+  id: root
+
+  implicitWidth: 380
+  implicitHeight: 136
+
+  readonly property var n: NotifCenter.currentNotification
+
+  function formatAppName(item) {
+    if (!item) return "Alert";
+    var name = (item.appName || "").trim();
+    if (!name) return "Alert";
+    if (name.indexOf("chrome-") === 0) {
+      var parts = name.split("___");
+      if (parts.length > 1) {
+        var site = parts[1].split("-")[0].replace("web.", "").replace(".com", "").replace(".org", "");
+        return site.charAt(0).toUpperCase() + site.slice(1);
+      }
+    }
+    return name;
+  }
+
+  function getActionLabel(item) {
+    return NotifCenter.actionLabel(item);
+  }
+
+  readonly property bool hasOpenAction: NotifCenter.hasOpenableAction(root.n)
+
+  Column {
+    anchors.fill: parent
+    anchors.leftMargin: 20
+    anchors.rightMargin: 20
+    anchors.topMargin: 16
+    anchors.bottomMargin: 16
+    spacing: 10
+
+    // 1. Top Row: [App Badge / Status] [Icon] [Timestamp]
+    Row {
+      width: parent.width
+      height: 24
+      spacing: 8
+
+      // App Pill Badge
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        height: 22
+        width: Math.min(130, appText.implicitWidth + 20)
+        radius: 11
+        color: SettingsState.accent
+        opacity: 0.9
+
+        Text {
+          id: appText
+          anchors.centerIn: parent
+          text: root.formatAppName(root.n)
+          color: SettingsState.isDark ? "#0d140e" : "#ffffff"
+          font.pixelSize: SettingsState.px(11)
+          font.bold: true
+          font.family: SettingsState.fontFamily
+          elide: Text.ElideRight
+          width: parent.width - 8
+          horizontalAlignment: Text.AlignHCenter
+        }
+      }
+
+      Item {
+        width: parent.width - (appText.parent.width + 60)
+        height: 1
+      }
+
+      // App Icon / Favicon in Top-Right
+      Item {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 22
+        height: 22
+
+        Image {
+          id: imgView
+          anchors.centerIn: parent
+          width: 18
+          height: 18
+          visible: status === Image.Ready
+          source: {
+            if (!root.n) return "";
+            var s = NotifCenter.iconSourceFor(root.n);
+            if (s && (s + "") !== "") return s;
+            if (root.n.image) return root.n.image;
+            return "";
+          }
+          smooth: true
+          asynchronous: true
+        }
+
+        CCIcon {
+          anchors.centerIn: parent
+          width: 16
+          height: 16
+          visible: imgView.status !== Image.Ready
+          kind: NotifCenter.iconKindFor(root.n)
+          glyph: SettingsState.textSecondary
+        }
+      }
+
+      // Timestamp (e.g. "now")
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "now"
+        color: SettingsState.textMuted
+        font.pixelSize: SettingsState.px(11)
+        font.family: SettingsState.fontFamily
+      }
+    }
+
+    // 2. Middle Content (Summary Title + Body Description)
+    Column {
+      width: parent.width
+      spacing: 3
+
+      Text {
+        width: parent.width
+        text: (root.n && root.n.summary) ? root.n.summary : ""
+        textFormat: Text.StyledText
+        color: SettingsState.textMain
+        font.pixelSize: SettingsState.px(14)
+        font.bold: true
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+        maximumLineCount: 1
+      }
+
+      Text {
+        width: parent.width
+        visible: root.n && root.n.body !== ""
+        text: (root.n && root.n.body) ? root.n.body : ""
+        textFormat: Text.StyledText
+        color: SettingsState.textSecondary
+        font.pixelSize: SettingsState.px(12)
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+        maximumLineCount: 1
+      }
+    }
+
+    // 3. Bottom Row: Action Pills
+    Row {
+      width: parent.width
+      height: 28
+      spacing: 10
+
+      // Dismiss Pill (✕)
+      Rectangle {
+        height: 28
+        width: 42
+        radius: 14
+        color: dismissMouse.containsMouse ? SettingsState.bgCardHover : (SettingsState.isDark ? "#202620" : "#e0e6e0")
+        border.color: SettingsState.borderBase
+        border.width: 1
+
+        Text {
+          anchors.centerIn: parent
+          text: "\uea76"
+            font.family: SettingsState.nerdIconFont
+          color: SettingsState.accent
+          font.pixelSize: SettingsState.px(12)
+          font.bold: true
+        }
+
+        MouseArea {
+          id: dismissMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: NotifCenter.dismissCurrent()
+        }
+      }
+
+      // Open Action Pill (only when the notification has an invocable action)
+      Rectangle {
+        height: 28
+        width: root.hasOpenAction ? parent.width - 52 : 0
+        visible: root.hasOpenAction
+        radius: 14
+        color: openMouse.containsMouse ? SettingsState.accent : SettingsState.bgCard
+        border.color: SettingsState.borderBase
+        border.width: 1
+
+        Behavior on color {
+          ColorAnimation { duration: 100 }
+        }
+
+        Row {
+          anchors.centerIn: parent
+          spacing: 6
+
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.getActionLabel(root.n)
+            color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textMain
+            font.pixelSize: SettingsState.px(12)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+          }
+
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "\ueab6"
+              font.family: SettingsState.nerdIconFont
+            color: openMouse.containsMouse ? (SettingsState.isDark ? "#0d140e" : "#ffffff") : SettingsState.textSecondary
+            font.pixelSize: SettingsState.px(13)
+            font.bold: true
+          }
+        }
+
+        MouseArea {
+          id: openMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: NotifCenter.activateCurrent()
+        }
+      }
+    }
+  }
+
+  // Hover detection to pause auto-dismiss timer while reading
+  MouseArea {
+    anchors.fill: parent
+    hoverEnabled: true
+    acceptedButtons: Qt.NoButton
+    onEntered: NotifCenter.isHovered = true
+    onExited: NotifCenter.isHovered = false
+  }
+}

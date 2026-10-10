@@ -16,6 +16,10 @@ Singleton {
   readonly property string thumbDir: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/quickshell/cliphist-thumbs/"
 
   property var _buffer: []
+  // Ids (from the list header line) that have a usable thumbnail file.
+  // Entries without one use the fallback icon silently instead of probing
+  // a missing file and spamming "Cannot open" warnings.
+  property var _okThumbs: ({})
 
   Component.onCompleted: {
     refresh();
@@ -39,6 +43,7 @@ Singleton {
 
   function refresh() {
     _buffer = [];
+    _okThumbs = {};
     loading = true;
     if (thumbProc.running) {
       thumbProc.running = false;
@@ -124,6 +129,17 @@ Singleton {
       onRead: data => {
         if (data && data.trim() !== "") {
           var clean = data.trim();
+          // Header line listing image ids with valid thumbnails (see list).
+          if (clean.indexOf("OK:") === 0) {
+            var set = {};
+            var ids = clean.substring(3).split(",");
+            for (var k = 0; k < ids.length; ++k) {
+              var kk = (ids[k] + "").trim();
+              if (kk !== "") set[kk] = true;
+            }
+            root._okThumbs = set;
+            return;
+          }
           var tabIdx = clean.indexOf("\t");
           var id = (tabIdx >= 0) ? clean.substring(0, tabIdx).trim() : "";
           var preview = (tabIdx >= 0) ? clean.substring(tabIdx + 1).trim() : clean;
@@ -150,7 +166,7 @@ Singleton {
             isImage: isImage,
             label: label,
             sizeLabel: sizeLabel,
-            thumb: isImage ? root.thumbDir + id + ".png" : ""
+            thumb: (isImage && root._okThumbs[id]) ? root.thumbDir + id + ".png" : ""
           });
         }
       }

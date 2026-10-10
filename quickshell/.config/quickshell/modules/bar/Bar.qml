@@ -5,8 +5,8 @@ import QtQuick
 import QtQuick.Effects
 import "../services"
 
-// Top bar: centered clock pill with media player on the left
-// and network circle on the right.
+// Top bar: centered clock pill (right swipe opens control center,
+// left swipe opens timer, then reminders).
 Scope {
   Variants {
     model: Quickshell.screens
@@ -23,7 +23,7 @@ Scope {
       // any height (settings, control center, calendar, player card).
       // ClockPill.isExpanded is true while hovered or showing any
       // modal / weather / timer / notification view.
-      readonly property bool barHover: (clockPill && clockPill.isExpanded) || (netCircle && netCircle.hovered) || (mediaPlayer && mediaPlayer.hovered)
+      readonly property bool barHover: (clockPill && clockPill.isExpanded) || (reminderCircle && reminderCircle.hovered)
       property bool barRevealed: true
 
       function shouldReveal() {
@@ -136,7 +136,7 @@ Scope {
         // While auto-hide is enabled, exclusiveZone stays 0 so windows don't jump/resize on hover.
         exclusiveZone: (!SettingsState.barAutoHide && screenScope.barRevealed) ? Math.round((30 + 6 + SettingsState.barGap) * SettingsState.uiScale) : 0
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || ReminderState.promptOpen || ReminderState.editing || (netCircle && (netCircle.fontDropdownOpen || netCircle.aboutInputOpen))
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || ReminderState.promptOpen || ReminderState.editing || (clockPill && (clockPill.ccFontDropdownOpen || clockPill.ccAboutInputOpen || clockPill.swipeOpen || clockPill.pillOpen))
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -160,7 +160,7 @@ Scope {
               else if (AboutState.open && clockPill) clockPill.forceFocusAbout();
               else if (NotifCenter.inboxOpen && clockPill) clockPill.forceFocusNotifInbox();
               else if (ReminderState.promptOpen && clockPill) clockPill.forceFocusReminder();
-              else if (netCircle && netCircle.fontDropdownOpen) netCircle.forceFocusFontSearch();
+              else if (clockPill && clockPill.ccFontDropdownOpen) clockPill.forceFocusCCFontSearch();
             });
           }
         }
@@ -189,16 +189,14 @@ Scope {
             if (FileTrayState.open) FileTrayState.close();
             if (ReminderState.promptOpen) ReminderState.closePrompt();
             if (ReminderState.editing) ReminderState.editing = false;
+            if (clockPill) clockPill.collapseAll();
           }
         }
 
         mask: Region {
           item: clockPill
           Region {
-            item: netCircle
-          }
-          Region {
-            item: mediaPlayer
+            item: (reminderCircle && reminderCircle.visible) ? reminderCircle : null
           }
         }
 
@@ -324,10 +322,12 @@ Scope {
           }
 
           Rectangle {
-            anchors.fill: mediaPlayer
-            radius: mediaPlayer.radius
+            anchors.fill: reminderCircle
+            radius: reminderCircle.radius
             color: "transparent"
-            visible: mediaPlayer.visible
+            visible: reminderCircle.visible && reminderCircle.opacity > 0.05
+            opacity: reminderCircle.opacity
+            scale: reminderCircle.scale
             layer.enabled: true
             layer.effect: MultiEffect {
               shadowEnabled: true
@@ -338,39 +338,13 @@ Scope {
             }
 
             SquircleBackground {
-              radius: mediaPlayer.radius
+              radius: reminderCircle.radius
               power: SettingsState.cardRoundingPower
               fillColor: SettingsState.bgCard
               strokeColor: "transparent"
               strokeWidth: 0
             }
           }
-
-          Rectangle {
-            anchors.fill: netCircle
-            radius: netCircle.radius
-            color: "transparent"
-            visible: netCircle.visible
-            layer.enabled: true
-            layer.effect: MultiEffect {
-              shadowEnabled: true
-              shadowColor: SettingsState.shadowColor
-              shadowBlur: 0.4
-              shadowVerticalOffset: 0
-              shadowHorizontalOffset: 0
-            }
-
-            SquircleBackground {
-              radius: netCircle.radius
-              power: SettingsState.cardRoundingPower
-              fillColor: SettingsState.bgCard
-              strokeColor: "transparent"
-              strokeWidth: 0
-            }
-          }
-
-
-
 
           // ==========================================
           // FOREGROUND COMPONENTS (Direct rendering with full subpixel font sharpness)
@@ -382,18 +356,12 @@ Scope {
             date: clock.date
           }
 
-          MediaPlayer {
-            id: mediaPlayer
+          ReminderCircle {
+            id: reminderCircle
             anchors.top: clockPill.top
             anchors.right: clockPill.left
             anchors.rightMargin: 10
-          }
-
-          NetworkCircle {
-            id: netCircle
-            anchors.top: clockPill.top
-            anchors.left: clockPill.right
-            anchors.leftMargin: 10
+            clockPill: clockPill
           }
 
 

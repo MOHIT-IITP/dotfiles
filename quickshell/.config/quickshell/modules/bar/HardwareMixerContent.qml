@@ -14,6 +14,9 @@ Item {
   readonly property real inVol: AudioState.inVol
   readonly property bool inMuted: AudioState.inMuted
 
+  signal openSoundSettings
+  signal openMicSettings
+
   implicitWidth: 440
   implicitHeight: 360
 
@@ -132,7 +135,7 @@ Item {
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
-              onClicked: AudioState.toggleOutMute()
+              onClicked: root.openSoundSettings()
             }
           }
 
@@ -154,7 +157,7 @@ Item {
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
-              onClicked: AudioState.toggleInMute()
+              onClicked: root.openMicSettings()
             }
           }
 
@@ -278,7 +281,7 @@ Item {
         onSeeked: function (v) {
           AudioState.setOutVol(v);
         }
-        onIconClicked: AudioState.toggleOutMute()
+        onIconClicked: root.openSoundSettings()
       }
 
       // 4. Microphone Fader
@@ -293,7 +296,7 @@ Item {
         onSeeked: function (v) {
           AudioState.setInVol(v);
         }
-        onIconClicked: AudioState.toggleInMute()
+        onIconClicked: root.openMicSettings()
       }
     }
   }

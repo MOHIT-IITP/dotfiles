@@ -20,19 +20,25 @@ function paint(ctx, W, H, o) {
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
 
-  var pad = Math.max(showHandle ? handleW : 0, waveW) / 2 + 1;
+  var pad = Math.max(showHandle ? handleW : 0, waveW, trackH) / 2 + 1;
   var cy = H / 2;
   var x0 = pad;
   var x1 = W - pad;
   var fx = x0 + (x1 - x0) * shown;
   var hx = Math.max(x0, Math.min(x1, fx));
 
+  var trackGap = (o.trackGap !== undefined) ? o.trackGap : ((o.gap !== undefined) ? o.gap : (showHandle ? 0 : 8));
+  var halfGap = trackGap / 2;
+
   // 1. Unfilled track: only the remaining (unfilled) stretch, so no
   // straight bar peeks out beside the wavy active fill.
   if (showTrack) {
     var trackStart = x0;
     if (shown > 0.005) {
-      trackStart = showHandle ? (hx + handleW / 2 - 1) : fx;
+      trackStart = showHandle ? (hx + handleW / 2 - 1) : (fx + halfGap);
+    }
+    if (shown >= 0.995) {
+      trackStart = x1 + 1;
     }
     if (x1 - Math.max(trackStart, x0) > 1) {
       ctx.beginPath();
@@ -46,8 +52,13 @@ function paint(ctx, W, H, o) {
 
   // 2. Wavy fill (stops at the handle's left edge so its round cap
   // tucks under the handle instead of painting over it;
-  // runs the full value length when there is no handle)
-  var waveEnd = showHandle ? hx - handleW / 2 + 1 : fx;
+  // runs the full value length when there is no handle or up to gap)
+  var waveEnd = fx;
+  if (showHandle) {
+    waveEnd = hx - handleW / 2 + 1;
+  } else if (trackGap > 0 && shown < 0.995) {
+    waveEnd = Math.max(x0, fx - halfGap);
+  }
   if (shown > 0.005 && waveEnd > x0 + 1) {
     ctx.beginPath();
     ctx.strokeStyle = o.waveColor;

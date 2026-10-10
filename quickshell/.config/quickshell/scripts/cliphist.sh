@@ -71,8 +71,14 @@ case "$CMD" in
 
   list)
     if command -v cliphist >/dev/null 2>&1; then
+      # First line tells the UI which image ids have a usable thumbnail file,
+      # so it never probes missing files (a failed decode leaves the entry
+      # without a png, which otherwise logs "Cannot open" every refresh).
+      ok="$(find "$THUMB_DIR" -maxdepth 1 -type f -name '*.png' -size +0c -printf '%f\n' 2>/dev/null | sed 's/\.png$//' | sort -n | paste -sd, -)"
+      printf 'OK:%s\n' "$ok"
       cliphist list | tr -d '\0'
     elif [ -f "$FALLBACK_FILE" ]; then
+      printf 'OK:\n'
       cat "$FALLBACK_FILE"
     fi
     ;;

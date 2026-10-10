@@ -132,7 +132,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: AudioState.toggleOutMute()
+            onClicked: {
+              AudioState.refreshDevices();
+              circle.activePage = "sound";
+            }
           }
         }
 
@@ -154,7 +157,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: AudioState.toggleInMute()
+            onClicked: {
+              AudioState.refreshDevices();
+              circle.activePage = "mic";
+            }
           }
         }
 
@@ -278,7 +284,10 @@ Column {
       onSeeked: function (v) {
         AudioState.setOutVol(v);
       }
-      onIconClicked: AudioState.toggleOutMute()
+      onIconClicked: {
+        AudioState.refreshDevices();
+        circle.activePage = "sound";
+      }
     }
 
     // 4. Microphone Fader
@@ -293,7 +302,10 @@ Column {
       onSeeked: function (v) {
         AudioState.setInVol(v);
       }
-      onIconClicked: AudioState.toggleInMute()
+      onIconClicked: {
+        AudioState.refreshDevices();
+        circle.activePage = "mic";
+      }
     }
   }
 }
