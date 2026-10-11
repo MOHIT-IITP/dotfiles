@@ -22,13 +22,13 @@ Column {
     width: parent.width
     spacing: 10
 
-    // Wi-Fi Pill
+    // Wi-Fi / Ethernet Pill (opens Network page with wired + wifi)
     Rectangle {
       width: (parent.width - 10) / 2
       height: 68
       radius: 24
-      color: circle.wifiUp ? SettingsState.bgActivePill : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: circle.wifiUp ? SettingsState.borderActive : (wifiCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+      color: (circle.wifiUp || circle.wiredUp) ? SettingsState.bgActivePill : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+      border.color: (circle.wifiUp || circle.wiredUp) ? SettingsState.borderActive : (wifiCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
       border.width: 1
 
       Row {
@@ -41,14 +41,14 @@ Column {
           width: 42
           height: 42
           radius: 21
-          color: circle.wifiUp ? SettingsState.accent : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
+          color: (circle.wifiUp || circle.wiredUp) ? SettingsState.accent : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
 
           CCIcon {
             anchors.centerIn: parent
             width: 20
             height: 20
-            kind: "wifi"
-            glyph: circle.wifiUp ? (SettingsState.isDark ? "#121612" : "#ffffff") : (wifiCardMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+            kind: (circle.wiredUp && !circle.wifiUp) ? "ethernet" : "wifi"
+            glyph: (circle.wifiUp || circle.wiredUp) ? (SettingsState.isDark ? "#121612" : "#ffffff") : (wifiCardMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
           }
         }
 
@@ -58,7 +58,7 @@ Column {
           spacing: 2
 
           Text {
-            text: "Wi-Fi"
+            text: (circle.wiredUp && !circle.wifiUp) ? "Ethernet" : "Wi-Fi"
             color: SettingsState.textMain
             font.pixelSize: SettingsState.px(17)
             font.bold: true
@@ -66,8 +66,8 @@ Column {
           }
           Text {
             width: parent.width
-            text: circle.wifiUp ? circle.wifiName : (circle.wiredUp ? circle.wiredName : (circle.wifiEnabled ? "Disconnected" : "Off"))
-            color: circle.wifiUp ? SettingsState.textActive : SettingsState.textSecondary
+            text: circle.wifiUp ? circle.wifiName : (circle.wiredUp ? ("Eth · " + circle.wiredName) : (circle.wifiEnabled ? "Disconnected" : "Off"))
+            color: (circle.wifiUp || circle.wiredUp) ? SettingsState.textActive : SettingsState.textSecondary
             font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
@@ -131,7 +131,14 @@ Column {
           }
           Text {
             width: parent.width
-            text: circle.btName
+            text: {
+              // Prefer connected BT device name; fall back to UPower
+              // accessory summary (e.g. MX Master 2S 55%) so mouse /
+              // headphone battery is visible right on the main page.
+              if (circle.btOn && BluetoothState.btDevice) return circle.btName;
+              if (DeviceBatteryState.hasAccessories) return DeviceBatteryState.summary;
+              return circle.btName;
+            }
             color: (circle.btOn && BluetoothState.btDevice) ? SettingsState.textActive : SettingsState.textSecondary
             font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
@@ -149,6 +156,106 @@ Column {
         onClicked: {
           circle.activePage = "bluetooth";
           BluetoothState.startDiscovery();
+        }
+      }
+    }
+  }
+
+  // Mouse / headphone battery strip (UPower accessories). Visible when
+  // e.g. MX Master 2S or a headset reports a percentage via upower.
+  Column {
+    width: parent.width
+    spacing: 6
+    visible: DeviceBatteryState.hasAccessories
+
+    Repeater {
+      model: DeviceBatteryState.accessories
+      delegate: Rectangle {
+        id: accPill
+        width: parent.width
+        height: 44
+        radius: 16
+        color: accMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
+        border.color: accMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
+        border.width: 1
+
+        readonly property int accPct: DeviceBatteryState.pct100(modelData)
+        readonly property string accKind: DeviceBatteryState.iconKindFor(modelData)
+
+        Row {
+          anchors.fill: parent
+          anchors.margins: 8
+          spacing: 10
+
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 28
+            height: 28
+            radius: 14
+            color: SettingsState.bgSurface
+
+            CCIcon {
+              anchors.centerIn: parent
+              width: 16
+              height: 16
+              kind: accPill.accKind
+              glyph: SettingsState.textSecondary
+            }
+          }
+
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 28 - 10 - 70
+            text: DeviceBatteryState.labelFor(modelData)
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(14)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+            maximumLineCount: 1
+          }
+
+          Row {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 6
+
+            Rectangle {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 24
+              height: 5
+              radius: 2.5
+              color: SettingsState.borderBase
+
+              Rectangle {
+                width: parent.width * Math.max(0, Math.min(1, accPill.accPct / 100))
+                height: parent.height
+                radius: parent.radius
+                color: SettingsState.accent
+              }
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 34
+              horizontalAlignment: Text.AlignRight
+              text: accPill.accPct >= 0 ? accPill.accPct + "%" : "--"
+              color: SettingsState.textSecondary
+              font.pixelSize: SettingsState.px(13)
+              font.bold: true
+              font.family: SettingsState.fontFamily
+            }
+          }
+        }
+
+        MouseArea {
+          id: accMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            circle.activePage = "bluetooth";
+            BluetoothState.startDiscovery();
+          }
         }
       }
     }

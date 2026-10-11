@@ -89,6 +89,7 @@ Item {
     if (k === "swap" || k === "exchange" || k === "transfer" || k === "swap_horizontal") return "󰓡"; // nf-md-swap_horizontal
     if (k === "disk" || k === "hdd" || k === "drive" || k === "storage") return "󰋊"; // nf-md-harddisk
     if (k === "ethernet" || k === "wired") return "󰈀"; // nf-md-ethernet
+    if (k === "battery") return "󰁹"; // nf-md-battery_medium
     if (k === "font") return "󰛖"; // nf-md-format_font
     if (k === "eye" || k === "autohide" || k === "hide") return "󰛐"; // nf-md-eye_outline
     if (k === "eye-off") return "󰛑"; // nf-md-eye_off_outline

@@ -204,14 +204,28 @@ Column {
 
       readonly property bool isPaired: !!(modelData.paired || modelData.bonded)
       readonly property bool hasBattery: modelData.batteryAvailable === true
-      readonly property int battPct: btRow.hasBattery ? Math.round(modelData.battery * 100) : -1
-      readonly property bool showBattery: modelData.connected && btRow.hasBattery
+      readonly property int battPct: btRow.hasBattery ? Math.round((Number(modelData.battery) <= 1.01 ? Number(modelData.battery) * 100 : Number(modelData.battery))) : -1
+      readonly property bool showBattery: modelData.connected && btRow.hasBattery && btRow.battPct >= 0
       readonly property bool showPair: !btRow.isPaired
       readonly property string subLine: {
         var mac = modelData.address || "";
-        if (modelData.connected) return mac ? ("connected \u00b7 " + mac) : "connected";
-        if (btRow.isPaired) return mac ? ("paired \u00b7 disconnected \u00b7 " + mac) : "paired \u00b7 disconnected";
-        return mac ? ("disconnected \u00b7 " + mac) : "disconnected";
+        var batt = (btRow.hasBattery && btRow.battPct >= 0) ? (btRow.battPct + "%") : "";
+        if (modelData.connected) {
+          var s = "connected";
+          if (batt !== "") s += " · " + batt;
+          if (mac !== "") s += " · " + mac;
+          return s;
+        }
+        if (btRow.isPaired) {
+          var p = "paired · disconnected";
+          if (batt !== "") p += " · " + batt;
+          if (mac !== "") p += " · " + mac;
+          return p;
+        }
+        var d = "disconnected";
+        if (batt !== "") d += " · " + batt;
+        if (mac !== "") d += " · " + mac;
+        return d;
       }
 
       // Left Icon Box (Nerd Font device glyph)
@@ -261,7 +275,7 @@ Column {
             color: SettingsState.borderBase
 
             Rectangle {
-              width: parent.width * Math.max(0, Math.min(1, modelData.battery || 0))
+              width: parent.width * Math.max(0, Math.min(1, (Number(modelData.battery) <= 1.01 ? Number(modelData.battery) : Number(modelData.battery) / 100) || 0))
               height: parent.height
               radius: parent.radius
               color: SettingsState.accent
@@ -359,6 +373,128 @@ Column {
             modelData.connected = true;
           } else {
             modelData.pair();
+          }
+        }
+      }
+    }
+  }
+
+  // ---- Mouse & accessories battery (UPower: Logitech hidpp, headsets, etc.) ----
+  // Covers wireless mice/dongles that never appear as Bluetooth battery
+  // devices, e.g. MX Master 2S at 55% via upower.
+  Column {
+    width: parent.width
+    spacing: 8
+    visible: DeviceBatteryState.hasAccessories
+
+    Text {
+      text: "MOUSE & ACCESSORIES"
+      color: SettingsState.textMuted
+      font.pixelSize: SettingsState.px(12)
+      font.bold: true
+      font.family: SettingsState.fontFamily
+    }
+
+    Repeater {
+      model: DeviceBatteryState.accessories
+      delegate: Rectangle {
+        id: accRow
+        width: parent.width
+        height: 56
+        radius: 14
+        color: SettingsState.bgCard
+        border.color: SettingsState.borderBase
+        border.width: 1
+
+        readonly property int accPct: DeviceBatteryState.pct100(modelData)
+        readonly property string accKind: DeviceBatteryState.iconKindFor(modelData)
+        readonly property string accLabel: DeviceBatteryState.labelFor(modelData)
+        readonly property string accState: DeviceBatteryState.stateText(modelData)
+
+        Rectangle {
+          id: accIconBox
+          anchors.left: parent.left
+          anchors.leftMargin: 10
+          anchors.verticalCenter: parent.verticalCenter
+          width: 36
+          height: 36
+          radius: 10
+          color: SettingsState.bgSurface
+
+          CCIcon {
+            anchors.centerIn: parent
+            width: 20
+            height: 20
+            kind: accRow.accKind
+            glyph: SettingsState.textSecondary
+          }
+        }
+
+        Item {
+          id: accRight
+          anchors.right: parent.right
+          anchors.rightMargin: 12
+          anchors.verticalCenter: parent.verticalCenter
+          width: accBattRow.implicitWidth
+          height: 26
+
+          Row {
+            id: accBattRow
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            spacing: 8
+
+            Rectangle {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 26
+              height: 5
+              radius: 2.5
+              color: SettingsState.borderBase
+
+              Rectangle {
+                width: parent.width * Math.max(0, Math.min(1, accRow.accPct / 100))
+                height: parent.height
+                radius: parent.radius
+                color: SettingsState.accent
+              }
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: accRow.accPct >= 0 ? accRow.accPct + "%" : "--"
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(14)
+              font.bold: true
+              font.family: SettingsState.fontFamily
+            }
+          }
+        }
+
+        Column {
+          anchors.left: accIconBox.right
+          anchors.leftMargin: 10
+          anchors.right: accRight.left
+          anchors.rightMargin: 8
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 2
+
+          Text {
+            width: parent.width
+            text: accRow.accLabel
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(15)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: parent.width
+            text: accRow.accState !== "" ? ("upower · " + accRow.accState) : "upower"
+            color: SettingsState.textMuted
+            font.pixelSize: SettingsState.px(13)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
           }
         }
       }

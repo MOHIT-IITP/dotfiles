@@ -16,13 +16,14 @@ hl.bind(mainMod .. " + CTRL + T ", hl.dsp.exec_cmd("qs ipc call mohiitp wallpape
 hl.bind(mainMod .. " + CTRL + W ", hl.dsp.exec_cmd("qs ipc call mohiitp power"))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call mohiitp launcher"))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("qs ipc call mohiitp files"))
-hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorder"))
+hl.bind(mainMod .. " + CTRL + R ", hl.dsp.exec_cmd("qs ipc call mohiitp recorderCard"))
 hl.bind(mainMod .. " + CTRL + V ", hl.dsp.exec_cmd("qs ipc call mohiitp mixer "))
 hl.bind(mainMod .. " + CTRL + C ", hl.dsp.exec_cmd("qs ipc call mohiitp clipboard  "))
 hl.bind(mainMod .. " + CTRL + A ", hl.dsp.exec_cmd("qs ipc call mohiitp about"))
 hl.bind(mainMod .. " + CTRL + N ", hl.dsp.exec_cmd("qs ipc call mohiitp notifInbox"))
 hl.bind(mainMod .. " + R ", hl.dsp.exec_cmd("qs ipc call mohiitp reminder"))
-
+hl.bind(mainMod .. " + CTRL + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotCard"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
 
 -- Super+C / Super+V as Copy / Paste (terminal-aware)
 -- Sends CTRL+C/V normally, CTRL+SHIFT+C/V in terminals where CTRL+C = interrupt
@@ -49,17 +50,7 @@ end
 hl.bind(mainMod .. " + C", super_copy, { release = true, description = "Copy (Super+C)" })
 hl.bind(mainMod .. " + V", super_paste, { release = true, description = "Paste (Super+V)" })
 
--- Screenshot keybindings:
--- Print / Super+Shift+S: Area capture (drag to select)
--- hl.bind("Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotArea"))
--- Super+Alt+S / Alt+Print: Window capture (click window)
-hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
--- hl.bind("ALT + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotWindow"))
--- Super+Ctrl+S / Ctrl+Print: Full Display capture
-hl.bind(mainMod .. " + CTRL + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
--- hl.bind("CTRL + Print", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
--- hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + h",  hl.dsp.focus({ direction = "left" }))

@@ -115,7 +115,9 @@ function paint(ctx, W, H, o) {
 }
 
 // Vertical variant for mixer faders: straight muted track,
-// sine-wave fill rising from the bottom, horizontal accent pill handle.
+// sine-wave fill rising from the bottom, optional horizontal pill handle.
+// With showHandle false, a trackGap separates the wavy active fill
+// from the remaining track (mirrors the horizontal painter).
 function paintVertical(ctx, W, H, o) {
   if (!ctx || W <= 0 || H <= 0)
     return;
@@ -126,24 +128,28 @@ function paintVertical(ctx, W, H, o) {
   var waveLen = o.waveLen || 26;
   var handleW = o.handleW || 16;
   var handleH = o.handleH || 6;
+  var showHandle = o.showHandle !== false;
 
   ctx.clearRect(0, 0, W, H);
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
 
   var cx = W / 2;
-  var padV = Math.max(handleH, waveW) / 2 + 1;
+  var padV = Math.max(showHandle ? handleH : 0, waveW, trackW) / 2 + 1;
   var y0 = H - padV; // bottom (0%)
   var y1 = padV;     // top (100%)
   var fy = y0 - (y0 - y1) * shown;
   var hy = Math.max(y1, Math.min(y0, fy));
 
-  // 1. Unfilled track: only the remaining stretch above the handle
-  // (top y1 down to the handle's top edge), so no straight bar
-  // peeks out beside the wavy active fill rising from the bottom.
+  var trackGap = (o.trackGap !== undefined) ? o.trackGap : ((o.gap !== undefined) ? o.gap : (showHandle ? 0 : 8));
+  var halfGap = trackGap / 2;
+
+  // 1. Unfilled track: only the remaining stretch above the value
+  // (top y1 down to half a gap above it when there is no handle),
+  // so no straight bar peeks out beside the wavy active fill.
   var remBottom = y0;
   if (shown > 0.005) {
-    remBottom = hy - handleH / 2 + 1;
+    remBottom = showHandle ? (hy - handleH / 2 + 1) : (hy - halfGap);
   }
   if (remBottom - y1 > 1) {
     ctx.beginPath();
@@ -154,8 +160,12 @@ function paintVertical(ctx, W, H, o) {
     ctx.stroke();
   }
 
-  // 2. Wavy fill (bottom -> handle's bottom edge, tucks under the handle)
-  var waveEnd = hy + handleH / 2 - 1;
+  // 2. Wavy fill (bottom -> value; tucks under the handle when shown,
+  // stops half a gap below the value when there is no handle)
+  var waveEnd = showHandle ? (hy + handleH / 2 - 1) : (hy + halfGap);
+  if (!showHandle && shown >= 0.995) {
+    waveEnd = y1;
+  }
   if (shown > 0.005 && (y0 - waveEnd) > 1) {
     ctx.beginPath();
     ctx.strokeStyle = o.waveColor;
@@ -173,6 +183,8 @@ function paintVertical(ctx, W, H, o) {
   }
 
   // 3. Horizontal pill handle (stadium path: straight top/bottom + round ends)
+  if (!showHandle)
+    return;
   var px0 = cx - handleW / 2;
   var px1 = cx + handleW / 2;
   var py0 = hy - handleH / 2;

@@ -76,6 +76,10 @@ Scope {
       RecorderState.toggle();
     }
 
+    function recorderCard(): void {
+      RecorderState.toggleCard();
+    }
+
     function calendar(): void {
       CalendarState.toggle();
     }
@@ -90,6 +94,10 @@ Scope {
 
     function screenshot(): void {
       ScreenshotState.capture(ScreenshotState.mode);
+    }
+
+    function screenshotCard(): void {
+      ScreenshotState.toggle();
     }
 
     function screenshotArea(): void {

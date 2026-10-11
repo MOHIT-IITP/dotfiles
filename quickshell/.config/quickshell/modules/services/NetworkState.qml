@@ -1,12 +1,14 @@
 pragma Singleton
 
 import Quickshell
+import Quickshell.Io
 import Quickshell.Networking
 import QtQuick
 
 // Shared network state: which device is up and what it is connected to.
 // Prefer wired when both are up.
 Singleton {
+  id: root
   readonly property var wifiDev: {
     var ds = (Networking.devices) ? Networking.devices.values : [];
     for (var i = 0; i < ds.length; ++i) {
@@ -60,5 +62,82 @@ Singleton {
       }
     }
     return wiredDev.name || "Connected";
+  }
+
+  // ---- Wired / Ethernet details (interface, IP, link speed) ----
+  // Quickshell.Networking only tells us up/down + name, so poll the
+  // OS for the interface behind wiredDev (e.g. enp10s0 -> IP/speed).
+  property string wiredIface: ""
+  property string wiredIp: ""
+  property string wiredSpeed: "" // e.g. "1000 Mb/s"
+  property string wiredOpState: ""
+  property string _netStdout: ""
+
+  function wiredSummary() {
+    if (!wiredUp) return "Cable unplugged";
+    var bits = [];
+    if (wiredIface !== "") bits.push(wiredIface);
+    if (wiredIp !== "") bits.push(wiredIp);
+    if (wiredSpeed !== "") bits.push(wiredSpeed);
+    if (bits.length === 0) return wiredName;
+    return bits.join(" · ");
+  }
+
+  function refreshWired() {
+    _netStdout = "";
+    if (netProc.running)
+      netProc.running = false;
+    var iface = (wiredDev && wiredDev.name) ? String(wiredDev.name) : "";
+    root.wiredIface = iface;
+    if (iface === "") {
+      root.wiredIp = "";
+      root.wiredSpeed = "";
+      root.wiredOpState = "";
+      return;
+    }
+    netProc.command = ["bash", "-c", "IF=" + "'" + iface.replace(/'/g, "'\\''") + "'; echo \"IF=$IF\"; ip -4 -o addr show \"$IF\" 2>/dev/null | awk '{print \"IP=\" $4}' | cut -d/ -f1 | head -n1; [ -f /sys/class/net/\"$IF\"/speed ] && echo \"SPEED=$(cat /sys/class/net/\"$IF\"/speed 2>/dev/null)\"; [ -f /sys/class/net/\"$IF\"/operstate ] && echo \"STATE=$(cat /sys/class/net/\"$IF\"/operstate 2>/dev/null)\""];
+    netProc.running = true;
+  }
+
+  Timer {
+    interval: 5000
+    repeat: true
+    running: true
+    triggeredOnStart: true
+    onTriggered: root.refreshWired()
+  }
+
+  Process {
+    id: netProc
+    running: false
+    stdout: SplitParser {
+      splitMarker: "\n"
+      onRead: data => {
+        if (data)
+          root._netStdout += data;
+      }
+    }
+    onExited: function (code, status) {
+      try {
+        var txt = (root._netStdout || "").trim();
+        if (txt === "") return;
+        var lines = txt.split("\n");
+        var ip = "", speed = "", state = "";
+        for (var i = 0; i < lines.length; ++i) {
+          var ln = lines[i].trim();
+          if (ln.indexOf("IP=") === 0) ip = ln.substring(3).trim();
+          else if (ln.indexOf("SPEED=") === 0) speed = ln.substring(6).trim();
+          else if (ln.indexOf("STATE=") === 0) state = ln.substring(6).trim();
+        }
+        root.wiredIp = (ip === "" || ip === "IP=") ? "" : ip;
+        if (speed !== "" && speed !== "-1" && speed !== "4294967295") {
+          var n = parseInt(speed, 10);
+          root.wiredSpeed = isNaN(n) ? "" : (n >= 1000 && n % 1000 === 0 ? (n / 1000) + " Gb/s" : n + " Mb/s");
+        } else {
+          root.wiredSpeed = "";
+        }
+        root.wiredOpState = state;
+      } catch (e) {}
+    }
   }
 }

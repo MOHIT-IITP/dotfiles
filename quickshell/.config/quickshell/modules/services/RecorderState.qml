@@ -8,7 +8,7 @@ import QtQuick
 Singleton {
   id: root
 
-  property bool open: false
+  property bool open: false // expanded recorder card in the center bar (Super+Ctrl+R)
   property bool isRecording: false
   property int elapsedSeconds: 0
   property var recentRecordings: []
@@ -43,7 +43,35 @@ Singleton {
     }
   }
 
+  // Expanded card view in the center bar (Super+Ctrl+R). Mirrors
+  // ScreenshotState.open: ClockPill shows CenterCC on the recorder page
+  // while this is true. Separate from toggle() which starts/stops recording.
+  function toggleCard(): void {
+    open = !open;
+    if (open) {
+      refreshRecent();
+      checkStatus();
+    }
+  }
+
+  function openCard(): void {
+    open = true;
+    refreshRecent();
+    checkStatus();
+  }
+
+  function closeCard(): void {
+    open = false;
+  }
+
+  function close(): void {
+    open = false;
+  }
+
   function start() {
+    // Starting a recording dismisses the card so the bar collapses
+    // (avoids capturing the expanded bar, shows the REC indicator).
+    open = false;
     // Area mode without a selection: run slurp first, then start.
     if (mode === "area" && areaGeometry === "") {
       selectArea(true);

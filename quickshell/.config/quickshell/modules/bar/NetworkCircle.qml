@@ -205,8 +205,8 @@ Rectangle {
       anchors.centerIn: parent
       width: 18
       height: 18
-      kind: wifiUp ? "wifi" : "wifi-off"
-      glyph: wifiUp ? SettingsState.textMain : SettingsState.textMuted
+      kind: wifiUp ? "wifi" : (wiredUp ? "ethernet" : "wifi-off")
+      glyph: (wifiUp || wiredUp) ? SettingsState.textMain : SettingsState.textMuted
     }
   }
 

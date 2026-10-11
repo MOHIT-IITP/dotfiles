@@ -663,7 +663,8 @@ Column {
               WavyPaint.paint(getContext("2d"), width, height, {
                 shown: AudioState.inMuted ? 0 : micSliderTrack.shown,
                 showTrack: true,
-                showHandle: true,
+                showHandle: false,
+                trackGap: 8,
                 showRemaining: false,
                 waveColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
                 trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -671,7 +672,7 @@ Column {
                 trackH: 4.5,
                 waveW: 4.5,
                 waveAmp: 2.2,
-                waveLen: width / 5,
+                waveLen: width / 2,
                 handleW: 6,
                 handleH: 16
               });
@@ -896,7 +897,8 @@ Column {
               WavyPaint.paint(getContext("2d"), width, height, {
                 shown: AudioState.outMuted ? 0 : deskSliderTrack.shown,
                 showTrack: true,
-                showHandle: true,
+                showHandle: false,
+                trackGap: 8,
                 showRemaining: false,
                 waveColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
                 trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -904,7 +906,7 @@ Column {
                 trackH: 4.5,
                 waveW: 4.5,
                 waveAmp: 2.2,
-                waveLen: width / 5,
+                waveLen: width / 2,
                 handleW: 6,
                 handleH: 16
               });

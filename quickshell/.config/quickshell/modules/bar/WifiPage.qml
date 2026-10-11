@@ -152,6 +152,76 @@ Column {
     color: "#252b25"
   }
 
+  // ---- Ethernet / Wired section ----
+  Rectangle {
+    width: parent.width
+    height: 64
+    radius: 14
+    color: circle.wiredUp ? SettingsState.bgActivePill : SettingsState.bgCard
+    border.color: circle.wiredUp ? SettingsState.borderActive : SettingsState.borderBase
+    border.width: 1
+
+    Rectangle {
+      id: ethIconBox
+      anchors.left: parent.left
+      anchors.leftMargin: 10
+      anchors.verticalCenter: parent.verticalCenter
+      width: 36
+      height: 36
+      radius: 10
+      color: circle.wiredUp ? SettingsState.accent : SettingsState.bgSurface
+
+      CCIcon {
+        anchors.centerIn: parent
+        width: 20
+        height: 20
+        kind: "ethernet"
+        glyph: circle.wiredUp ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
+      }
+    }
+
+    Column {
+      anchors.left: ethIconBox.right
+      anchors.leftMargin: 10
+      anchors.right: ethStateText.left
+      anchors.rightMargin: 8
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 2
+
+      Text {
+        width: parent.width
+        text: "Ethernet" + (NetworkState.wiredIface !== "" ? " · " + NetworkState.wiredIface : "")
+        color: SettingsState.textMain
+        font.pixelSize: SettingsState.px(15)
+        font.bold: true
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+      }
+
+      Text {
+        width: parent.width
+        text: circle.wiredUp ? (NetworkState.wiredSummary() === NetworkState.wiredName ? NetworkState.wiredName : NetworkState.wiredName + " · " + NetworkState.wiredSummary()) : "Cable unplugged"
+        color: circle.wiredUp ? SettingsState.textActive : SettingsState.textMuted
+        font.pixelSize: SettingsState.px(13)
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+        maximumLineCount: 1
+      }
+    }
+
+    Text {
+      id: ethStateText
+      anchors.right: parent.right
+      anchors.rightMargin: 12
+      anchors.verticalCenter: parent.verticalCenter
+      text: circle.wiredUp ? "Connected" : "Off"
+      color: circle.wiredUp ? "#7ee2a8" : "#6e756e"
+      font.pixelSize: SettingsState.px(13)
+      font.bold: true
+      font.family: SettingsState.fontFamily
+    }
+  }
+
   // Empty / Off state
   Text {
     visible: !NetworkState.wifiEnabled || circle.wifiNetworksList.length === 0

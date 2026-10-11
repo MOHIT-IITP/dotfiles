@@ -13,10 +13,39 @@ Singleton {
   property string lastPath: "~/Pictures/Screenshots"
   property bool capturing: false
 
+  // Expanded card view in the center bar (Super+Ctrl+S). Mirrors
+  // CalendarState.open: ClockPill shows CenterCC on the screenshot page
+  // while this is true.
+  property bool open: false
+
+  function toggle(): void {
+    open = !open;
+    if (open) {
+      refreshLast();
+    }
+  }
+
+  function openCard(): void {
+    open = true;
+    refreshLast();
+  }
+
+  function closeCard(): void {
+    open = false;
+  }
+
+  function close(): void {
+    open = false;
+  }
+
   property string _rawOut: ""
 
   function capture(targetMode): void {
     var m = targetMode || mode;
+    // Picking a mode from the expanded card dismisses the card so the
+    // bar collapses before hyprshot runs (avoids capturing the bar,
+    // unblocks region/window pickers).
+    open = false;
     activeMode = m;
     capturing = true;
     _rawOut = "";

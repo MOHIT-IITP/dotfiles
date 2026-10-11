@@ -75,9 +75,9 @@ Rectangle {
   readonly property bool showFileTray: (FileTrayState.open || FileTrayState.dndHover) && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif
   readonly property bool showAbout: AboutState.open && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray
   readonly property bool showReminderPrompt: ReminderState.promptOpen && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout
-  readonly property bool showCC: (isControlCenterView || CalendarState.open) && !isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !showReminderPrompt
-  readonly property bool showTimer: isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isControlCenterView && !showReminderPrompt
-  readonly property bool showReminders: isReminderView && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !isControlCenterView && !showReminderPrompt
+  readonly property bool showCC: (isControlCenterView || CalendarState.open || ScreenshotState.open || RecorderState.open) && !isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !showReminderPrompt
+  readonly property bool showTimer: isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !isControlCenterView && !showReminderPrompt
+  readonly property bool showReminders: isReminderView && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !isControlCenterView && !showReminderPrompt
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: ccView.visible && ccView.ccHover
@@ -85,14 +85,20 @@ Rectangle {
   readonly property bool remHovering: reminderWrap.visible && reminderWrap.remHover
   property bool mediaHover: false
   readonly property bool isHovered: (mouse.containsMouse || calHovering || timerHovering || remHovering || root.mediaHover) && !root.dismissLock
-  readonly property bool isExpanded: isHovered || root.isControlCenterView || root.isTimerView || root.isReminderView || CalendarState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
+  readonly property bool isExpanded: isHovered || root.isControlCenterView || root.isTimerView || root.isReminderView || CalendarState.open || ScreenshotState.open || RecorderState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (root.dismissLock ? 30 : 132))))))))))))))) : 30
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (MediaState.hasTrack ? (root.dismissLock ? (collapsedRow.implicitWidth + 44) : 492) : (root.dismissLock ? (collapsedRow.implicitWidth + 44) : 280)))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (MediaState.hasTrack ? 148 : 132))))))))))))))) : 30
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (MediaState.hasTrack ? 492 : 240))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
+
+  onIsExpandedChanged: {
+    if (isExpanded && !isHovered) {
+      root.dismissLock = false;
+    }
+  }
 
   radius: (isExpanded && implicitHeight > 30.5) ? SettingsState.cardRadius : 15
   color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
@@ -177,6 +183,8 @@ Rectangle {
     MixerState.close();
     TimerState.open = false;
     CalendarState.close();
+    ScreenshotState.close();
+    RecorderState.close();
     root.isTimerView = false;
     root.isReminderView = false;
     if (ReminderState.editing) ReminderState.editing = false;
@@ -220,6 +228,8 @@ Rectangle {
     root.isTimerView = false;
     root.isReminderView = false;
     CalendarState.close();
+    ScreenshotState.close();
+    RecorderState.close();
     if (ccView) ccView.resetToMain();
   }
 
@@ -287,6 +297,8 @@ Rectangle {
         root.isControlCenterView = false;
         root.isReminderView = false;
         CalendarState.close();
+        ScreenshotState.close();
+        RecorderState.close();
       } else if (!mouse.containsMouse) {
         root.isTimerView = false;
         root.isReminderView = false;
@@ -301,9 +313,56 @@ Rectangle {
         root.isControlCenterView = true;
         root.isTimerView = false;
         root.isReminderView = false;
+        ScreenshotState.close();
+        RecorderState.close();
         if (ccView) ccView.activePage = "calendar";
         CalendarState.refreshWeather();
-      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !ScreenshotState.open && !RecorderState.open) {
+        root.isControlCenterView = false;
+        root.isTimerView = false;
+        root.isReminderView = false;
+        if (ccView) ccView.resetToMain();
+      }
+    }
+  }
+
+  Connections {
+    target: ScreenshotState
+    function onOpenChanged() {
+      if (ScreenshotState.open) {
+        root.dismissLock = false;
+        root.isControlCenterView = true;
+        root.isTimerView = false;
+        root.isReminderView = false;
+        TimerState.open = false;
+        CalendarState.close();
+        RecorderState.close();
+        if (ccView) ccView.activePage = "screenshot";
+        ScreenshotState.refreshLast();
+      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !CalendarState.open && !RecorderState.open) {
+        root.isControlCenterView = false;
+        root.isTimerView = false;
+        root.isReminderView = false;
+        if (ccView) ccView.resetToMain();
+      }
+    }
+  }
+
+  Connections {
+    target: RecorderState
+    function onOpenChanged() {
+      if (RecorderState.open) {
+        root.dismissLock = false;
+        root.isControlCenterView = true;
+        root.isTimerView = false;
+        root.isReminderView = false;
+        TimerState.open = false;
+        CalendarState.close();
+        ScreenshotState.close();
+        if (ccView) ccView.activePage = "recorder";
+        RecorderState.refreshRecent();
+        RecorderState.checkStatus();
+      } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !CalendarState.open && !ScreenshotState.open && !RecorderState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -320,7 +379,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusLauncher();
-      } else if (!mouse.containsMouse && !CalendarState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -336,7 +395,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusWallpaper();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -352,7 +411,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusPower();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -368,7 +427,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusClipboard();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !MixerState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -384,7 +443,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusMixer();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -400,7 +459,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusAuth();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -427,7 +486,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusAbout();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -437,13 +496,19 @@ Rectangle {
 
   Connections {
     target: NotifCenter
+    function onShowNotificationPillChanged() {
+      if (NotifCenter.showNotificationPill) {
+        root.dismissLock = false;
+      }
+    }
     function onInboxOpenChanged() {
       if (NotifCenter.inboxOpen) {
+        root.dismissLock = false;
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusNotifInbox();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -459,7 +524,7 @@ Rectangle {
         root.isTimerView = false;
         root.isReminderView = false;
         forceFocusReminder();
-      } else if (!mouse.containsMouse && !CalendarState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !NotifCenter.inboxOpen) {
+      } else if (!mouse.containsMouse && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !NotifCenter.inboxOpen) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
@@ -495,7 +560,7 @@ Rectangle {
     id: collapsedRow
     anchors.centerIn: parent
     spacing: RecorderState.isRecording ? 14 : 7
-    opacity: ((!root.isExpanded || root.dismissLock) && !root.showWorkspaces && !root.showCapture && !root.showTimerCollapsed) ? 1 : 0
+    opacity: (!root.isExpanded && !root.showWorkspaces && !root.showCapture && !root.showTimerCollapsed) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -1430,7 +1495,7 @@ Rectangle {
             Column {
       id: clockCol
       anchors.verticalCenter: parent.verticalCenter
-      width: MediaState.hasTrack ? 196 : 180
+      width: MediaState.hasTrack ? 196 : 170
       spacing: 2
 
       // Big time - centered, AM/PM as small superscript
@@ -1518,8 +1583,8 @@ Rectangle {
 
           delegate: Column {
             property int dist: Math.abs(index - 2)
-            width: dist === 0 ? 38 : (dist === 1 ? 30 : 26)
-            spacing: 3
+            width: dist === 0 ? 32 : (dist === 1 ? 26 : 22)
+            spacing: 2
             // Today biggest + brightest, ±1 medium, ±2 smallest + dimmest.
             opacity: dist === 0 ? 1.0 : (dist === 1 ? 0.7 : 0.38)
 
@@ -1535,7 +1600,7 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: isToday ? Qt.formatDateTime(dayDate, "ddd").toUpperCase() : Qt.formatDateTime(dayDate, "ddd").substring(0, 1).toUpperCase()
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textMuted)
-              font.pixelSize: SettingsState.px(parent.dist === 0 ? 14 : (parent.dist === 1 ? 12 : 10))
+              font.pixelSize: SettingsState.px(parent.dist === 0 ? 11 : (parent.dist === 1 ? 10 : 9))
               font.bold: isToday || isSunday
               font.family: SettingsState.fontFamily
             }
@@ -1543,7 +1608,7 @@ Rectangle {
               anchors.horizontalCenter: parent.horizontalCenter
               text: Qt.formatDateTime(dayDate, "d")
               color: isToday ? SettingsState.accent : (isSunday ? "#e86a65" : SettingsState.textSecondary)
-              font.pixelSize: SettingsState.px(parent.dist === 0 ? 26 : (parent.dist === 1 ? 18 : 14))
+              font.pixelSize: SettingsState.px(parent.dist === 0 ? 20 : (parent.dist === 1 ? 15 : 12))
               font.bold: isToday
               font.family: SettingsState.fontFamily
             }
@@ -1870,9 +1935,11 @@ Rectangle {
       // (ControlCenter -> Clock)
       if (dx < -14 && dy < 45) {
         root._swiped = true;
-        if (root.isControlCenterView || CalendarState.open) {
+        if (root.isControlCenterView || CalendarState.open || ScreenshotState.open || RecorderState.open) {
           root.isControlCenterView = false;
           CalendarState.close();
+          ScreenshotState.close();
+          RecorderState.close();
           if (ccView) ccView.resetToMain();
         } else if (root.isTimerView) {
           root.isTimerView = false;
@@ -1898,7 +1965,7 @@ Rectangle {
         } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
-        } else if (!root.isControlCenterView && !CalendarState.open) {
+        } else if (!root.isControlCenterView && !CalendarState.open && !ScreenshotState.open && !RecorderState.open) {
           root.isControlCenterView = true;
           if (ccView) ccView.activePage = "main";
         }
@@ -1908,9 +1975,11 @@ Rectangle {
     onWheel: wheel => {
       // Touchpad horizontal swipe left: CC -> Clock, Clock -> Timer -> Reminders -> Clock
       if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
-        if (root.isControlCenterView || CalendarState.open) {
+        if (root.isControlCenterView || CalendarState.open || ScreenshotState.open || RecorderState.open) {
           root.isControlCenterView = false;
           CalendarState.close();
+          ScreenshotState.close();
+          RecorderState.close();
           if (ccView) ccView.resetToMain();
         } else if (root.isTimerView) {
           root.isTimerView = false;
@@ -1934,7 +2003,7 @@ Rectangle {
         } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
-        } else if (!root.isControlCenterView && !CalendarState.open) {
+        } else if (!root.isControlCenterView && !CalendarState.open && !ScreenshotState.open && !RecorderState.open) {
           root.isControlCenterView = true;
           if (ccView) ccView.activePage = "main";
         }

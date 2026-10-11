@@ -2,8 +2,8 @@ import QtQuick
 import "../services"
 import "WavySliderPaint.js" as WavyPaint
 
-// Wavy vertical mixer fader with handle: sine-wave active fill
-// rising from the bottom, muted track, horizontal pill handle.
+// Wavy vertical mixer fader without handle: sine-wave active fill
+// rising from the bottom, muted track, gap between fill and track.
 Item {
   id: root
 
@@ -95,7 +95,7 @@ Item {
     }
   }
 
-  // Fader Track Area (wavy slider with handle)
+  // Fader Track Area (handle-less wavy slider)
   Item {
     id: trackArea
     anchors.top: parent.top
@@ -114,13 +114,15 @@ Item {
       onPaint: {
         WavyPaint.paintVertical(getContext("2d"), width, height, {
           shown: root.shown,
+          showHandle: false,
+          trackGap: 8,
           trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
           waveColor: root.muted ? SettingsState.textMuted : root.activeColor,
           handleColor: root.muted ? "#666666" : root.activeColor,
           trackW: 4.5,
           waveW: 4.5,
           waveAmp: 2.5,
-          waveLen: height / 5, // Exactly 5 waves across full height
+          waveLen: height / 2, // Exactly 2 waves across full height
           handleW: 20,
           handleH: 8
         });
