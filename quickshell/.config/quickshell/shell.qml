@@ -8,6 +8,7 @@ Scope {
 
   // Hyprland keybinds IPC:
   // Super+Space: toggle launcher (apps)
+  // Super+S: toggle control center
   // Super+F: toggle file search launcher
   // Super+W: toggle wallpaper selector
   // Super+Ctrl+V: toggle clipboard history
@@ -86,6 +87,10 @@ Scope {
 
     function timer(): void {
       TimerState.toggle();
+    }
+
+    function cc(): void {
+      CCState.toggle();
     }
 
     function reminder(): void {

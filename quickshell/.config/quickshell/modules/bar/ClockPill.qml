@@ -307,6 +307,26 @@ Rectangle {
   }
 
   Connections {
+    target: CCState
+    function onOpenChanged() {
+      if (CCState.open) {
+        root.dismissLock = false;
+        root.isControlCenterView = true;
+        root.isTimerView = false;
+        root.isReminderView = false;
+        TimerState.open = false;
+        CalendarState.close();
+        ScreenshotState.close();
+        RecorderState.close();
+        if (ccView) ccView.activePage = "main";
+      } else {
+        root.isControlCenterView = false;
+        if (ccView) ccView.resetToMain();
+      }
+    }
+  }
+
+  Connections {
     target: CalendarState
     function onOpenChanged() {
       if (CalendarState.open) {
@@ -1882,6 +1902,10 @@ Rectangle {
   onIsTimerViewChanged: {
     if (TimerState.open !== root.isTimerView)
       TimerState.open = root.isTimerView;
+  }
+  onIsControlCenterViewChanged: {
+    if (!root.isControlCenterView && CCState.open)
+      CCState.open = false;
   }
 
   // GESTURE & INTERACTION HANDLER

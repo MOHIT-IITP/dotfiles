@@ -122,6 +122,7 @@ Item {
     if (root.activePage === "calendar") return 560;
     if (root.activePage === "power") return 360;
     if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
+    if (root.activePage === "main") return 660;
     return 410;
   }
 
@@ -144,7 +145,7 @@ Item {
       if (RecorderState.mode === "area") extraMode += 48;
       return 460 + extraMode + extraMic + extraList;
     }
-    return mainPage.implicitHeight + 36;
+    return mainPage.implicitHeight + 12;
   }
 
   // Hover tracking so ClockPill stays expanded while interacting with
@@ -160,7 +161,10 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: 18
+    anchors.topMargin: 6
+    anchors.leftMargin: 4
+    anchors.rightMargin: 4
+    anchors.bottomMargin: 6
     circle: root
     hovered: true
   }

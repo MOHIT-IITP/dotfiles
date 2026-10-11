@@ -157,7 +157,7 @@ Item {
     Text {
       anchors.horizontalCenter: parent.horizontalCenter
       text: root.muted ? "MUTE" : (Math.round(root.shown * 100) + "%")
-      color: root.muted ? "#ff8a8a" : (faderMouse.containsMouse ? root.activeColor : "#8e998e")
+      color: root.muted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : (faderMouse.containsMouse ? root.activeColor : SettingsState.textSecondary)
       font.pixelSize: SettingsState.px(10)
       font.bold: true
       font.family: SettingsState.fontFamily
@@ -169,14 +169,14 @@ Item {
       width: 32
       height: 32
       radius: 16
-      color: iconAreaMouse.containsMouse ? "#262020" : "transparent"
+      color: iconAreaMouse.containsMouse ? Qt.rgba(root.activeColor.r, root.activeColor.g, root.activeColor.b, 0.14) : "transparent"
 
       CCIcon {
         anchors.centerIn: parent
         width: 18
         height: 18
         kind: root.muted ? (root.icon + "-mute") : root.icon
-        glyph: root.muted ? "#ff8a8a" : (faderMouse.containsMouse ? root.activeColor : "#c0c8c0")
+        glyph: root.muted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : (faderMouse.containsMouse ? root.activeColor : SettingsState.textSecondary)
       }
 
       MouseArea {
@@ -193,7 +193,7 @@ Item {
       visible: root.showLabel && root.label !== ""
       anchors.horizontalCenter: parent.horizontalCenter
       text: root.label
-      color: root.muted ? "#777777" : (faderMouse.containsMouse ? "#ffffff" : "#99a299")
+      color: root.muted ? SettingsState.textMuted : (faderMouse.containsMouse ? SettingsState.textMain : SettingsState.textSecondary)
       font.pixelSize: SettingsState.px(11)
       font.bold: true
       font.family: SettingsState.fontFamily

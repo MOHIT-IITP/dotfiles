@@ -2,1059 +2,283 @@ import Quickshell
 import QtQuick
 import "../services"
 
-// Main control-center page (pills). Extracted from NetworkCircle.qml.
-Column {
+// Horizontal control-center strip (reference-image layout):
+// [toggles] | [capsule: ethernet + bluetooth + accessory] [time + date]
+// Mixer/Power/Apps/Wall/Clip open via keybinds, not shown here.
+Item {
   id: mainPage
   required property var circle
   required property bool hovered
-  spacing: 12
+  implicitHeight: 52
   opacity: (hovered && circle.activePage === "main") ? 1 : 0
   visible: opacity > 0
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: 220
-    }
+    NumberAnimation { duration: 220 }
   }
 
-  // Wi-Fi + Bluetooth Material 3 Pills
+  SystemClock {
+    id: sysClock
+    precision: SystemClock.Minutes
+  }
+
+  readonly property string timeStr: {
+    var fmt = SettingsState.timeFormat === "24h" ? "HH:mm" : "h:mm AP";
+    return Qt.formatDateTime(sysClock.date, fmt);
+  }
+  readonly property string dateStr: {
+    return Qt.formatDateTime(sysClock.date, "ddd d MMM").toUpperCase();
+  }
+
+  readonly property bool hasAcc: DeviceBatteryState.hasAccessories
+  readonly property var firstAcc: hasAcc ? DeviceBatteryState.accessories[0] : null
+  readonly property int accPct: firstAcc ? DeviceBatteryState.pct100(firstAcc) : -1
+  readonly property string accKind: firstAcc ? DeviceBatteryState.iconKindFor(firstAcc) : "mouse"
+
   Row {
-    width: parent.width
-    spacing: 10
-
-    // Wi-Fi / Ethernet Pill (opens Network page with wired + wifi)
-    Rectangle {
-      width: (parent.width - 10) / 2
-      height: 68
-      radius: 24
-      color: (circle.wifiUp || circle.wiredUp) ? SettingsState.bgActivePill : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.wifiUp || circle.wiredUp) ? SettingsState.borderActive : (wifiCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Row {
-        anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 42
-          height: 42
-          radius: 21
-          color: (circle.wifiUp || circle.wiredUp) ? SettingsState.accent : (wifiCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 20
-            height: 20
-            kind: (circle.wiredUp && !circle.wifiUp) ? "ethernet" : "wifi"
-            glyph: (circle.wifiUp || circle.wiredUp) ? (SettingsState.isDark ? "#121612" : "#ffffff") : (wifiCardMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Column {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 62
-          spacing: 2
-
-          Text {
-            text: (circle.wiredUp && !circle.wifiUp) ? "Ethernet" : "Wi-Fi"
-            color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(17)
-            font.bold: true
-            font.family: SettingsState.fontFamily
-          }
-          Text {
-            width: parent.width
-            text: circle.wifiUp ? circle.wifiName : (circle.wiredUp ? ("Eth · " + circle.wiredName) : (circle.wifiEnabled ? "Disconnected" : "Off"))
-            color: (circle.wifiUp || circle.wiredUp) ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: SettingsState.px(14)
-            font.family: SettingsState.fontFamily
-            elide: Text.ElideRight
-            maximumLineCount: 1
-          }
-        }
-      }
-
-      MouseArea {
-        id: wifiCardMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          circle.activePage = "wifi";
-        }
-      }
-    }
-
-    // Bluetooth Pill
-    Rectangle {
-      width: (parent.width - 10) / 2
-      height: 68
-      radius: 24
-      color: (circle.btOn && BluetoothState.btDevice) ? SettingsState.bgActivePill : (btCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.btOn && BluetoothState.btDevice) ? SettingsState.borderActive : (btCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Row {
-        anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 42
-          height: 42
-          radius: 21
-          color: (circle.btOn && BluetoothState.btDevice) ? SettingsState.accent : (btCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 20
-            height: 20
-            kind: "bt"
-            glyph: (circle.btOn && BluetoothState.btDevice) ? (SettingsState.isDark ? "#121612" : "#ffffff") : (btCardMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Column {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 62
-          spacing: 2
-
-          Text {
-            text: "Bluetooth"
-            color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(17)
-            font.bold: true
-            font.family: SettingsState.fontFamily
-          }
-          Text {
-            width: parent.width
-            text: {
-              // Prefer connected BT device name; fall back to UPower
-              // accessory summary (e.g. MX Master 2S 55%) so mouse /
-              // headphone battery is visible right on the main page.
-              if (circle.btOn && BluetoothState.btDevice) return circle.btName;
-              if (DeviceBatteryState.hasAccessories) return DeviceBatteryState.summary;
-              return circle.btName;
-            }
-            color: (circle.btOn && BluetoothState.btDevice) ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: SettingsState.px(14)
-            font.family: SettingsState.fontFamily
-            elide: Text.ElideRight
-            maximumLineCount: 1
-          }
-        }
-      }
-
-      MouseArea {
-        id: btCardMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          circle.activePage = "bluetooth";
-          BluetoothState.startDiscovery();
-        }
-      }
-    }
-  }
-
-  // Mouse / headphone battery strip (UPower accessories). Visible when
-  // e.g. MX Master 2S or a headset reports a percentage via upower.
-  Column {
-    width: parent.width
-    spacing: 6
-    visible: DeviceBatteryState.hasAccessories
-
-    Repeater {
-      model: DeviceBatteryState.accessories
-      delegate: Rectangle {
-        id: accPill
-        width: parent.width
-        height: 44
-        radius: 16
-        color: accMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
-        border.color: accMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
-        border.width: 1
-
-        readonly property int accPct: DeviceBatteryState.pct100(modelData)
-        readonly property string accKind: DeviceBatteryState.iconKindFor(modelData)
-
-        Row {
-          anchors.fill: parent
-          anchors.margins: 8
-          spacing: 10
-
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 28
-            height: 28
-            radius: 14
-            color: SettingsState.bgSurface
-
-            CCIcon {
-              anchors.centerIn: parent
-              width: 16
-              height: 16
-              kind: accPill.accKind
-              glyph: SettingsState.textSecondary
-            }
-          }
-
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 28 - 10 - 70
-            text: DeviceBatteryState.labelFor(modelData)
-            color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(14)
-            font.bold: true
-            font.family: SettingsState.fontFamily
-            elide: Text.ElideRight
-            maximumLineCount: 1
-          }
-
-          Row {
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 6
-
-            Rectangle {
-              anchors.verticalCenter: parent.verticalCenter
-              width: 24
-              height: 5
-              radius: 2.5
-              color: SettingsState.borderBase
-
-              Rectangle {
-                width: parent.width * Math.max(0, Math.min(1, accPill.accPct / 100))
-                height: parent.height
-                radius: parent.radius
-                color: SettingsState.accent
-              }
-            }
-
-            Text {
-              anchors.verticalCenter: parent.verticalCenter
-              width: 34
-              horizontalAlignment: Text.AlignRight
-              text: accPill.accPct >= 0 ? accPill.accPct + "%" : "--"
-              color: SettingsState.textSecondary
-              font.pixelSize: SettingsState.px(13)
-              font.bold: true
-              font.family: SettingsState.fontFamily
-            }
-          }
-        }
-
-        MouseArea {
-          id: accMouse
-          anchors.fill: parent
-          hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
-          onClicked: {
-            circle.activePage = "bluetooth";
-            BluetoothState.startDiscovery();
-          }
-        }
-      }
-    }
-  }
-
-  // Material 3 Quick Action Pills Grid (3 Columns) - always visible pills.
-  // Apps / Wall / Clip / Mixer / Power live in the expandable grid below.
-  Grid {
-    width: parent.width
-    columns: 3
+    id: strip
+    anchors.centerIn: parent
+    width: implicitWidth
+    height: parent.height
     spacing: 8
 
-    // 4. Hyprsunset Nightlight Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: NightlightState.active ? SettingsState.bgActivePill : (nightMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: NightlightState.active ? SettingsState.borderActive : (nightMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
+    // Main toggles order: calendar first, record+camera together,
+    // DND+nightshift together, about+settings together (gear right of about).
+    // Mixer/Power removed — keybinds cover them.
+    Row {
+      id: iconRow
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 2
 
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: NightlightState.active ? SettingsState.accent : (nightMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "sunset"
-            glyph: NightlightState.active ? (SettingsState.isDark ? "#121612" : "#ffffff") : (nightMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Night"
-          color: NightlightState.active ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
+      CCHIcon {
+        kind: "calendar"
+        active: circle.activePage === "calendar"
+        onClicked: {
+          CalendarState.refreshWeather();
+          circle.activePage = "calendar";
         }
       }
-
-      MouseArea {
-        id: nightMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: NightlightState.toggle()
-      }
-    }
-
-    // 6. Screen Recorder Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? (SettingsState.isDark ? "#3a1e1e" : "#ffe5e5") : SettingsState.bgActivePill) : (recMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.borderActive) : (recMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.accent) : (recMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "record"
-            glyph: (circle.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#ffffff" : (SettingsState.isDark ? "#121612" : "#ffffff")) : (recMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: RecorderState.isRecording ? RecorderState.formattedTime : "Record"
-          color: (circle.activePage === "recorder" || RecorderState.isRecording) ? (RecorderState.isRecording ? "#e05f65" : SettingsState.textActive) : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: recMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+      CCHIcon {
+        kind: "record"
+        active: circle.activePage === "recorder" || RecorderState.isRecording
+        alert: RecorderState.isRecording
         onClicked: {
           circle.activePage = "recorder";
           RecorderState.refreshRecent();
           RecorderState.checkStatus();
         }
       }
-    }
-
-    // 7. Screenshot / Capture Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "screenshot") ? SettingsState.bgActivePill : (shotMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "screenshot") ? SettingsState.borderActive : (shotMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "screenshot") ? SettingsState.accent : (shotMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "camera"
-            glyph: (circle.activePage === "screenshot") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (shotMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Shot"
-          color: (circle.activePage === "screenshot") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: shotMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+      CCHIcon {
+        kind: "camera"
+        active: circle.activePage === "screenshot"
         onClicked: {
           circle.activePage = "screenshot";
           ScreenshotState.refreshLast();
         }
       }
-    }
-
-    // 8. Settings Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "settings") ? SettingsState.bgActivePill : (setMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "settings") ? SettingsState.borderActive : (setMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
+      CCHIcon {
+        kind: "moon"
+        active: NotifCenter.dnd
+        onClicked: NotifCenter.toggleDnd()
       }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "settings") ? SettingsState.accent : (setMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "gear"
-            glyph: (circle.activePage === "settings") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (setMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Config"
-          color: (circle.activePage === "settings") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
+      CCHIcon {
+        kind: "sunset"
+        active: NightlightState.active
+        onClicked: NightlightState.toggle()
       }
-
-      MouseArea {
-        id: setMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+      CCHIcon {
+        kind: "about"
+        active: circle.activePage === "about"
+        onClicked: circle.activePage = "about"
+      }
+      CCHIcon {
+        kind: "gear"
+        active: circle.activePage === "settings"
         onClicked: {
           circle.settingsSub = "";
           circle.activePage = "settings";
         }
       }
-    }
-
-    // 8. DND (Do Not Disturb) Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: NotifCenter.dnd ? SettingsState.bgActivePill : (dndMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: NotifCenter.dnd ? SettingsState.borderActive : (dndMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: NotifCenter.dnd ? SettingsState.accent : (dndMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "moon"
-            glyph: NotifCenter.dnd ? (SettingsState.isDark ? "#121612" : "#ffffff") : (dndMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "DND"
-          color: NotifCenter.dnd ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: dndMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: NotifCenter.toggleDnd()
+      CCHIcon {
+        kind: "cpu"
+        active: circle.activePage === "stats"
+        onClicked: circle.activePage = "stats"
       }
     }
 
-    // 10. About Pill
     Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "about") ? SettingsState.bgActivePill : (aboutMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "about") ? SettingsState.borderActive : (aboutMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "about" || aboutMouse.containsMouse) ? SettingsState.accent : SettingsState.bgSurface
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "about"
-            glyph: (circle.activePage === "about" || aboutMouse.containsMouse) ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "About"
-          color: (circle.activePage === "about" || aboutMouse.containsMouse) ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: aboutMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          circle.activePage = "about";
-        }
-      }
+      anchors.verticalCenter: parent.verticalCenter
+      width: 1
+      height: 30
+      color: SettingsState.borderBase
+      opacity: 0.7
     }
 
-    // Calendar Pill (weather + monthly calendar sub-page)
+    // Grouped capsule like the reference: bluetooth + accessory only.
+    // Ethernet / wifi stays outside, unsheathed.
+    CCHIcon {
+      anchors.verticalCenter: parent.verticalCenter
+      kind: (circle.wiredUp && !circle.wifiUp) ? "ethernet" : "wifi"
+      filled: false
+      active: circle.wifiUp || circle.wiredUp || circle.activePage === "wifi"
+      onClicked: circle.activePage = "wifi"
+    }
+
     Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "calendar") ? SettingsState.bgActivePill : (calMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "calendar") ? SettingsState.borderActive : (calMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+      id: netCapsule
+      anchors.verticalCenter: parent.verticalCenter
+      width: netRow.implicitWidth + 14
+      height: 44
+      radius: 22
+      color: SettingsState.bgCardHover
+      border.color: SettingsState.borderBase
       border.width: 1
 
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
       Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
+        id: netRow
+        anchors.centerIn: parent
+        spacing: 2
 
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "calendar") ? SettingsState.accent : (calMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "calendar"
-            glyph: (circle.activePage === "calendar") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (calMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
+        CCHIcon {
+          kind: "bt"
+          filled: true
+          active: (circle.btOn && BluetoothState.btDevice) || circle.activePage === "bluetooth"
+          onClicked: {
+            circle.activePage = "bluetooth";
+            BluetoothState.startDiscovery();
           }
         }
 
-        Text {
+        // Accessory battery inline with bluetooth - own lighter-shade pill
+        Rectangle {
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Cal"
-          color: (circle.activePage === "calendar") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
+          width: visible ? accRow.implicitWidth + 16 : 0
+          height: 32
+          radius: 16
+          color: SettingsState.bgActivePill
+          opacity: accMouse.containsMouse ? 0.8 : 1.0
+          visible: mainPage.hasAcc
 
-      MouseArea {
-        id: calMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          CalendarState.refreshWeather();
-          circle.activePage = "calendar";
+          Behavior on opacity { NumberAnimation { duration: 150 } }
+
+          Row {
+            id: accRow
+            anchors.centerIn: parent
+            spacing: 6
+
+            CCIcon {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 18
+              height: 18
+              kind: mainPage.accKind
+              glyph: accMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
+            }
+
+            WavyStatSlider {
+              anchors.verticalCenter: parent.verticalCenter
+              width: 44
+              height: 14
+              fraction: Math.max(0, Math.min(1, mainPage.accPct / 100))
+              waveColor: SettingsState.accent
+              trackColor: SettingsState.borderBase
+              showTrack: true
+              showHandle: false
+              showRemaining: false
+              doubleWave: false
+              flowing: false
+              trackH: 4
+              waveW: 3
+              waveAmp: 2
+              waveLen: 12
+              waveCount: 2
+            }
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: mainPage.accPct >= 0 ? mainPage.accPct + "%" : "--"
+              color: SettingsState.textMain
+              font.pixelSize: SettingsState.px(13)
+              font.bold: true
+              font.family: SettingsState.fontFamily
+            }
+          }
+
+          MouseArea {
+            id: accMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+              circle.activePage = "bluetooth";
+              BluetoothState.startDiscovery();
+            }
+          }
         }
       }
     }
 
-    // Stats Pill (CPU / RAM / Swap / Disk sub-page)
     Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "stats") ? SettingsState.bgActivePill : (statsMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "stats") ? SettingsState.borderActive : (statsMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
+      anchors.verticalCenter: parent.verticalCenter
+      width: 1
+      height: 30
+      color: SettingsState.borderBase
+      opacity: 0.7
+    }
 
-      Behavior on color {
-        ColorAnimation { duration: 150 }
+    // Time + date on the right
+    Column {
+      id: timeCol
+      anchors.verticalCenter: parent.verticalCenter
+      width: timeMetrics.implicitWidth
+      spacing: 0
+
+      Text {
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        text: mainPage.timeStr
+        color: SettingsState.textMain
+        font.pixelSize: SettingsState.px(20)
+        font.bold: true
+        font.family: SettingsState.fontFamily
+      }
+      Text {
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        text: mainPage.dateStr
+        color: SettingsState.textSecondary
+        font.pixelSize: SettingsState.px(11)
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+        maximumLineCount: 1
       }
 
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "stats") ? SettingsState.accent : (statsMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "cpu"
-            glyph: (circle.activePage === "stats") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (statsMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Stats"
-          color: (circle.activePage === "stats") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: statsMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          circle.activePage = "stats";
-        }
+      Text {
+        id: timeMetrics
+        visible: false
+        text: SettingsState.timeFormat === "24h" ? "88:88" : "8:88 PM"
+        font.pixelSize: SettingsState.px(20)
+        font.bold: true
+        font.family: SettingsState.fontFamily
       }
     }
   }
 
-  // Expand/collapse dash handle for the hidden pills (Apps, Wall, Clip, Mixer, Power)
-  Item {
-    width: parent.width
-    height: 18
+  // Recording dot pinned at top-center
+  Rectangle {
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: parent.top
+    anchors.topMargin: -4
+    width: 5
+    height: 5
+    radius: 2.5
+    color: "#ff453a"
+    visible: RecorderState.isRecording
 
-    Rectangle {
-      anchors.centerIn: parent
-      width: 44
-      height: 4
-      radius: 2
-      color: pillMoreMouse.containsMouse ? SettingsState.accent : SettingsState.borderBase
-
-      Behavior on color { ColorAnimation { duration: 150 } }
-    }
-
-    MouseArea {
-      id: pillMoreMouse
-      anchors.fill: parent
-      anchors.margins: -4
-      hoverEnabled: true
-      cursorShape: Qt.PointingHandCursor
-      onClicked: circle.pillsExpanded = !circle.pillsExpanded
+    SequentialAnimation on opacity {
+      running: RecorderState.isRecording
+      loops: Animation.Infinite
+      NumberAnimation { from: 1.0; to: 0.2; duration: 900; easing.type: Easing.InOutSine }
+      NumberAnimation { from: 0.2; to: 1.0; duration: 900; easing.type: Easing.InOutSine }
     }
   }
-
-  // Hidden pills grid: Apps / Wall / Clip / Mixer / Power
-  Grid {
-    width: parent.width
-    columns: 3
-    spacing: 8
-    visible: circle.pillsExpanded
-    height: visible ? implicitHeight : 0
-
-    // 1. App Launcher Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: LauncherState.open ? SettingsState.bgActivePill : (appMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: LauncherState.open ? SettingsState.borderActive : (appMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: LauncherState.open ? SettingsState.accent : (appMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "apps"
-            glyph: LauncherState.open ? (SettingsState.isDark ? "#121612" : "#ffffff") : (appMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Apps"
-          color: LauncherState.open ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: appMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          if (LauncherState.open && LauncherState.mode === "apps")
-            LauncherState.close();
-          else
-            LauncherState.openApps();
-        }
-      }
-    }
-
-    // 2. Wallpaper Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: WallpaperState.open ? SettingsState.bgActivePill : (wallMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: WallpaperState.open ? SettingsState.borderActive : (wallMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: WallpaperState.open ? SettingsState.accent : (wallMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "wallpaper"
-            glyph: WallpaperState.open ? (SettingsState.isDark ? "#ffffff" : "#000000") : (wallMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Wall"
-          color: WallpaperState.open ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: wallMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: WallpaperState.toggle()
-      }
-    }
-
-    // 3. Clipboard Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: ClipboardState.open ? SettingsState.bgActivePill : (clipMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: ClipboardState.open ? SettingsState.borderActive : (clipMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: ClipboardState.open ? SettingsState.accent : (clipMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "clipboard"
-            glyph: ClipboardState.open ? (SettingsState.isDark ? "#121612" : "#ffffff") : (clipMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Clip"
-          color: ClipboardState.open ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: clipMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: ClipboardState.toggle()
-      }
-    }
-
-    // 5. Hardware Mixer Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "mixer") ? SettingsState.bgActivePill : (mixerMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "mixer") ? SettingsState.borderActive : (mixerMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "mixer") ? SettingsState.accent : (mixerMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "mixer"
-            glyph: (circle.activePage === "mixer") ? (SettingsState.isDark ? "#121612" : "#ffffff") : (mixerMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary)
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Mixer"
-          color: (circle.activePage === "mixer") ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: mixerMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          circle.activePage = "mixer";
-        }
-      }
-    }
-
-    // 9. Power Menu Pill
-    Rectangle {
-      width: (parent.width - 16) / 3
-      height: 48
-      radius: 24
-      color: (circle.activePage === "power") ? SettingsState.bgActivePill : (powerMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (circle.activePage === "power") ? SettingsState.borderActive : (powerMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
-
-      Behavior on color {
-        ColorAnimation { duration: 150 }
-      }
-
-      Row {
-        anchors.fill: parent
-        anchors.leftMargin: 6
-        anchors.rightMargin: 8
-        spacing: 6
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 34
-          height: 34
-          radius: 17
-          color: (circle.activePage === "power" || powerMouse.containsMouse) ? SettingsState.accent : SettingsState.bgSurface
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 16
-            height: 16
-            kind: "power"
-            glyph: (circle.activePage === "power" || powerMouse.containsMouse) ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
-          }
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 46
-          text: "Power"
-          color: (circle.activePage === "power" || powerMouse.containsMouse) ? SettingsState.textActive : SettingsState.textMain
-          font.pixelSize: SettingsState.px(14)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          elide: Text.ElideRight
-        }
-      }
-
-      MouseArea {
-        id: powerMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          circle.activePage = "power";
-        }
-      }
-    }
-  }
-
 }

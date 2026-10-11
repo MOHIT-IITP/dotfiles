@@ -162,8 +162,7 @@ Item {
             height: 52
             radius: 12
             color: folderMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
-            border.color: folderMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
-            border.width: 1
+            border.width: 0
 
             Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -277,8 +276,7 @@ Item {
               height: 24
               radius: 6
               color: SettingsState.timeFormat === "24h" ? SettingsState.bgActivePill : "transparent"
-              border.color: SettingsState.timeFormat === "24h" ? SettingsState.borderActive : "transparent"
-              border.width: 1
+              border.width: 0
 
               Text {
                 anchors.centerIn: parent
@@ -301,8 +299,7 @@ Item {
               height: 24
               radius: 6
               color: SettingsState.timeFormat === "12h" ? SettingsState.bgActivePill : "transparent"
-              border.color: SettingsState.timeFormat === "12h" ? SettingsState.borderActive : "transparent"
-              border.width: 1
+              border.width: 0
 
               Text {
                 anchors.centerIn: parent
@@ -652,8 +649,7 @@ Item {
                 height: 22
                 radius: 6
                 color: Math.abs(SettingsState.uiScale - modelData.val) < 0.01 ? SettingsState.bgActivePill : "transparent"
-                border.color: Math.abs(SettingsState.uiScale - modelData.val) < 0.01 ? SettingsState.borderActive : "transparent"
-                border.width: 1
+                border.width: 0
 
                 Text {
                   id: sText
@@ -712,8 +708,7 @@ Item {
               width: gapValText.implicitWidth + 12
               radius: 6
               color: SettingsState.bgCard
-              border.color: SettingsState.borderBase
-              border.width: 1
+              border.width: 0
 
               Text {
                 id: gapValText
@@ -892,8 +887,7 @@ Item {
                 height: 24
                 radius: 6
                 color: SettingsState.themeMode === modelData.toLowerCase() ? SettingsState.bgActivePill : "transparent"
-                border.color: SettingsState.themeMode === modelData.toLowerCase() ? SettingsState.borderActive : "transparent"
-                border.width: 1
+                border.width: 0
 
                 Text {
                   id: tText
@@ -999,8 +993,7 @@ Item {
               height: 34
               radius: 9
               color: SettingsState.accent
-              border.color: SettingsState.borderActive
-              border.width: 1
+              border.width: 0
             }
 
             Column {
@@ -1037,8 +1030,7 @@ Item {
                 height: 24
                 radius: 6
                 color: SettingsState.accentTone === modelData.toLowerCase() ? SettingsState.bgActivePill : SettingsState.bgCard
-                border.color: SettingsState.accentTone === modelData.toLowerCase() ? SettingsState.borderActive : SettingsState.borderBase
-                border.width: 1
+                border.width: 0
 
                 Row {
                   anchors.centerIn: parent

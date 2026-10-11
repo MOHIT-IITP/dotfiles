@@ -17,30 +17,30 @@ Column {
     }
   }
 
-  // Wi-Fi Header
+  // Wi-Fi Header - minimal
   Item {
     width: parent.width
-    height: 32
+    height: 28
 
     Row {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
+      spacing: 6
 
       // Back button
       Rectangle {
-        width: 28
-        height: 28
-        radius: 14
-        color: wifiBackMouse.containsMouse ? "#252b25" : "transparent"
+        width: 24
+        height: 24
+        radius: 12
+        color: wifiBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
             font.family: SettingsState.nerdIconFont
-          color: "#f2f2f2"
-          font.pixelSize: SettingsState.px(22)
+          color: SettingsState.textMain
+          font.pixelSize: SettingsState.px(16)
           font.bold: true
         }
 
@@ -58,7 +58,7 @@ Column {
       Item {
         anchors.verticalCenter: parent.verticalCenter
         width: wifiTitleGroup.implicitWidth + 4
-        height: 28
+        height: 24
 
         Row {
           id: wifiTitleGroup
@@ -71,7 +71,7 @@ Column {
             visible: SettingsState.japaneseGlyphs
             text: "波"
             color: wifiTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(20)
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
           }
 
@@ -80,9 +80,10 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             text: "WI-FI"
             color: wifiTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(17)
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
+            font.letterSpacing: 0.5
           }
         }
 
@@ -101,22 +102,24 @@ Column {
     Row {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
+      spacing: 8
 
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: NetworkState.wifiEnabled ? (circle.wifiUp ? "Connected" : "Available") : "Off"
-        color: circle.wifiUp ? "#7ee2a8" : "#6e756e"
-        font.pixelSize: SettingsState.px(14)
+        color: circle.wifiUp ? (SettingsState.isDark ? "#7ee2a8" : "#2e7d32") : SettingsState.textMuted
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
       }
 
-      // Toggle switch
+      // Toggle switch - minimal / smaller
       Rectangle {
-        width: 40
-        height: 22
-        radius: 11
-        color: NetworkState.wifiEnabled ? "#e05f65" : "#252b25"
+        width: 34
+        height: 18
+        radius: 9
+        color: NetworkState.wifiEnabled ? SettingsState.accent : SettingsState.bgCard
+        border.color: SettingsState.borderBase
+        border.width: NetworkState.wifiEnabled ? 0 : 1
         anchors.verticalCenter: parent.verticalCenter
 
         Behavior on color {
@@ -124,10 +127,10 @@ Column {
         }
 
         Rectangle {
-          width: 16
-          height: 16
-          radius: 8
-          color: "#ffffff"
+          width: 12
+          height: 12
+          radius: 6
+          color: NetworkState.wifiEnabled ? "#ffffff" : SettingsState.textMuted
           anchors.verticalCenter: parent.verticalCenter
           x: NetworkState.wifiEnabled ? parent.width - width - 3 : 3
 
@@ -149,51 +152,46 @@ Column {
   Rectangle {
     width: parent.width
     height: 1
-    color: "#252b25"
+    color: SettingsState.borderBase
   }
 
-  // ---- Ethernet / Wired section ----
+  // ---- Ethernet / Wired section - minimal ----
   Rectangle {
     width: parent.width
-    height: 64
-    radius: 14
-    color: circle.wiredUp ? SettingsState.bgActivePill : SettingsState.bgCard
-    border.color: circle.wiredUp ? SettingsState.borderActive : SettingsState.borderBase
-    border.width: 1
+    height: 52
+    radius: 10
+    color: "transparent"
 
-    Rectangle {
+    Item {
       id: ethIconBox
       anchors.left: parent.left
-      anchors.leftMargin: 10
+      anchors.leftMargin: 6
       anchors.verticalCenter: parent.verticalCenter
-      width: 36
-      height: 36
-      radius: 10
-      color: circle.wiredUp ? SettingsState.accent : SettingsState.bgSurface
+      width: 28
+      height: 28
 
       CCIcon {
         anchors.centerIn: parent
-        width: 20
-        height: 20
+        width: 18
+        height: 18
         kind: "ethernet"
-        glyph: circle.wiredUp ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
+        glyph: SettingsState.textSecondary
       }
     }
 
     Column {
       anchors.left: ethIconBox.right
-      anchors.leftMargin: 10
+      anchors.leftMargin: 8
       anchors.right: ethStateText.left
       anchors.rightMargin: 8
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 2
+      spacing: 1
 
       Text {
         width: parent.width
         text: "Ethernet" + (NetworkState.wiredIface !== "" ? " · " + NetworkState.wiredIface : "")
         color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(15)
-        font.bold: true
+        font.pixelSize: SettingsState.px(14)
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
       }
@@ -201,8 +199,8 @@ Column {
       Text {
         width: parent.width
         text: circle.wiredUp ? (NetworkState.wiredSummary() === NetworkState.wiredName ? NetworkState.wiredName : NetworkState.wiredName + " · " + NetworkState.wiredSummary()) : "Cable unplugged"
-        color: circle.wiredUp ? SettingsState.textActive : SettingsState.textMuted
-        font.pixelSize: SettingsState.px(13)
+        color: circle.wiredUp ? (SettingsState.isDark ? "#7ee2a8" : "#2e7d32") : SettingsState.textMuted
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
         elide: Text.ElideRight
         maximumLineCount: 1
@@ -212,12 +210,11 @@ Column {
     Text {
       id: ethStateText
       anchors.right: parent.right
-      anchors.rightMargin: 12
+      anchors.rightMargin: 10
       anchors.verticalCenter: parent.verticalCenter
       text: circle.wiredUp ? "Connected" : "Off"
-      color: circle.wiredUp ? "#7ee2a8" : "#6e756e"
-      font.pixelSize: SettingsState.px(13)
-      font.bold: true
+      color: circle.wiredUp ? (SettingsState.isDark ? "#7ee2a8" : "#2e7d32") : SettingsState.textMuted
+      font.pixelSize: SettingsState.px(12)
       font.family: SettingsState.fontFamily
     }
   }
@@ -226,18 +223,18 @@ Column {
   Text {
     visible: !NetworkState.wifiEnabled || circle.wifiNetworksList.length === 0
     text: !NetworkState.wifiEnabled ? "Wi-Fi is turned off" : "No Wi-Fi networks found"
-    color: "#6e756e"
-    font.pixelSize: SettingsState.px(15)
+    color: SettingsState.textMuted
+    font.pixelSize: SettingsState.px(13)
     font.family: SettingsState.fontFamily
     anchors.horizontalCenter: parent.horizontalCenter
   }
 
-  // Networks List
+  // Networks List - minimal rows
   ListView {
     id: wifiList
     width: parent.width
-    height: !visible ? 0 : Math.min(320, circle.wifiNetworksList.length * 64 - 8)
-    spacing: 8
+    height: !visible ? 0 : Math.min(300, circle.wifiNetworksList.length * 60 - 8)
+    spacing: 4
     clip: true
     visible: NetworkState.wifiEnabled && circle.wifiNetworksList.length > 0
     model: circle.wifiNetworksList
@@ -252,51 +249,47 @@ Column {
     delegate: Rectangle {
       id: wifiRow
       width: ListView.view.width
-      height: 56
-      radius: 14
-      color: modelData.connected ? SettingsState.bgActivePill : (wifiRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: modelData.connected ? SettingsState.borderActive : (wifiRowMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-      border.width: 1
+      height: 52
+      radius: 10
+      color: wifiRowMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
-      // Left Icon Box
-      Rectangle {
+      readonly property string greenTint: SettingsState.isDark ? "#7ee2a8" : "#2e7d32"
+
+      // Left icon - minimal, no filled box
+      Item {
         id: wIconBox
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 6
         anchors.verticalCenter: parent.verticalCenter
-        width: 36
-        height: 36
-        radius: 10
-        color: modelData.connected ? SettingsState.accent : SettingsState.bgSurface
+        width: 28
+        height: 28
 
         CCIcon {
           anchors.centerIn: parent
-          width: 20
-          height: 20
+          width: 18
+          height: 18
           kind: "wifi"
-          glyph: modelData.connected ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
+          glyph: SettingsState.textSecondary
         }
       }
 
-      // Right Action Button
-      Rectangle {
+      // Right action - minimal text button (no pill)
+      Item {
         id: wActionBtn
         anchors.right: parent.right
         anchors.rightMargin: 10
         anchors.verticalCenter: parent.verticalCenter
-        height: 26
-        width: wBtnText.implicitWidth + 18
-        radius: 13
-        color: wBtnMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
-        border.color: SettingsState.borderBase
-        border.width: 1
+        height: 24
+        width: wBtnText.implicitWidth + 4
+        implicitWidth: wBtnText.implicitWidth + 4
+        implicitHeight: 24
         z: 5
 
         Text {
           id: wBtnText
           anchors.centerIn: parent
           text: modelData.connected ? "Disconnect" : "Connect"
-          color: modelData.connected ? "#ff8a8a" : SettingsState.textMain
+          color: modelData.connected ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : (wBtnMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted)
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
@@ -319,18 +312,17 @@ Column {
       // Center Details
       Column {
         anchors.left: wIconBox.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: 8
         anchors.right: wActionBtn.left
         anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 2
+        spacing: 1
 
         Text {
           width: parent.width
           text: modelData.name || "Hidden Network"
           color: SettingsState.textMain
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
+          font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }
@@ -338,8 +330,8 @@ Column {
         Text {
           width: parent.width
           text: (modelData.connected ? "connected" : "available") + " · " + Math.round((modelData.signalStrength || 0) * 100) + "% signal"
-          color: modelData.connected ? SettingsState.textActive : SettingsState.textMuted
-          font.pixelSize: SettingsState.px(13)
+          color: modelData.connected ? wifiRow.greenTint : SettingsState.textMuted
+          font.pixelSize: SettingsState.px(12)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }

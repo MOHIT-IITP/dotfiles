@@ -31,14 +31,14 @@ Column {
         width: 26
         height: 26
         radius: 13
-        color: mixerBackMouse.containsMouse ? "#252b25" : "transparent"
+        color: mixerBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
             font.family: SettingsState.nerdIconFont
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(22)
           font.bold: true
         }
@@ -213,13 +213,13 @@ Column {
           width: 28
           height: 26
           radius: 13
-          color: brBtnMouse.containsMouse ? "#222822" : "transparent"
+          color: brBtnMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
           CCIcon {
             anchors.centerIn: parent
             width: 14
             height: 14
             kind: "sun"
-            glyph: "#9aa39a"
+            glyph: brBtnMouse.containsMouse ? SettingsState.accent : SettingsState.textSecondary
           }
           MouseArea {
             id: brBtnMouse
@@ -237,7 +237,7 @@ Column {
   Rectangle {
     width: parent.width
     height: 1
-    color: "#252b25"
+    color: SettingsState.borderBase
   }
 
   // 4 Vertical Faders Row (Matching Reference UI)

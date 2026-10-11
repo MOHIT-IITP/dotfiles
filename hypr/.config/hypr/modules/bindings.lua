@@ -23,6 +23,7 @@ hl.bind(mainMod .. " + CTRL + A ", hl.dsp.exec_cmd("qs ipc call mohiitp about"))
 hl.bind(mainMod .. " + CTRL + N ", hl.dsp.exec_cmd("qs ipc call mohiitp notifInbox"))
 hl.bind(mainMod .. " + R ", hl.dsp.exec_cmd("qs ipc call mohiitp reminder"))
 hl.bind(mainMod .. " + CTRL + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotCard"))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("qs ipc call mohiitp cc"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screenshotDisplay"))
 
 -- Super+C / Super+V as Copy / Paste (terminal-aware)

@@ -149,7 +149,7 @@ PanelWindow {
               cursorShape: Qt.PointingHandCursor
               onClicked: {
                 if (modelData)
-                  modelData.dismiss();
+                  NotifCenter.dismissNotification(modelData);
               }
             }
           }

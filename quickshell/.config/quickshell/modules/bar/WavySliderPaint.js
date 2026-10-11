@@ -15,6 +15,9 @@ function paint(ctx, W, H, o) {
   var showTrack = o.showTrack !== false;
   var showHandle = o.showHandle !== false;
   var showRemaining = o.showRemaining === true;
+  var phase = o.phase || 0;
+  var doubleWave = o.doubleWave === true;
+  var secondColor = o.secondColor || o.waveColor;
 
   ctx.clearRect(0, 0, W, H);
   ctx.lineJoin = "round";
@@ -59,14 +62,35 @@ function paint(ctx, W, H, o) {
   } else if (trackGap > 0 && shown < 0.995) {
     waveEnd = Math.max(x0, fx - halfGap);
   }
+  // Fixed cycle count: exactly `waveCount` sine periods across the filled
+  // stretch, whatever the value (0 = legacy fixed-pixel `waveLen`).
+  if (o.waveCount > 0) {
+    waveLen = Math.max(8, (waveEnd - x0) / o.waveCount);
+  }
   if (shown > 0.005 && waveEnd > x0 + 1) {
+    var steps = Math.max(8, Math.floor((waveEnd - x0) / 3));
+    // Faint second wave on the opposite phase, drawn first so the
+    // main wave sits on top (the "two waves" look).
+    if (doubleWave) {
+      ctx.beginPath();
+      ctx.strokeStyle = secondColor;
+      ctx.lineWidth = waveW;
+      for (var j = 0; j <= steps; ++j) {
+        var x2 = x0 + (waveEnd - x0) * (j / steps);
+        var y2 = cy + waveAmp * 0.7 * Math.sin((x2 - x0) / waveLen * Math.PI * 2 + phase + Math.PI);
+        if (j === 0)
+          ctx.moveTo(x2, y2);
+        else
+          ctx.lineTo(x2, y2);
+      }
+      ctx.stroke();
+    }
     ctx.beginPath();
     ctx.strokeStyle = o.waveColor;
     ctx.lineWidth = waveW;
-    var steps = Math.max(8, Math.floor((waveEnd - x0) / 3));
     for (var i = 0; i <= steps; ++i) {
       var x = x0 + (waveEnd - x0) * (i / steps);
-      var y = cy + waveAmp * Math.sin((x - x0) / waveLen * Math.PI * 2);
+      var y = cy + waveAmp * Math.sin((x - x0) / waveLen * Math.PI * 2 + phase);
       if (i === 0)
         ctx.moveTo(x, y);
       else

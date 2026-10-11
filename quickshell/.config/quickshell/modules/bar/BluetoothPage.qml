@@ -17,30 +17,30 @@ Column {
     }
   }
 
-  // Bluetooth Header
+  // Bluetooth Header - minimal
   Item {
     width: parent.width
-    height: 32
+    height: 28
 
     Row {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
+      spacing: 6
 
       // Back button
       Rectangle {
-        width: 28
-        height: 28
-        radius: 14
-        color: btBackMouse.containsMouse ? "#252b25" : "transparent"
+        width: 24
+        height: 24
+        radius: 12
+        color: btBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
             font.family: SettingsState.nerdIconFont
-          color: "#f2f2f2"
-          font.pixelSize: SettingsState.px(22)
+          color: SettingsState.textMain
+          font.pixelSize: SettingsState.px(16)
           font.bold: true
         }
 
@@ -58,7 +58,7 @@ Column {
       Item {
         anchors.verticalCenter: parent.verticalCenter
         width: btTitleGroup.implicitWidth + 4
-        height: 28
+        height: 24
 
         Row {
           id: btTitleGroup
@@ -71,7 +71,7 @@ Column {
             visible: SettingsState.japaneseGlyphs
             text: "歯"
             color: btTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(20)
+            font.pixelSize: SettingsState.px(15)
             font.bold: true
           }
 
@@ -80,9 +80,10 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             text: "BLUETOOTH"
             color: btTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(17)
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
+            font.letterSpacing: 0.5
           }
         }
 
@@ -101,22 +102,24 @@ Column {
     Row {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
+      spacing: 8
 
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: BluetoothState.discovering ? "Scanning..." : (BluetoothState.btOn ? "Ready" : "Off")
         color: BluetoothState.discovering ? SettingsState.accent : (BluetoothState.btOn ? SettingsState.textActive : SettingsState.textMuted)
-        font.pixelSize: SettingsState.px(14)
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
       }
 
-      // Toggle switch
+      // Toggle switch - minimal / smaller
       Rectangle {
-        width: 40
-        height: 22
-        radius: 11
+        width: 34
+        height: 18
+        radius: 9
         color: BluetoothState.btOn ? SettingsState.accent : SettingsState.bgCard
+        border.color: SettingsState.borderBase
+        border.width: BluetoothState.btOn ? 0 : 1
         anchors.verticalCenter: parent.verticalCenter
 
         Behavior on color {
@@ -124,10 +127,10 @@ Column {
         }
 
         Rectangle {
-          width: 16
-          height: 16
-          radius: 8
-          color: BluetoothState.btOn ? (SettingsState.isDark ? "#ffffff" : "#000000") : SettingsState.textMuted
+          width: 12
+          height: 12
+          radius: 6
+          color: BluetoothState.btOn ? "#ffffff" : SettingsState.textMuted
           anchors.verticalCenter: parent.verticalCenter
           x: BluetoothState.btOn ? parent.width - width - 3 : 3
 
@@ -157,17 +160,17 @@ Column {
     visible: !BluetoothState.btOn || circle.btDevicesList.length === 0
     text: !BluetoothState.btOn ? "Bluetooth is turned off" : "No Bluetooth devices found"
     color: SettingsState.textMuted
-    font.pixelSize: SettingsState.px(15)
+    font.pixelSize: SettingsState.px(13)
     font.family: SettingsState.fontFamily
     anchors.horizontalCenter: parent.horizontalCenter
   }
 
-  // Devices List
+  // Devices List - minimal rows
   ListView {
     id: btList
     width: parent.width
-    height: !visible ? 0 : Math.min(320, circle.btDevicesList.length * 64 - 8)
-    spacing: 8
+    height: !visible ? 0 : Math.min(300, circle.btDevicesList.length * 60 - 8)
+    spacing: 4
     clip: true
     visible: BluetoothState.btOn && circle.btDevicesList.length > 0
     model: circle.btDevicesList
@@ -182,9 +185,9 @@ Column {
     delegate: Rectangle {
       id: btRow
       width: ListView.view.width
-      height: 56
-      radius: 14
-      color: modelData.connected ? SettingsState.bgActivePill : (btRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
+      height: 52
+      radius: 10
+      color: btRowMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
       // Device type detection for the left icon (mouse / headphones / etc.)
       readonly property string devName: (modelData.name || modelData.deviceName || "").toLowerCase()
@@ -207,44 +210,33 @@ Column {
       readonly property int battPct: btRow.hasBattery ? Math.round((Number(modelData.battery) <= 1.01 ? Number(modelData.battery) * 100 : Number(modelData.battery))) : -1
       readonly property bool showBattery: modelData.connected && btRow.hasBattery && btRow.battPct >= 0
       readonly property bool showPair: !btRow.isPaired
+      readonly property string greenTint: SettingsState.isDark ? "#7ee2a8" : "#2e7d32"
       readonly property string subLine: {
-        var mac = modelData.address || "";
         var batt = (btRow.hasBattery && btRow.battPct >= 0) ? (btRow.battPct + "%") : "";
         if (modelData.connected) {
-          var s = "connected";
-          if (batt !== "") s += " · " + batt;
-          if (mac !== "") s += " · " + mac;
-          return s;
+          return batt !== "" ? ("connected · " + batt) : "connected";
         }
         if (btRow.isPaired) {
-          var p = "paired · disconnected";
-          if (batt !== "") p += " · " + batt;
-          if (mac !== "") p += " · " + mac;
-          return p;
+          return "paired · disconnected";
         }
-        var d = "disconnected";
-        if (batt !== "") d += " · " + batt;
-        if (mac !== "") d += " · " + mac;
-        return d;
+        return "disconnected";
       }
 
-      // Left Icon Box (Nerd Font device glyph)
-      Rectangle {
+      // Left icon - minimal, no filled box
+      Item {
         id: iconBox
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 6
         anchors.verticalCenter: parent.verticalCenter
-        width: 36
-        height: 36
-        radius: 10
-        color: modelData.connected ? SettingsState.accent : SettingsState.bgSurface
+        width: 28
+        height: 28
 
         CCIcon {
           anchors.centerIn: parent
-          width: 20
-          height: 20
+          width: 18
+          height: 18
           kind: btRow.devKind
-          glyph: modelData.connected ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
+          glyph: SettingsState.textSecondary
         }
       }
 
@@ -259,62 +251,55 @@ Column {
         height: 26
         visible: btRow.showBattery || btRow.showPair
 
-        // Battery: mini level bar + percentage (e.g. mouse / headphones)
+        // Battery: mini level bar + percentage in green tint
         Row {
           id: battRow
           anchors.verticalCenter: parent.verticalCenter
           anchors.right: parent.right
-          spacing: 8
+          spacing: 6
           visible: btRow.showBattery
 
           Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            width: 26
-            height: 5
-            radius: 2.5
+            width: 22
+            height: 4
+            radius: 2
             color: SettingsState.borderBase
 
             Rectangle {
               width: parent.width * Math.max(0, Math.min(1, (Number(modelData.battery) <= 1.01 ? Number(modelData.battery) : Number(modelData.battery) / 100) || 0))
               height: parent.height
               radius: parent.radius
-              color: SettingsState.accent
+              color: btRow.greenTint
             }
           }
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: btRow.battPct + "%"
-            color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(14)
-            font.bold: true
+            color: btRow.greenTint
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
           }
         }
 
-        // Pair pill (compact padding)
-        Rectangle {
+        // Pair - minimal text button (no pill)
+        Item {
           id: pairBtn
           anchors.verticalCenter: parent.verticalCenter
           anchors.right: parent.right
           height: 24
-          width: pairText.implicitWidth + 16
-          implicitWidth: pairText.implicitWidth + 16
+          width: pairText.implicitWidth + 4
+          implicitWidth: pairText.implicitWidth + 4
           implicitHeight: 24
-          radius: 12
           visible: btRow.showPair
-          color: pairMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
-          border.color: SettingsState.borderBase
-          border.width: 1
-          z: 5
 
           Text {
             id: pairText
             anchors.centerIn: parent
             text: "Pair"
-            color: pairMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-            font.pixelSize: SettingsState.px(12)
-            font.bold: true
+            color: pairMouse.containsMouse ? SettingsState.textActive : SettingsState.textMuted
+            font.pixelSize: SettingsState.px(13)
             font.family: SettingsState.fontFamily
           }
 
@@ -334,18 +319,18 @@ Column {
       // Center Details
       Column {
         anchors.left: iconBox.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: 8
         anchors.right: rightSlot.left
         anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 2
+        spacing: 1
 
         Text {
           width: parent.width
           text: modelData.name || modelData.deviceName || modelData.address || "Unknown Device"
-          color: "#f2f2f2"
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
+          color: SettingsState.textMain
+          font.pixelSize: SettingsState.px(14)
+          font.bold: false
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }
@@ -353,8 +338,8 @@ Column {
         Text {
           width: parent.width
           text: btRow.subLine
-          color: modelData.connected ? "#7ee2a8" : "#6e756e"
-          font.pixelSize: SettingsState.px(13)
+          color: modelData.connected ? btRow.greenTint : SettingsState.textMuted
+          font.pixelSize: SettingsState.px(12)
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }
@@ -384,15 +369,15 @@ Column {
   // devices, e.g. MX Master 2S at 55% via upower.
   Column {
     width: parent.width
-    spacing: 8
+    spacing: 4
     visible: DeviceBatteryState.hasAccessories
 
     Text {
       text: "MOUSE & ACCESSORIES"
       color: SettingsState.textMuted
-      font.pixelSize: SettingsState.px(12)
-      font.bold: true
+      font.pixelSize: SettingsState.px(11)
       font.family: SettingsState.fontFamily
+      font.letterSpacing: 0.5
     }
 
     Repeater {
@@ -400,31 +385,28 @@ Column {
       delegate: Rectangle {
         id: accRow
         width: parent.width
-        height: 56
-        radius: 14
-        color: SettingsState.bgCard
-        border.color: SettingsState.borderBase
-        border.width: 1
+        height: 52
+        radius: 10
+        color: "transparent"
 
         readonly property int accPct: DeviceBatteryState.pct100(modelData)
         readonly property string accKind: DeviceBatteryState.iconKindFor(modelData)
         readonly property string accLabel: DeviceBatteryState.labelFor(modelData)
         readonly property string accState: DeviceBatteryState.stateText(modelData)
+        readonly property string greenTint: SettingsState.isDark ? "#7ee2a8" : "#2e7d32"
 
-        Rectangle {
+        Item {
           id: accIconBox
           anchors.left: parent.left
-          anchors.leftMargin: 10
+          anchors.leftMargin: 6
           anchors.verticalCenter: parent.verticalCenter
-          width: 36
-          height: 36
-          radius: 10
-          color: SettingsState.bgSurface
+          width: 28
+          height: 28
 
           CCIcon {
             anchors.centerIn: parent
-            width: 20
-            height: 20
+            width: 18
+            height: 18
             kind: accRow.accKind
             glyph: SettingsState.textSecondary
           }
@@ -433,7 +415,7 @@ Column {
         Item {
           id: accRight
           anchors.right: parent.right
-          anchors.rightMargin: 12
+          anchors.rightMargin: 10
           anchors.verticalCenter: parent.verticalCenter
           width: accBattRow.implicitWidth
           height: 26
@@ -442,29 +424,28 @@ Column {
             id: accBattRow
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            spacing: 8
+            spacing: 6
 
             Rectangle {
               anchors.verticalCenter: parent.verticalCenter
-              width: 26
-              height: 5
-              radius: 2.5
+              width: 22
+              height: 4
+              radius: 2
               color: SettingsState.borderBase
 
               Rectangle {
                 width: parent.width * Math.max(0, Math.min(1, accRow.accPct / 100))
                 height: parent.height
                 radius: parent.radius
-                color: SettingsState.accent
+                color: accRow.greenTint
               }
             }
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
               text: accRow.accPct >= 0 ? accRow.accPct + "%" : "--"
-              color: SettingsState.textMain
-              font.pixelSize: SettingsState.px(14)
-              font.bold: true
+              color: accRow.greenTint
+              font.pixelSize: SettingsState.px(12)
               font.family: SettingsState.fontFamily
             }
           }
@@ -472,27 +453,26 @@ Column {
 
         Column {
           anchors.left: accIconBox.right
-          anchors.leftMargin: 10
+          anchors.leftMargin: 8
           anchors.right: accRight.left
           anchors.rightMargin: 8
           anchors.verticalCenter: parent.verticalCenter
-          spacing: 2
+          spacing: 1
 
           Text {
             width: parent.width
             text: accRow.accLabel
             color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(15)
-            font.bold: true
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
           }
 
           Text {
             width: parent.width
-            text: accRow.accState !== "" ? ("upower · " + accRow.accState) : "upower"
+            text: accRow.accState !== "" ? accRow.accState : "upower"
             color: SettingsState.textMuted
-            font.pixelSize: SettingsState.px(13)
+            font.pixelSize: SettingsState.px(12)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
           }

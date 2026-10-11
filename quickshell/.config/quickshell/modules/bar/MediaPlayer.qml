@@ -500,7 +500,7 @@ Rectangle {
               width: 3
               height: isPlaying ? (5 + 9 * (0.5 + 0.5 * Math.sin(eqRow.phase + index * 2.1))) : 4
               radius: 1.5
-              color: isPlaying ? "#7ee2a8" : SettingsState.textMuted
+              color: isPlaying ? (SettingsState.isDark ? "#7ee2a8" : "#2e7d32") : SettingsState.textMuted
             }
           }
         }

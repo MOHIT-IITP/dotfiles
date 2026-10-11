@@ -162,6 +162,12 @@ Column {
         showTrack: false
         showHandle: false
         showRemaining: true
+        remainingW: 2
+        doubleWave: false
+        flowing: false
+        phaseOffset: 0
+        waveCount: 2
+        waveW: 2
       }
     }
 
@@ -219,6 +225,12 @@ Column {
         showTrack: false
         showHandle: false
         showRemaining: true
+        remainingW: 2
+        doubleWave: false
+        flowing: false
+        phaseOffset: Math.PI / 2
+        waveCount: 2
+        waveW: 2
       }
     }
 
@@ -276,6 +288,12 @@ Column {
         showTrack: false
         showHandle: false
         showRemaining: true
+        remainingW: 2
+        doubleWave: false
+        flowing: false
+        phaseOffset: Math.PI
+        waveCount: 2
+        waveW: 2
       }
     }
 
@@ -333,6 +351,12 @@ Column {
         showTrack: false
         showHandle: false
         showRemaining: true
+        remainingW: 2
+        doubleWave: false
+        flowing: false
+        phaseOffset: Math.PI * 1.5
+        waveCount: 2
+        waveW: 2
       }
     }
   }

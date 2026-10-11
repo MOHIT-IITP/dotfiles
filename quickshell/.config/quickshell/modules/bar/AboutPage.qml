@@ -50,20 +50,20 @@ Column {
     }
   }
 
-  // About Header
+  // About Header - minimal
   Item {
     width: parent.width
-    height: 32
+    height: 28
 
     Row {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
+      spacing: 6
 
       Rectangle {
-        width: 28
-        height: 28
-        radius: 14
+        width: 24
+        height: 24
+        radius: 12
         color: aboutBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
@@ -72,7 +72,7 @@ Column {
           text: "\ueab5"
           font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
-          font.pixelSize: SettingsState.px(22)
+          font.pixelSize: SettingsState.px(16)
           font.bold: true
         }
 
@@ -91,7 +91,7 @@ Column {
       Item {
         anchors.verticalCenter: parent.verticalCenter
         width: aboutTitleGroup.implicitWidth + 4
-        height: 28
+        height: 24
 
         Row {
           id: aboutTitleGroup
@@ -100,20 +100,20 @@ Column {
 
           CCIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 18
-            height: 18
+            width: 16
+            height: 16
             kind: "about"
-            glyph: SettingsState.accent
+            glyph: SettingsState.textSecondary
           }
 
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "ABOUT"
             color: aboutTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(16)
+            font.pixelSize: SettingsState.px(13)
             font.bold: true
             font.family: SettingsState.fontFamily
-            font.letterSpacing: 1.2
+            font.letterSpacing: 0.5
           }
         }
 
@@ -135,7 +135,7 @@ Column {
       anchors.verticalCenter: parent.verticalCenter
       text: (AboutState.links ? AboutState.links.length : 0) + " links"
       color: SettingsState.textMuted
-      font.pixelSize: SettingsState.px(13)
+      font.pixelSize: SettingsState.px(12)
       font.family: SettingsState.fontFamily
     }
   }
@@ -151,17 +151,17 @@ Column {
     visible: !AboutState.links || AboutState.links.length === 0
     text: "No links yet — add your email, GitHub, LinkedIn…"
     color: SettingsState.textMuted
-    font.pixelSize: SettingsState.px(14)
+    font.pixelSize: SettingsState.px(13)
     font.family: SettingsState.fontFamily
     wrapMode: Text.WordWrap
     width: parent.width
   }
 
-  // Links list (taller view — fits ~6 entries before scrolling)
+  // Links list - minimal compact rows
   ListView {
     width: parent.width
-    height: (!AboutState.links || AboutState.links.length === 0) ? 0 : Math.min(420, AboutState.links.length * 70)
-    spacing: 8
+    height: (!AboutState.links || AboutState.links.length === 0) ? 0 : Math.min(336, AboutState.links.length * 56 - 4)
+    spacing: 4
     clip: true
     visible: AboutState.links && AboutState.links.length > 0
     model: AboutState.links
@@ -170,112 +170,76 @@ Column {
       required property var modelData
       required property int index
       width: ListView.view.width
-      height: 62
-      radius: 14
-      color: aboutRowMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
-
-      // Dotted outline
-      Canvas {
-        anchors.fill: parent
-        antialiasing: true
-        property string dashHex: aboutRowMouse.containsMouse ? SettingsState.borderActive : SettingsState.textMuted
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-        onDashHexChanged: requestPaint()
-        onPaint: {
-          var ctx = getContext("2d");
-          ctx.reset();
-          ctx.clearRect(0, 0, width, height);
-          var r = 14;
-          var pad = 1.0;
-          var x = pad, y = pad, w = width - pad * 2, h = height - pad * 2;
-          ctx.beginPath();
-          ctx.moveTo(x + r, y);
-          ctx.lineTo(x + w - r, y);
-          ctx.arcTo(x + w, y, x + w, y + r, r);
-          ctx.lineTo(x + w, y + h - r);
-          ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-          ctx.lineTo(x + r, y + h);
-          ctx.arcTo(x, y + h, x, y + h - r, r);
-          ctx.lineTo(x, y + r);
-          ctx.arcTo(x, y, x + r, y, r);
-          ctx.closePath();
-          ctx.lineCap = "round";
-          ctx.setLineDash([1.5, 4.5]);
-          ctx.lineWidth = 1.0;
-          ctx.strokeStyle = dashHex;
-          ctx.stroke();
-        }
-      }
+      height: 52
+      radius: 10
+      color: aboutRowMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
 
       Row {
         anchors.fill: parent
-        anchors.margins: 8
-        spacing: 10
+        anchors.leftMargin: 10
+        anchors.rightMargin: 12
+        anchors.topMargin: 6
+        anchors.bottomMargin: 6
+        spacing: 8
         // Must sit above the row-wide aboutRowMouse below (sibling
         // stacking wins over grandchild z), else row MouseArea eats clicks.
         z: 1
 
-        Rectangle {
+        Item {
           anchors.verticalCenter: parent.verticalCenter
-          width: 40
-          height: 40
-          radius: 11
-          color: aboutRowMouse.containsMouse ? SettingsState.accent : SettingsState.bgSurface
+          width: 28
+          height: 28
 
           CCIcon {
             anchors.centerIn: parent
-            width: 20
-            height: 20
+            width: 18
+            height: 18
             kind: AboutState.iconFor(modelData)
-            glyph: aboutRowMouse.containsMouse ? (SettingsState.isDark ? "#121612" : "#ffffff") : SettingsState.textSecondary
+            glyph: SettingsState.textSecondary
           }
         }
 
         Column {
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 40 - 10 - 64
-          spacing: 3
+          width: parent.width - 28 - 24 - 24 - 16
+          spacing: 1
 
           Text {
             width: parent.width
             text: (modelData && modelData.label) ? modelData.label : ""
             color: SettingsState.textMuted
-            font.pixelSize: SettingsState.px(15)
-            font.bold: true
+            font.pixelSize: SettingsState.px(11)
             font.family: SettingsState.fontFamily
             font.capitalization: Font.AllUppercase
+            font.letterSpacing: 0.5
             elide: Text.ElideRight
           }
 
           Text {
             width: parent.width
             text: (modelData && modelData.value) ? modelData.value : ""
-            color: aboutRowMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-            font.pixelSize: SettingsState.px(17)
-            font.bold: true
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
             maximumLineCount: 1
           }
         }
 
-        // copy button
-        Rectangle {
+        // copy button - minimal ghost
+        Item {
           anchors.verticalCenter: parent.verticalCenter
-          width: 26
-          height: 26
-          radius: 13
+          width: 24
+          height: 24
           // Above the row-wide aboutRowMouse below, else it eats button clicks
           z: 2
-          color: copyMouse.containsMouse ? SettingsState.bgActivePill : "transparent"
 
           CCIcon {
             anchors.centerIn: parent
             width: 13
             height: 13
             kind: "copy"
-            glyph: SettingsState.textSecondary
+            glyph: copyMouse.containsMouse ? SettingsState.textMain : SettingsState.textMuted
           }
 
           MouseArea {
@@ -290,15 +254,13 @@ Column {
           }
         }
 
-        // delete button
-        Rectangle {
+        // delete button - minimal ghost
+        Item {
           anchors.verticalCenter: parent.verticalCenter
-          width: 26
-          height: 26
-          radius: 13
+          width: 24
+          height: 24
           // Above the row-wide aboutRowMouse below, else it eats button clicks
           z: 2
-          color: delMouse.containsMouse ? "#3a1e1e" : "transparent"
 
           CCIcon {
             anchors.centerIn: parent
@@ -504,35 +466,32 @@ Column {
     }
   }
 
-  // + add button at the bottom (per sketch)
+  // + add button at the bottom - minimal pill
   Rectangle {
     anchors.horizontalCenter: parent.horizontalCenter
-    width: 130
-    height: 36
-    radius: 12
+    width: 90
+    height: 28
+    radius: 14
     visible: !page.adding
-    color: addMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgCard
-    border.color: addMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
-    border.width: 1
+    color: addMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
     // dashed feel via subtle inner border
     Row {
       anchors.centerIn: parent
-      spacing: 6
+      spacing: 4
 
       CCIcon {
         anchors.verticalCenter: parent.verticalCenter
-        width: 14
-        height: 14
+        width: 12
+        height: 12
         kind: "plus"
-        glyph: addMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
+        glyph: addMouse.containsMouse ? SettingsState.textMain : SettingsState.textSecondary
       }
 
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: "add"
-        color: addMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain
-        font.pixelSize: SettingsState.px(15)
-        font.bold: true
+        color: addMouse.containsMouse ? SettingsState.textMain : SettingsState.textSecondary
+        font.pixelSize: SettingsState.px(13)
         font.family: SettingsState.fontFamily
       }
     }

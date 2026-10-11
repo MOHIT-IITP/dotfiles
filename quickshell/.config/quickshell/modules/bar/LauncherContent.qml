@@ -535,7 +535,18 @@ Item {
               sourceSize.width: 48
               sourceSize.height: 48
               visible: modelData && modelData.icon !== "" && status !== Image.Error
-              source: (modelData && modelData.icon !== "") ? Quickshell.iconPath(modelData.icon, "application-x-executable") : ""
+              // Silent probe first (fallback="") so missing theme icons
+              // (hwloc, applications-system, network-wired, ...) don't spam
+              // "Could not load icon ... from request" warnings; fall back to
+              // the generic executable icon explicitly.
+              source: {
+                var n = (modelData && modelData.icon) ? (modelData.icon + "") : "";
+                if (n === "") return "";
+                var p = "";
+                try { p = Quickshell.iconPath(n, ""); } catch (e) { p = ""; }
+                if (p && (p + "") !== "") return p;
+                try { return Quickshell.iconPath("application-x-executable", ""); } catch (e) { return ""; }
+              }
               smooth: true
               asynchronous: true
             }

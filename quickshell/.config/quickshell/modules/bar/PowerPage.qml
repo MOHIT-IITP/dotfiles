@@ -41,14 +41,14 @@ Column {
         width: 24
         height: 24
         radius: 12
-        color: powerBackMouse.containsMouse ? "#252b25" : "transparent"
+        color: powerBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
             font.family: SettingsState.nerdIconFont
-          color: "#f2f2f2"
+          color: SettingsState.textMain
           font.pixelSize: SettingsState.px(20)
           font.bold: true
         }
@@ -112,7 +112,7 @@ Column {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
       text: powerPage.hoveredAction
-      color: powerPage.hoveredAction === "Power Off" ? "#ef5350" : (powerPage.hoveredAction === "Restart" ? "#ffd23f" : "#7ee2a8")
+      color: powerPage.hoveredAction === "Power Off" ? (SettingsState.isDark ? "#ef5350" : "#d32f2f") : (powerPage.hoveredAction === "Restart" ? (SettingsState.isDark ? "#ffd23f" : "#9a7600") : (SettingsState.isDark ? "#7ee2a8" : "#2e7d32"))
       font.pixelSize: SettingsState.px(14)
       font.bold: true
       font.family: SettingsState.fontFamily
@@ -128,7 +128,7 @@ Column {
   Rectangle {
     width: parent.width
     height: 1
-    color: "#252b25"
+    color: SettingsState.borderBase
   }
 
   // 5 Power Action Buttons Row (Lock, Logout, Suspend, Reboot, Shutdown)
