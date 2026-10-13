@@ -505,15 +505,9 @@ Item {
         width: ListView.view.width
         height: 52
         radius: 14
-        color: isSelected
-          ? (SettingsState.isDark ? "#232629" : "#e6eaee")
-          : (itemMouse.containsMouse ? (SettingsState.isDark ? "#191c1e" : "#f0f3f6") : "transparent")
-        border.color: isSelected ? (SettingsState.isDark ? "#353a3e" : "#d2d8de") : "transparent"
+        color: isSelected ? SettingsState.bgActivePill : (itemMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
+        border.color: isSelected ? SettingsState.borderActive : "transparent"
         border.width: 1
-
-        Behavior on color {
-          ColorAnimation { duration: 70 }
-        }
 
         Row {
           anchors.fill: parent
@@ -624,15 +618,9 @@ Item {
         width: ListView.view.width
         height: 52
         radius: 14
-        color: isSelected
-          ? (SettingsState.isDark ? "#232629" : "#e6eaee")
-          : (fileMouse.containsMouse ? (SettingsState.isDark ? "#191c1e" : "#f0f3f6") : "transparent")
-        border.color: isSelected ? (SettingsState.isDark ? "#353a3e" : "#d2d8de") : "transparent"
+        color: isSelected ? SettingsState.bgActivePill : (fileMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
+        border.color: isSelected ? SettingsState.borderActive : "transparent"
         border.width: 1
-
-        Behavior on color {
-          ColorAnimation { duration: 70 }
-        }
 
         // ---- Outbound drag: drop the file onto Chrome / any app ----
         Drag.active: fileMouse.drag.active

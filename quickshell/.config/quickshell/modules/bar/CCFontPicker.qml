@@ -1,4 +1,3 @@
-import Quickshell
 import QtQuick
 import "../services"
 import "WavySliderPaint.js" as WavyPaint

@@ -20,10 +20,6 @@ Singleton {
     inboxOpen = !inboxOpen;
   }
 
-  function openInbox() {
-    inboxOpen = true;
-  }
-
   function closeInbox() {
     inboxOpen = false;
   }
@@ -235,7 +231,6 @@ Singleton {
 
   // Live toast queue (subset of tracked)
   property var popups: []
-  readonly property int popupCount: popups.length
 
   function toggleDnd() {    dnd = !dnd;
     if (dnd) {

@@ -70,37 +70,6 @@ Singleton {
     return 1 - (soonestRemainingSeconds / soonestTotalSeconds);
   }
 
-  // 1..0 fraction remaining for the soonest reminder (1 = full remaining, 0 = expired)
-  readonly property real soonestRemaining: {
-    if (soonestFinished) return 0;
-    if (soonestTotalSeconds <= 0) return 0;
-    return Math.max(0, Math.min(1, soonestRemainingSeconds / soonestTotalSeconds));
-  }
-
-  // Format MM:SS or H:MM:SS for soonest reminder
-  readonly property string soonestFormatted: {
-    var s = soonest;
-    if (!s) return "00:00";
-    if (s.finished) return "00:00";
-    var sec = Math.max(0, s.remainingSeconds || 0);
-    var h = Math.floor(sec / 3600);
-    var m = Math.floor((sec % 3600) / 60);
-    var r = sec % 60;
-    if (h > 0) {
-      return h + ":" + (m < 10 ? "0" + m : "" + m) + ":" + (r < 10 ? "0" + r : "" + r);
-    }
-    return (m < 10 ? "0" + m : "" + m) + ":" + (r < 10 ? "0" + r : "" + r);
-  }
-
-  // Compact remaining label for the collapsed badge: "45s" / "10m" / "2h".
-  function fmtCompact(s) {
-    s = Math.max(0, Math.ceil(Number(s) || 0));
-    if (s < 60) return s + "s";
-    var m = Math.ceil(s / 60);
-    if (m < 60) return m + "m";
-    return Math.floor(m / 60) + "h";
-  }
-
   function fmt(s) {
     s = Math.max(0, Math.round(s));
     var h = Math.floor(s / 3600);

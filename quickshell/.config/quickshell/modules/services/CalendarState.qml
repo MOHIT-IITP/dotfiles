@@ -62,13 +62,6 @@ Singleton {
     viewYear = y;
   }
 
-  function resetToToday(): void {
-    var d = new Date();
-    viewDate = d;
-    viewYear = d.getFullYear();
-    viewMonth = d.getMonth();
-  }
-
   function isSundayDay(y, m, d): bool {
     return new Date(y, m, d).getDay() === 0;
   }
@@ -127,6 +120,30 @@ Singleton {
     }
 
     return cells;
+  }
+
+  // Trailing weeks with no current-month days are dropped so short months
+  // render 4-5 rows (like the reference) instead of always 6.
+  readonly property int calendarRows: {
+    var all = calendarGrid;
+    var rows = 6;
+    while (rows > 1) {
+      var start = (rows - 1) * 7;
+      var anyCur = false;
+      for (var i = start; i < start + 7; ++i) {
+        if (all[i] && all[i].isCurrentMonth) {
+          anyCur = true;
+          break;
+        }
+      }
+      if (anyCur) break;
+      rows -= 1;
+    }
+    return rows;
+  }
+
+  readonly property var visibleCalendarGrid: {
+    return calendarGrid.slice(0, calendarRows * 7);
   }
 
   // --- Weather State ---

@@ -1,20 +1,17 @@
-import Quickshell
 import QtQuick
 import "../services"
 
-// Dual-pane Weather & Calendar view embedded directly within ClockPill.
+// Compact calendar card widget matching user reference image:
+// - Clean rounded dark card without dividers
+// - Left pane: coral uppercase weekday, prominent day number, and bottom events note
+// - Right pane: coral uppercase month, M T W T F S S row (weekdays bright, weekends muted),
+//   and compact grid with accent today and white-circle selected day.
 Item {
   id: root
 
-  implicitWidth: 520
-  implicitHeight: 265
+  implicitWidth: 370
+  implicitHeight: 170
 
-  signal swipeLeft
-  signal swipeRight
-
-  // Tracks pointer hover anywhere over this view (including over day /
-  // chevron MouseAreas which sit above ClockPill's gesture layer).
-  // ClockPill keeps the pill expanded while this is true.
   property bool calHover: false
 
   HoverHandler {
@@ -22,401 +19,267 @@ Item {
     onHoveredChanged: root.calHover = hovered
   }
 
-  Row {
+  // Selected date state
+  property int selectedDay: (CalendarState.viewYear === CalendarState.todayYear && CalendarState.viewMonth === CalendarState.todayMonth)
+                            ? CalendarState.todayDay
+                            : 1
+
+  readonly property var weekdayNames: [
+    "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"
+  ]
+
+  readonly property string selectedWeekdayStr: {
+    var d = new Date(CalendarState.viewYear, CalendarState.viewMonth, root.selectedDay);
+    return weekdayNames[d.getDay()] || "";
+  }
+
+  readonly property string currentMonthStr: {
+    return CalendarState.monthNames[CalendarState.viewMonth] || "";
+  }
+
+  // Accent color for weekday title, month header, and today's indicator
+  readonly property color calAccent: "#ff3b5c"
+
+  // Rounded card container (borderless: the pill behind already draws the frame)
+  // Fill matches the pill background so there is a single even surface.
+  Rectangle {
     anchors.fill: parent
-    anchors.margins: 14
-    spacing: 14
+    radius: 22
+    color: SettingsState.bgCard
+    border.width: 0
 
-    // ==========================================
-    // LEFT COLUMN: WEATHER WIDGET
-    // ==========================================
-    Item {
-      width: 195
-      height: parent.height
+    Row {
+      anchors.fill: parent
+      anchors.margins: 14
+      spacing: 16
 
-      Column {
-        anchors.fill: parent
-        spacing: 9
+      // ================= LEFT PANE: SELECTED DAY & AGENDA =================
+      Item {
+        width: 105
+        height: parent.height
 
-        // Top Row: Current Weather Icon + Large Temperature
-        Item {
-          width: parent.width
-          height: 56
+        Column {
+          anchors.left: parent.left
+          anchors.right: parent.right
+          anchors.top: parent.top
+          spacing: 0
 
-          Row {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 12
+          // Weekday label (e.g. "THURSDAY")
+          Text {
+            text: root.selectedWeekdayStr
+            color: root.calAccent
+            font.pixelSize: SettingsState.px(10)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 1.0
+          }
 
-            // Weather Cloud with Lightning Icon
-            Item {
-              width: 42
-              height: 42
-              anchors.verticalCenter: parent.verticalCenter
-
-              Text {
-                anchors.centerIn: parent
-                text: SettingsState.nerdWeatherIcon(CalendarState.weatherKind)
-                color: "#e89988"
-                font.family: SettingsState.nerdIconFont
-                font.pixelSize: SettingsState.px(30)
-              }
-            }
-
-            // Temperature + Condition
-            Column {
-              anchors.verticalCenter: parent.verticalCenter
-              spacing: 1
-
-              Text {
-                text: CalendarState.temp + "°"
-                color: SettingsState.textMain
-                font.pixelSize: SettingsState.px(30)
-                font.bold: true
-                font.family: SettingsState.fontFamily
-              }
-
-              Text {
-                text: CalendarState.condition
-                color: SettingsState.textSecondary
-                font.pixelSize: SettingsState.px(11)
-                font.family: SettingsState.fontFamily
-                elide: Text.ElideRight
-                width: 115
-              }
-            }
+          // Large day number (e.g. "18")
+          Text {
+            text: "" + root.selectedDay
+            color: SettingsState.isDark ? "#ffffff" : "#1a1a1a"
+            font.pixelSize: SettingsState.px(42)
+            font.bold: true
+            font.family: SettingsState.fontFamily
+            lineHeight: 0.95
           }
         }
 
-        // City Location & Humidity Badges
-        Item {
-          width: parent.width
-          height: 16
+        // Bottom agenda / events note
+        Column {
+          anchors.left: parent.left
+          anchors.right: parent.right
+          anchors.bottom: parent.bottom
+          spacing: 2
 
           Text {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            text: CalendarState.city
-            color: SettingsState.textSecondary
+            text: "No events"
+            color: SettingsState.isDark ? "#9a9a9e" : "#55555a"
             font.pixelSize: SettingsState.px(11)
             font.bold: true
             font.family: SettingsState.fontFamily
-            font.letterSpacing: 1.1
-            elide: Text.ElideRight
-            width: 120
           }
 
-          Row {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 3
+          Text {
+            text: "This day is clear"
+            color: SettingsState.isDark ? "#55555c" : "#88888e"
+            font.pixelSize: SettingsState.px(10)
+            font.family: SettingsState.fontFamily
+          }
+        }
+      }
+
+      // ================= RIGHT PANE: MONTH & CALENDAR GRID =================
+      Item {
+        width: parent.width - 105 - 16
+        height: parent.height
+
+        Column {
+          anchors.fill: parent
+          spacing: 4
+
+          // Month header (e.g. "JUNE") + subtle navigation chevrons
+          Item {
+            width: parent.width
+            height: 16
 
             Text {
+              anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
-              text: "󰸊"
-              color: SettingsState.textSecondary
-              font.family: SettingsState.nerdIconFont
+              text: root.currentMonthStr
+              color: root.calAccent
               font.pixelSize: SettingsState.px(10)
+              font.bold: true
+              font.family: SettingsState.fontFamily
+              font.letterSpacing: 1.2
             }
 
-            Text {
+            Row {
+              anchors.right: parent.right
               anchors.verticalCenter: parent.verticalCenter
-              text: CalendarState.humidity + "%"
-              color: SettingsState.textSecondary
-              font.pixelSize: SettingsState.px(11)
-              font.family: SettingsState.fontFamily
+              spacing: 6
+
+              Text {
+                text: "‹"
+                color: prevMonthMouse.containsMouse ? (SettingsState.isDark ? "#ffffff" : "#000000") : "#606066"
+                font.pixelSize: SettingsState.px(15)
+                font.family: SettingsState.fontFamily
+                anchors.verticalCenter: parent.verticalCenter
+
+                MouseArea {
+                  id: prevMonthMouse
+                  anchors.fill: parent
+                  anchors.margins: -4
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: CalendarState.prevMonth()
+                }
+              }
+
+              Text {
+                text: "›"
+                color: nextMonthMouse.containsMouse ? (SettingsState.isDark ? "#ffffff" : "#000000") : "#606066"
+                font.pixelSize: SettingsState.px(15)
+                font.family: SettingsState.fontFamily
+                anchors.verticalCenter: parent.verticalCenter
+
+                MouseArea {
+                  id: nextMonthMouse
+                  anchors.fill: parent
+                  anchors.margins: -4
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: CalendarState.nextMonth()
+                }
+              }
             }
           }
-        }
 
-        // Horizontal Divider Line
-        Rectangle {
-          width: parent.width
-          height: 1
-          color: SettingsState.borderBase
-        }
+          // Weekdays header row: M T W T F S S
+          Row {
+            width: parent.width
+            height: 14
 
-        // 4-Day Forecast Row
-        Row {
-          width: parent.width
-          height: 105
-          spacing: 3
+            Repeater {
+              model: [
+                { name: "M", isWeekend: false },
+                { name: "T", isWeekend: false },
+                { name: "W", isWeekend: false },
+                { name: "T", isWeekend: false },
+                { name: "F", isWeekend: false },
+                { name: "S", isWeekend: true },
+                { name: "S", isWeekend: true }
+              ]
 
-          Repeater {
-            model: CalendarState.forecast
+              delegate: Item {
+                width: parent.width / 7
+                height: parent.height
 
-            delegate: Item {
-              width: (parent.width - 9) / 4
-              height: parent.height
-
-              Column {
-                anchors.centerIn: parent
-                spacing: 5
-
-                // Day Label (e.g. TUE, WED)
                 Text {
-                  anchors.horizontalCenter: parent.horizontalCenter
-                  text: modelData.day
-                  color: SettingsState.textMuted
-                  font.pixelSize: SettingsState.px(10)
-                  font.bold: true
-                  font.family: SettingsState.fontFamily
-                }
-
-                // Weather Icon
-                Text {
-                  anchors.horizontalCenter: parent.horizontalCenter
-                  text: SettingsState.nerdWeatherIcon(modelData.kind)
-                  color: "#d4a49c"
-                  font.family: SettingsState.nerdIconFont
-                  font.pixelSize: SettingsState.px(16)
-                }
-
-                // Temp
-                Text {
-                  anchors.horizontalCenter: parent.horizontalCenter
-                  text: modelData.temp + "°"
-                  color: SettingsState.textMain
+                  anchors.centerIn: parent
+                  text: modelData.name
+                  color: modelData.isWeekend ? (SettingsState.isDark ? "#55555c" : "#98989e") : (SettingsState.isDark ? "#ffffff" : "#1a1a1a")
                   font.pixelSize: SettingsState.px(11)
                   font.bold: true
                   font.family: SettingsState.fontFamily
                 }
-
-                // Humidity with Droplet
-                Row {
-                  anchors.horizontalCenter: parent.horizontalCenter
-                  spacing: 2
-
-                  Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "󰸊"
-                    color: SettingsState.textMuted
-                    font.family: SettingsState.nerdIconFont
-                    font.pixelSize: SettingsState.px(9)
-                  }
-
-                  Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: modelData.humidity + "%"
-                    color: SettingsState.textMuted
-                    font.pixelSize: SettingsState.px(9)
-                    font.family: SettingsState.fontFamily
-                  }
-                }
               }
             }
           }
-        }
-      }
-    }
 
-    // ==========================================
-    // VERTICAL DIVIDER SEPARATOR
-    // ==========================================
-    Rectangle {
-      width: 1
-      height: parent.height
-      color: SettingsState.borderBase
-    }
+          // Days grid: 7 columns x 6 rows (sized to fit exactly: header 16
+          // + weekdays 14 + both column gaps of 4)
+          Grid {
+            id: calGrid
+            width: parent.width
+            height: parent.height - 16 - 14 - 8
+            columns: 7
+            rows: CalendarState.calendarRows
+            rowSpacing: 1
+            columnSpacing: 0
 
-    // ==========================================
-    // RIGHT COLUMN: CALENDAR WIDGET
-    // ==========================================
-    Item {
-      width: 270
-      height: parent.height
+            Repeater {
+              model: CalendarState.visibleCalendarGrid
 
-      Column {
-        anchors.fill: parent
-        spacing: 6
+              delegate: Item {
+                property real cellH: (calGrid.height - (CalendarState.calendarRows - 1)) / CalendarState.calendarRows
+                property real pillW: Math.min(24, cellH * 1.45)
+                property real pillH: Math.min(18, cellH)
+                width: calGrid.width / 7
+                height: cellH
 
-        // Header: Calendar icon + Month Year + Nav Chevrons
-        Item {
-          width: parent.width
-          height: 24
+                property bool inMonth: modelData.isCurrentMonth
+                property bool isToday: modelData.isToday
+                property bool isSelected: inMonth && (modelData.day === root.selectedDay)
+                property bool isWeekend: (index % 7) >= 5
 
-          Row {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 7
-
-            Text {
-              anchors.verticalCenter: parent.verticalCenter
-              text: "\ueab0"
-              color: SettingsState.textMain
-              font.family: SettingsState.nerdIconFont
-              font.pixelSize: SettingsState.px(15)
-            }
-
-            Text {
-              anchors.verticalCenter: parent.verticalCenter
-              text: CalendarState.currentMonthYearString
-              color: SettingsState.textMain
-              font.pixelSize: SettingsState.px(11)
-              font.bold: true
-              font.letterSpacing: 1.1
-              font.family: SettingsState.fontFamily
-            }
-          }
-
-          // Chevrons < >
-          Row {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 3
-
-            // Previous Month Button
-            Rectangle {
-              width: 20
-              height: 20
-              radius: 10
-              z: 5
-              color: prevMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
-
-              Text {
-                anchors.centerIn: parent
-                text: "\ueab5"
-                color: prevMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-                font.family: SettingsState.nerdIconFont
-                font.pixelSize: SettingsState.px(14)
-              }
-
-              MouseArea {
-                id: prevMouse
-                anchors.fill: parent
-                anchors.margins: -6
-                z: 5
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: CalendarState.prevMonth()
-              }
-            }
-
-            // Next Month Button
-            Rectangle {
-              width: 20
-              height: 20
-              radius: 10
-              z: 5
-              color: nextMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
-
-              Text {
-                anchors.centerIn: parent
-                text: "\ueab6"
-                color: nextMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-                font.family: SettingsState.nerdIconFont
-                font.pixelSize: SettingsState.px(14)
-              }
-
-              MouseArea {
-                id: nextMouse
-                anchors.fill: parent
-                anchors.margins: -6
-                z: 5
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: CalendarState.nextMonth()
-              }
-            }
-          }
-        }
-
-        // Weekday Headers (M T W T F S S, Sunday red)
-        Row {
-          width: parent.width
-          height: 15
-
-          Repeater {
-            model: ["M", "T", "W", "T", "F", "S", "S"]
-
-            delegate: Item {
-              width: parent.width / 7
-              height: parent.height
-
-              Text {
-                anchors.centerIn: parent
-                text: modelData
-                color: index === 6 ? "#e86a65" : SettingsState.textMuted
-                font.pixelSize: SettingsState.px(10)
-                font.bold: true
-                font.family: SettingsState.fontFamily
-              }
-            }
-          }
-        }
-
-        // Calendar 6x7 Grid
-        Grid {
-          width: parent.width
-          height: 172
-          columns: 7
-          rows: 6
-          rowSpacing: 1
-          columnSpacing: 0
-
-          Repeater {
-            model: CalendarState.calendarGrid
-
-            delegate: Item {
-              width: 270 / 7
-              height: 27
-              property bool isSunday: modelData.isSunday !== undefined ? modelData.isSunday : (new Date(modelData.year, modelData.month, modelData.day).getDay() === 0)
-
-              // Circular Accent Ring for Today
-              Rectangle {
-                anchors.centerIn: parent
-                width: 24
-                height: 24
-                radius: 12
-                visible: modelData.isToday
-                color: "transparent"
-                border.color: "#e86a65"
-                border.width: 1.5
-
-                // Soft inner glow/accent circle
+                // Solid white pill background for selected day
                 Rectangle {
                   anchors.centerIn: parent
-                  width: 18
-                  height: 18
-                  radius: 9
-                  color: SettingsState.isDark ? "#281b1b" : "#ffebee"
-                  opacity: 0.6
+                  width: pillW
+                  height: pillH
+                  radius: pillH / 2
+                  color: parent.isSelected ? "#ffffff" : "transparent"
+                  visible: parent.inMonth && parent.isSelected
                 }
-              }
 
-              // Hover Highlight
-              Rectangle {
-                anchors.centerIn: parent
-                width: 22
-                height: 22
-                radius: 11
-                visible: dayMouse.containsMouse && !modelData.isToday
-                color: SettingsState.bgCardHover
-              }
+                // Subtle hover pill for unselected days
+                Rectangle {
+                  anchors.centerIn: parent
+                  width: pillW
+                  height: pillH
+                  radius: pillH / 2
+                  color: SettingsState.isDark ? "#1e1e24" : "#e6e6ec"
+                  visible: parent.inMonth && !parent.isSelected && cellMouse.containsMouse
+                }
 
-              Text {
-                anchors.centerIn: parent
-                text: "" + modelData.day
-                color: modelData.isToday
-                  ? "#ffffff"
-                  : (isSunday && modelData.isCurrentMonth
-                      ? "#e86a65"
-                      : (modelData.isCurrentMonth
-                          ? (dayMouse.containsMouse ? SettingsState.textActive : SettingsState.textMain)
-                          : SettingsState.textMuted))
-                opacity: modelData.isCurrentMonth ? 1.0 : 0.35
-                font.pixelSize: SettingsState.px(11)
-                font.bold: modelData.isToday || isSunday || (modelData.isCurrentMonth && dayMouse.containsMouse)
-                font.family: SettingsState.fontFamily
-              }
+                Text {
+                  anchors.centerIn: parent
+                  visible: parent.inMonth
+                  text: "" + modelData.day
+                  color: {
+                    if (parent.isSelected) return "#000000";
+                    if (parent.isToday) return root.calAccent;
+                    if (parent.isWeekend) return SettingsState.isDark ? "#55555c" : "#98989e";
+                    return SettingsState.isDark ? "#ffffff" : "#1a1a1a";
+                  }
+                  font.pixelSize: SettingsState.px(12)
+                  font.bold: parent.isSelected || parent.isToday
+                  font.family: SettingsState.fontFamily
+                }
 
-              // Day cells are display-only: only the chevron buttons change month.
-              // This MouseArea just absorbs clicks (hover highlight only).
-              MouseArea {
-                id: dayMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
+                MouseArea {
+                  id: cellMouse
+                  anchors.fill: parent
+                  enabled: parent.inMonth
+                  hoverEnabled: true
+                  cursorShape: parent.inMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
+                  onClicked: {
+                    if (parent.inMonth) {
+                      root.selectedDay = modelData.day;
+                    }
+                  }
+                }
               }
             }
           }

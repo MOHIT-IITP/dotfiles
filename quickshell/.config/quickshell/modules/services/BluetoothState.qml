@@ -21,6 +21,27 @@ Singleton {
     return null;
   }
 
+  // Device list sorted by connected > paired > name.
+  // (Single source of truth for BluetoothPage via circle.btDevicesList.)
+  readonly property var sortedDevices: {
+    var ds = (Bluetooth.devices) ? Bluetooth.devices.values : [];
+    var arr = [];
+    for (var i = 0; i < ds.length; ++i) {
+      var d = ds[i];
+      if (d) {
+        arr.push(d);
+      }
+    }
+    arr.sort(function(a, b) {
+      if (a.connected !== b.connected) return a.connected ? -1 : 1;
+      if (a.paired !== b.paired) return a.paired ? -1 : 1;
+      var na = a.name || a.deviceName || a.address || "";
+      var nb = b.name || b.deviceName || b.address || "";
+      return na.localeCompare(nb);
+    });
+    return arr;
+  }
+
   readonly property string btName: {
     if (!btOn)
       return "Off";
@@ -34,27 +55,12 @@ Singleton {
       adapter.enabled = !adapter.enabled;
   }
 
-  function setEnabled(val) {
-    if (adapter)
-      adapter.enabled = val;
-  }
-
   function startDiscovery() {
     if (adapter && adapter.enabled) {
       try {
         adapter.discovering = true;
       } catch (e) {
         console.log("Bluetooth discovery error: " + e);
-      }
-    }
-  }
-
-  function stopDiscovery() {
-    if (adapter) {
-      try {
-        adapter.discovering = false;
-      } catch (e) {
-        console.log("Bluetooth stop discovery error: " + e);
       }
     }
   }

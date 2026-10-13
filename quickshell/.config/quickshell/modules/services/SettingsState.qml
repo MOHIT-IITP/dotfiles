@@ -33,8 +33,6 @@ Singleton {
   // 4. Theme & Accent Colors
   property string themeMode: "dark" // "light" | "dark" | "manual"
   property real accentHue: 0.52       // 0.0 - 1.0 (0.52 = #40AABF teal/cyan from reference)
-  property real accentSat: 0.65
-  property real accentVal: 0.85
   property string accentTone: "dark" // "light" | "dark" — card lightness in Manual (accent auto-inverts)
   property real themeBlend: 1.0 // 0.0 = light, 1.0 = dark (mirrors themeMode)
   property bool isDark: true // mirrored from themeMode, kept for icon logic compat
@@ -106,7 +104,6 @@ Singleton {
 
   // 4b. Drop Shadow Properties
   readonly property color shadowColor: mixc("#0f000000", "#70000000", themeBlend)
-  readonly property color shadowColorDeep: mixc("#15000000", "#99000000", themeBlend)
 
   // 5. System & nerd fonts
   readonly property var availableFonts: {
@@ -259,16 +256,6 @@ Singleton {
     themeBlend = (t === "light") ? 0.0 : 1.0;
     isDark = (t === "dark");
     saveSettings();
-  }
-
-  function setIsDark(d) {
-    setThemeMode(d ? "dark" : "light");
-  }
-
-  // Kept for compat with persisted settings; UI now uses Light/Dark only.
-  function setThemeBlend(v) {
-    var vv = Math.min(1.0, Math.max(0.0, v));
-    setThemeMode(vv >= 0.5 ? "dark" : "light");
   }
 
   function setHexColor(hex) {

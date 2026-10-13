@@ -1,6 +1,4 @@
-import Quickshell
 import QtQuick
-import QtQuick.Effects
 import "../services"
 
 // Embedded Clipboard History subview directly inside ClockPill.

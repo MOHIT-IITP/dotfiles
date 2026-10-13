@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Hyprland
 import QtQuick
 import "../services"
 
@@ -35,12 +36,96 @@ Item {
   readonly property int accPct: firstAcc ? DeviceBatteryState.pct100(firstAcc) : -1
   readonly property string accKind: firstAcc ? DeviceBatteryState.iconKindFor(firstAcc) : "mouse"
 
+  // ---- Workspaces (left pill, mirrors collapsed ClockPill dots) ----
+  readonly property int currentWsId: Hyprland.focusedWorkspace?.id ?? 1
+  readonly property int maxWs: {
+    var m = 3;
+    if (currentWsId > m) m = currentWsId;
+    var list = Hyprland.workspaces?.values ?? [];
+    for (var i = 0; i < list.length; ++i) {
+      var ws = list[i];
+      if (ws && ws.id > m && ws.id <= 10) m = ws.id;
+    }
+    return Math.min(Math.max(m, 3), 10);
+  }
+  function isOccupied(wsId) {
+    var list = Hyprland.workspaces?.values ?? [];
+    for (var i = 0; i < list.length; ++i) {
+      if (list[i] && list[i].id === wsId) return true;
+    }
+    return false;
+  }
+
   Row {
     id: strip
     anchors.centerIn: parent
     width: implicitWidth
     height: parent.height
     spacing: 8
+
+    // ---- Workspaces pill (left) ----
+    Rectangle {
+      id: wsCapsule
+      anchors.verticalCenter: parent.verticalCenter
+      width: wsRow.implicitWidth + 20
+      height: 32
+      radius: 16
+      color: SettingsState.bgCardHover
+      border.width: 0
+
+      Row {
+        id: wsRow
+        anchors.centerIn: parent
+        spacing: 6
+
+        Repeater {
+          model: mainPage.maxWs
+
+          delegate: Item {
+            property int wsId: index + 1
+            property bool isCurrent: mainPage.currentWsId === wsId
+            property bool occupied: mainPage.isOccupied(wsId)
+
+            width: isCurrent ? 22 : 7
+            height: 7
+            anchors.verticalCenter: parent.verticalCenter
+
+            Behavior on width {
+              NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutCubic
+              }
+            }
+
+            Rectangle {
+              anchors.fill: parent
+              radius: height / 2
+              color: parent.isCurrent ? SettingsState.accent : (parent.occupied ? SettingsState.textSecondary : SettingsState.borderBase)
+
+              Behavior on color {
+                ColorAnimation { duration: 200 }
+              }
+            }
+
+            MouseArea {
+              anchors.fill: parent
+              anchors.margins: -6
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: Hyprland.dispatch("workspace " + parent.wsId)
+            }
+          }
+        }
+      }
+    }
+
+    Rectangle {
+      anchors.verticalCenter: parent.verticalCenter
+      width: 1
+      height: 30
+      color: SettingsState.borderBase
+      opacity: 0.7
+    }
 
     // Main toggles order: calendar first, record+camera together,
     // DND+nightshift together, about+settings together (gear right of about).
@@ -88,8 +173,8 @@ Item {
       }
       CCHIcon {
         kind: "about"
-        active: circle.activePage === "about"
-        onClicked: circle.activePage = "about"
+        active: AboutState.open
+        onClicked: AboutState.toggle()
       }
       CCHIcon {
         kind: "gear"
@@ -229,7 +314,7 @@ Item {
     Column {
       id: timeCol
       anchors.verticalCenter: parent.verticalCenter
-      width: timeMetrics.implicitWidth
+      width: Math.max(timeMetrics.implicitWidth, dateMetrics.implicitWidth)
       spacing: 0
 
       Text {
@@ -258,6 +343,15 @@ Item {
         text: SettingsState.timeFormat === "24h" ? "88:88" : "8:88 PM"
         font.pixelSize: SettingsState.px(20)
         font.bold: true
+        font.family: SettingsState.fontFamily
+      }
+
+      // Widest possible date ("WWW 88 WWW") so "MON 12 OCT" never elides
+      Text {
+        id: dateMetrics
+        visible: false
+        text: "WWW 88 WWW"
+        font.pixelSize: SettingsState.px(11)
         font.family: SettingsState.fontFamily
       }
     }

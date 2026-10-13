@@ -48,8 +48,45 @@ Singleton {
     Networking.wifiEnabled = !Networking.wifiEnabled;
   }
 
+  function disconnectWifi(net) {
+    try {
+      if (net && typeof net.disconnect === "function") {
+        net.disconnect();
+        return;
+      }
+    } catch (e) {}
+    // Fallback: disconnect the whole wifi device
+    try {
+      if (wifiDev && typeof wifiDev.disconnect === "function")
+        wifiDev.disconnect();
+    } catch (e) {}
+  }
+
   readonly property string wifiName: wifiUp ? activeWifiNet.name : "Disconnected"
-  readonly property int wifiSignal: (wifiUp && activeWifiNet.signalStrength !== undefined) ? Math.round(activeWifiNet.signalStrength * 100) : 0
+
+  // Wi-Fi network list sorted by connected > signal, deduped by name.
+  // (Single source of truth for WifiPage via circle.wifiNetworksList.)
+  readonly property var sortedNetworks: {
+    var dev = wifiDev;
+    if (!dev || !dev.networks) return [];
+    var ns = dev.networks.values;
+    var arr = [];
+    var seen = {};
+    for (var i = 0; i < ns.length; ++i) {
+      var net = ns[i];
+      if (net && net.name && !seen[net.name]) {
+        seen[net.name] = true;
+        arr.push(net);
+      }
+    }
+    arr.sort(function(a, b) {
+      if (a.connected !== b.connected) return a.connected ? -1 : 1;
+      var sa = a.signalStrength || 0;
+      var sb = b.signalStrength || 0;
+      return sb - sa;
+    });
+    return arr;
+  }
 
   readonly property string wiredName: {
     if (!wiredUp)

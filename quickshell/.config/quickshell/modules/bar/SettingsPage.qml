@@ -1,4 +1,3 @@
-import Quickshell
 import QtQuick
 import "../services"
 import "WavySliderPaint.js" as WavyPaint
@@ -22,84 +21,64 @@ Item {
     NumberAnimation { duration: 220 }
   }
 
-  // Fixed Header
+  // Fixed Header — minimal like reference: spaced title left, thin chevron right
   Item {
     id: setHeader
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 32
+    height: 30
     z: 10
 
-    Item {
+    Text {
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      text: circle.settingsSub === "general" ? "GENERAL" : (circle.settingsSub === "ui" ? "UI" : (circle.settingsSub === "theme" ? "THEME" : "CONFIG"))
+      color: SettingsState.accent
+      font.pixelSize: SettingsState.px(14)
+      font.family: SettingsState.fontFamily
+      font.letterSpacing: 2
+      font.weight: Font.DemiBold
+    }
+
+    MouseArea {
+      id: titleMouse
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      width: titleRow.implicitWidth + 8
-
-      Row {
-        id: titleRow
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 10
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          visible: SettingsState.japaneseGlyphs
-          text: circle.settingsSub === "general" ? "般" : (circle.settingsSub === "ui" ? "面" : (circle.settingsSub === "theme" ? "色" : "相"))
-          color: titleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-          font.pixelSize: SettingsState.px(20)
-          font.bold: true
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          text: circle.settingsSub === "general" ? "GENERAL" : (circle.settingsSub === "ui" ? "UI" : (circle.settingsSub === "theme" ? "THEME" : "CONFIG"))
-          color: titleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-          font.pixelSize: SettingsState.px(16)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-          font.letterSpacing: 1.5
-        }
-      }
-
-      MouseArea {
-        id: titleMouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          if (circle.settingsSub !== "") {
-            circle.fontDropdownOpen = false;
-            circle.settingsSub = "";
-          } else {
-            circle.fontDropdownOpen = false;
-            circle.activePage = "main";
-          }
+      width: 180
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onClicked: {
+        if (circle.settingsSub !== "") {
+          circle.fontDropdownOpen = false;
+          circle.settingsSub = "";
+        } else {
+          circle.fontDropdownOpen = false;
+          circle.activePage = "main";
         }
       }
     }
 
-    Rectangle {
+    Item {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      width: 26
-      height: 26
-      radius: 13
-      color: setBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
+      width: 24
+      height: 24
 
       Text {
         anchors.centerIn: parent
-        text: "\ueab5"
-          font.family: SettingsState.nerdIconFont
-        color: SettingsState.textMain
+        text: "‹"
+        font.family: SettingsState.fontFamily
+        font.weight: Font.Light
+        color: setBackMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
         font.pixelSize: SettingsState.px(22)
-        font.bold: true
       }
 
       MouseArea {
         id: setBackMouse
         anchors.fill: parent
+        anchors.margins: -4
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
@@ -131,22 +110,15 @@ Item {
       width: parent.width
       spacing: 0
 
-      // Divider
-      Rectangle {
-        width: parent.width
-        height: 1
-        color: SettingsState.borderBase
-      }
-
       Item {
         width: parent.width
-        height: 8
+        height: 10
       }
 
-      // ============ FOLDER LIST: General / UI / Theme ============
+      // ============ FOLDER LIST: General / UI / Theme (plain rows like reference) ============
       Column {
         width: parent.width
-        spacing: 8
+        spacing: 4
         visible: circle.settingsSub === ""
         height: visible ? implicitHeight : 0
 
@@ -157,55 +129,49 @@ Item {
             { key: "theme", title: "Theme", desc: "Light, dark, manual, accent", icon: "palette" }
           ]
 
-          delegate: Rectangle {
+          delegate: Item {
             width: settingsCol.width
-            height: 52
-            radius: 12
-            color: folderMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
-            border.width: 0
+            height: 64
 
-            Behavior on color { ColorAnimation { duration: 150 } }
+            Rectangle {
+              anchors.fill: parent
+              radius: 10
+              color: "#1e1e22"
+              opacity: folderMouse.containsMouse ? (SettingsState.isDark ? 1 : 0.12) : 0
+              Behavior on opacity { NumberAnimation { duration: 150 } }
+            }
 
             Row {
               anchors.fill: parent
-              anchors.leftMargin: 10
-              anchors.rightMargin: 12
-              spacing: 10
+              anchors.leftMargin: 6
+              anchors.rightMargin: 8
+              spacing: 16
 
-              Rectangle {
+              CCIcon {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 32
-                height: 32
-                radius: 10
-                color: SettingsState.bgActivePill
-
-                CCIcon {
-                  anchors.centerIn: parent
-                  width: 16
-                  height: 16
-                  kind: modelData.icon
-                  glyph: SettingsState.accent
-                }
+                width: 22
+                height: 22
+                kind: modelData.icon
+                glyph: folderMouse.containsMouse ? SettingsState.textMain : (SettingsState.isDark ? "#b5b5b5" : "#555555")
               }
 
               Column {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 32 - 10 - 16 - 20
-                spacing: 2
+                width: parent.width - 22 - 16 - 20 - 14
+                spacing: 3
 
                 Text {
                   width: parent.width
                   text: modelData.title
-                  color: SettingsState.textMain
-                  font.pixelSize: SettingsState.px(15)
-                  font.bold: true
+                  color: folderMouse.containsMouse ? SettingsState.textMain : (SettingsState.isDark ? "#e2e2e2" : "#222222")
+                  font.pixelSize: SettingsState.px(17)
                   font.family: SettingsState.fontFamily
                 }
 
                 Text {
                   width: parent.width
                   text: modelData.desc
-                  color: SettingsState.textSecondary
+                  color: SettingsState.isDark ? "#7c7c7c" : "#777777"
                   font.pixelSize: SettingsState.px(13)
                   font.family: SettingsState.fontFamily
                   elide: Text.ElideRight
@@ -214,10 +180,11 @@ Item {
 
               Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "\ueab6"
-                  font.family: SettingsState.nerdIconFont
-                color: SettingsState.textMuted
-                font.pixelSize: SettingsState.px(16)
+                text: "›"
+                font.family: SettingsState.fontFamily
+                font.weight: Font.Light
+                color: folderMouse.containsMouse ? SettingsState.textMain : (SettingsState.isDark ? "#555555" : "#aaaaaa")
+                font.pixelSize: SettingsState.px(20)
               }
             }
 
@@ -346,32 +313,15 @@ Item {
             }
           }
 
-          Rectangle {
+          MiniToggle {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: 36
             height: 20
-            radius: 10
-            color: SettingsState.clockSeconds ? SettingsState.accent : SettingsState.bgCard
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-
-            Rectangle {
-              width: 14
-              height: 14
-              radius: 7
-              color: "#ffffff"
-              anchors.verticalCenter: parent.verticalCenter
-              x: SettingsState.clockSeconds ? parent.width - width - 3 : 3
-
-              Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            }
-
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: SettingsState.toggleClockSeconds()
-            }
+            on: SettingsState.clockSeconds
+            trackOff: SettingsState.isDark ? SettingsState.bgCard : SettingsState.borderBase
+            knobOff: "#ffffff"
+            onToggled: SettingsState.toggleClockSeconds()
           }
         }
 
@@ -402,32 +352,15 @@ Item {
             }
           }
 
-          Rectangle {
+          MiniToggle {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: 36
             height: 20
-            radius: 10
-            color: SettingsState.japaneseGlyphs ? SettingsState.accent : SettingsState.bgCard
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-
-            Rectangle {
-              width: 14
-              height: 14
-              radius: 7
-              color: "#ffffff"
-              anchors.verticalCenter: parent.verticalCenter
-              x: SettingsState.japaneseGlyphs ? parent.width - width - 3 : 3
-
-              Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            }
-
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: SettingsState.toggleJapaneseGlyphs()
-            }
+            on: SettingsState.japaneseGlyphs
+            trackOff: SettingsState.isDark ? SettingsState.bgCard : SettingsState.borderBase
+            knobOff: "#ffffff"
+            onToggled: SettingsState.toggleJapaneseGlyphs()
           }
         }
 
@@ -458,32 +391,15 @@ Item {
             }
           }
 
-          Rectangle {
+          MiniToggle {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: 36
             height: 20
-            radius: 10
-            color: SettingsState.musicVisualizer ? SettingsState.accent : SettingsState.bgCard
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-
-            Rectangle {
-              width: 14
-              height: 14
-              radius: 7
-              color: "#ffffff"
-              anchors.verticalCenter: parent.verticalCenter
-              x: SettingsState.musicVisualizer ? parent.width - width - 3 : 3
-
-              Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            }
-
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: SettingsState.toggleMusicVisualizer()
-            }
+            on: SettingsState.musicVisualizer
+            trackOff: SettingsState.isDark ? SettingsState.bgCard : SettingsState.borderBase
+            knobOff: "#ffffff"
+            onToggled: SettingsState.toggleMusicVisualizer()
           }
         }
       }
@@ -575,32 +491,15 @@ Item {
             }
           }
 
-          Rectangle {
+          MiniToggle {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: 36
             height: 20
-            radius: 10
-            color: SettingsState.barAutoHide ? SettingsState.accent : SettingsState.bgCard
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-
-            Rectangle {
-              width: 14
-              height: 14
-              radius: 7
-              color: "#ffffff"
-              anchors.verticalCenter: parent.verticalCenter
-              x: SettingsState.barAutoHide ? parent.width - width - 3 : 3
-
-              Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            }
-
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: SettingsState.toggleBarAutoHide()
-            }
+            on: SettingsState.barAutoHide
+            trackOff: SettingsState.isDark ? SettingsState.bgCard : SettingsState.borderBase
+            knobOff: "#ffffff"
+            onToggled: SettingsState.toggleBarAutoHide()
           }
         }
 

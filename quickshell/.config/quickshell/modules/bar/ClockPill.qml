@@ -3,7 +3,6 @@ import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Effects
 import "../services"
-import "../utils"
 import "WavySliderPaint.js" as WavyPaint
 
 // Center Date & Time pill.
@@ -11,7 +10,7 @@ import "WavySliderPaint.js" as WavyPaint
 // Workspace switch: temporarily reveals workspace dots + active bar.
 // Hovered: big clock + 7-day strip.
 // Right swipe on hover: seamlessly morphs the center bar itself into the Control Center!
-// Left swipe: timer. Calendar lives as a pill inside the control center.
+// Left swipe: calendar, then timer, then reminders. Calendar lives as a pill inside the control center.
 Rectangle {
   id: root
 
@@ -78,6 +77,9 @@ Rectangle {
   readonly property bool showCC: (isControlCenterView || CalendarState.open || ScreenshotState.open || RecorderState.open) && !isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !showReminderPrompt
   readonly property bool showTimer: isTimerView && !isReminderView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !isControlCenterView && !showReminderPrompt
   readonly property bool showReminders: isReminderView && !isTimerView && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showFileTray && !showAbout && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !isControlCenterView && !showReminderPrompt
+  // Expanded hover card (big clock + date strip + now playing). Factored out
+  // so its fade and slide entrance stay in sync during view transitions.
+  readonly property bool showHover: isExpanded && !showCC && !showTimer && !showReminders && !showAbout && !showFileTray && !showLauncher && !showWallpaper && !showPower && !showClipboard && !showMixer && !showAuth && !showNotif && !showInbox && !showReminderPrompt && !dismissLock
   // Hover inside the calendar view (over day/chevron buttons which sit above
   // the gesture MouseArea) must also keep the pill expanded.
   readonly property bool calHovering: ccView.visible && ccView.ccHover
@@ -91,8 +93,8 @@ Rectangle {
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (MediaState.hasTrack ? 148 : 132))))))))))))))) : 30
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (MediaState.hasTrack ? 492 : 240))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (hoverRow.implicitHeight + 36))))))))))))))) : 30
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (hoverRow.implicitWidth + 36))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
 
   onIsExpandedChanged: {
     if (isExpanded && !isHovered) {
@@ -100,7 +102,7 @@ Rectangle {
     }
   }
 
-  radius: (isExpanded && implicitHeight > 30.5) ? SettingsState.cardRadius : 15
+  radius: (isExpanded && implicitHeight > 30.5) ? SettingsState.cardRadius + 12 : 15
   color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
   border.color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
   border.width: (isExpanded && implicitHeight > 30.5) ? 0 : 1
@@ -194,7 +196,6 @@ Rectangle {
   }
 
   readonly property bool ccFontDropdownOpen: ccView ? ccView.fontDropdownOpen : false
-  readonly property bool ccAboutInputOpen: ccView ? ccView.aboutInputOpen : false
   // Sticky swipe views (control center / timer / reminders) persist after the
   // pointer leaves until dismissed via Esc, click-outside, click on the pill,
   // or the leave timer.
@@ -231,11 +232,6 @@ Rectangle {
     ScreenshotState.close();
     RecorderState.close();
     if (ccView) ccView.resetToMain();
-  }
-
-  function openReminders(): void {
-    root.collapseSwipe();
-    root.isReminderView = true;
   }
 
   function toggleReminders(): void {
@@ -1185,11 +1181,26 @@ Rectangle {
   // ========================================================
   Item {
     anchors.fill: parent
-    opacity: (root.isExpanded && !root.showCC && !root.showTimer && !root.showReminders && !root.showAbout && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showReminderPrompt && !root.dismissLock) ? 1 : 0
+    opacity: root.showHover ? 1 : 0
     visible: opacity > 0
 
+    // Slide-up entrance matched to the pill resize so view
+    // transitions (e.g. calendar -> now playing) glide, not pop.
+    transform: Translate {
+      y: root.showHover ? 0 : 10
+      Behavior on y {
+        NumberAnimation {
+          duration: 300
+          easing.type: Easing.OutCubic
+        }
+      }
+    }
+
     Behavior on opacity {
-      NumberAnimation { duration: 200 }
+      NumberAnimation {
+        duration: 250
+        easing.type: Easing.OutCubic
+      }
     }
 
     HoverHandler {
@@ -1204,6 +1215,7 @@ Rectangle {
     }
 
     Row {
+      id: hoverRow
       anchors.centerIn: parent
       spacing: 20
 
@@ -1212,18 +1224,122 @@ Rectangle {
         id: hoverMedia
         anchors.verticalCenter: parent.verticalCenter
         visible: MediaState.hasTrack
-        width: visible ? 248 : 0
+        width: visible ? 236 : 0
         height: Math.max(mediaCol.height, clockCol.height)
 
         readonly property var player: MediaState.activePlayer
         readonly property bool playing: MediaState.isPlaying
         readonly property real frac: (player && player.length > 0) ? Math.min(1, Math.max(0, (player.position || 0) / player.length)) : 0
 
+        // Directional poster flip: next song flips toward the right,
+        // previous song flips toward the left.
+        property int flipDir: 1 // 1 = next/right, -1 = prev/left
+        property int animDir: 1
+        property bool _artInit: false
+        // Frozen display values: swapped atomically at the flip midpoint so
+        // staged MPRIS metadata (title first, art later) never half-updates.
+        property string shownArtUrl: ""
+        property string shownTitle: "Unknown Title"
+        property string shownAlbum: ""
+        property string shownArtist: ""
+        readonly property string trackKey: (hoverMedia.player?.trackTitle ?? "") + "\n" + (hoverMedia.player?.trackArtist ?? "") + "|" + (hoverMedia.player?.trackArtUrl ?? "")
+        onTrackKeyChanged: {
+          if (hoverMedia._artInit) {
+            // Coalesce staged metadata arrivals into a single flip.
+            artSettle.restart();
+          } else {
+            hoverMedia._artInit = true;
+            hoverMedia.syncShown();
+          }
+        }
+
+        function syncShown(): void {
+          var p = hoverMedia.player;
+          hoverMedia.shownTitle = p?.trackTitle || "Unknown Title";
+          hoverMedia.shownAlbum = p?.trackAlbum || p?.identity || "";
+          hoverMedia.shownArtist = p?.trackArtist || "";
+          hoverMedia.shownArtUrl = p?.trackArtUrl ?? "";
+        }
+
+        // Fires once metadata settles: preload new art so the flip
+        // midpoint never shows a blank while the image downloads.
+        Timer {
+          id: artSettle
+          interval: 180
+          repeat: false
+          onTriggered: {
+            var art = hoverMedia.player?.trackArtUrl ?? "";
+            if (art === "" || art === hoverMedia.shownArtUrl) {
+              hoverMedia.syncShown();
+              hoverMedia.flipArt();
+            } else {
+              artPreload.source = art;
+              artFallbackTimer.restart();
+            }
+          }
+        }
+
+        // Offscreen preloader sharing the image cache with the poster.
+        Image {
+          id: artPreload
+          visible: false
+          asynchronous: true
+          sourceSize.width: 168
+          sourceSize.height: 168
+          onStatusChanged: {
+            if (status === Image.Ready) {
+              artFallbackTimer.stop();
+              hoverMedia.syncShown();
+              hoverMedia.flipArt();
+            } else if (status === Image.Error) {
+              artFallbackTimer.stop();
+              hoverMedia.syncShown();
+              hoverMedia.shownArtUrl = "";
+              hoverMedia.flipArt();
+            }
+          }
+        }
+
+        // Never leave the UI stuck waiting on a hung download.
+        Timer {
+          id: artFallbackTimer
+          interval: 1500
+          repeat: false
+          onTriggered: {
+            artPreload.source = "";
+            hoverMedia.syncShown();
+            hoverMedia.flipArt();
+          }
+        }
+
+        function flipArt(): void {
+          hoverMedia.animDir = hoverMedia.flipDir;
+          hoverArtShift.x = 0;
+          hoverArtScale.xScale = 1;
+          hoverArtFlipAnim.restart();
+        }
+
+        SequentialAnimation {
+          id: hoverArtFlipAnim
+          // Phase 1: collapse edge-on while drifting toward the flip direction
+          ParallelAnimation {
+            NumberAnimation { target: hoverArtScale; property: "xScale"; from: 1; to: 0; duration: 140; easing.type: Easing.InQuad }
+            NumberAnimation { target: hoverArtShift; property: "x"; from: 0; to: 18 * hoverMedia.animDir; duration: 140; easing.type: Easing.InQuad }
+          }
+          // Swap the poster at the edge-on midpoint
+          ScriptAction { script: { hoverMedia.shownArtUrl = hoverMedia.player?.trackArtUrl ?? ""; hoverArtShift.x = -18 * hoverMedia.animDir; } }
+          // Phase 2: expand back from the opposite side
+          ParallelAnimation {
+            NumberAnimation { target: hoverArtScale; property: "xScale"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
+            NumberAnimation { target: hoverArtShift; property: "x"; from: -18 * hoverMedia.animDir; to: 0; duration: 200; easing.type: Easing.OutCubic }
+          }
+        }
+
         Column {
           id: mediaCol
           anchors.verticalCenter: parent.verticalCenter
           width: parent.width
-          spacing: 6
+          spacing: 4
           visible: hoverMedia.visible
 
           Row {
@@ -1231,28 +1347,33 @@ Rectangle {
             spacing: 10
 
             Item {
-              width: 104
-              height: 104
+              width: 84
+              height: 84
               anchors.verticalCenter: parent.verticalCenter
 
-              Rectangle {
+              SquircleBackground {
                 id: hoverArtMask
-                anchors.fill: parent
-                radius: 18
-                color: SettingsState.bgActivePill
+                radius: 22
+                power: SettingsState.cardRoundingPower
+                fillColor: SettingsState.bgActivePill
+                strokeColor: "transparent"
+                strokeWidth: 0
                 visible: false
                 layer.enabled: true
               }
 
-              Rectangle {
-                anchors.fill: parent
-                radius: 18
-                color: SettingsState.bgActivePill
+              SquircleBackground {
+                radius: 22
+                power: SettingsState.cardRoundingPower
+                fillColor: SettingsState.bgActivePill
+                strokeColor: "transparent"
+                strokeWidth: 0
               }
 
               Item {
+                id: hoverArtFlip
                 anchors.fill: parent
-                visible: (hoverMedia.player?.trackArtUrl ?? "") !== ""
+                visible: hoverMedia.shownArtUrl !== ""
                 layer.enabled: true
                 layer.effect: MultiEffect {
                   maskEnabled: true
@@ -1260,37 +1381,51 @@ Rectangle {
                   maskThresholdMin: 0.5
                   maskSpreadAtMin: 1.0
                 }
+                transform: [
+                  Translate { id: hoverArtShift },
+                  Scale { id: hoverArtScale; origin.x: 42; origin.y: 42 }
+                ]
 
                 Image {
                   anchors.fill: parent
-                  source: (hoverMedia.player?.trackArtUrl ?? "")
+                  source: hoverMedia.shownArtUrl
                   fillMode: Image.PreserveAspectCrop
                   smooth: true
                   asynchronous: true
-                  visible: (hoverMedia.player?.trackArtUrl ?? "") !== ""
+                  visible: hoverMedia.shownArtUrl !== ""
                 }
               }
 
               Text {
                 anchors.centerIn: parent
-                visible: (hoverMedia.player?.trackArtUrl ?? "") === ""
+                visible: hoverMedia.shownArtUrl === ""
                 text: ""
                 font.family: SettingsState.nerdIconFont
                 color: SettingsState.textSecondary
                 font.pixelSize: SettingsState.px(18)
               }
+
+              // Crisp squircle frame over the art: evens out the masked
+              // edge and stays put while the poster flips beneath it.
+              SquircleBackground {
+                radius: 22
+                power: SettingsState.cardRoundingPower
+                fillColor: "transparent"
+                strokeColor: SettingsState.barBorder
+                strokeWidth: 1
+              }
             }
 
             Column {
               anchors.verticalCenter: parent.verticalCenter
-              width: parent.width - 114
+              width: parent.width - 94
               spacing: 1
 
               Text {
                 width: parent.width
                 text: hoverMedia.player?.trackTitle || "Unknown Title"
                 color: SettingsState.textMain
-                font.pixelSize: SettingsState.px(14)
+                font.pixelSize: SettingsState.px(10)
                 font.bold: true
                 font.family: SettingsState.fontFamily
                 elide: Text.ElideRight
@@ -1301,7 +1436,7 @@ Rectangle {
                 width: parent.width
                 text: hoverMedia.player?.trackAlbum || hoverMedia.player?.identity || ""
                 color: SettingsState.textSecondary
-                font.pixelSize: SettingsState.px(12)
+                font.pixelSize: SettingsState.px(9)
                 font.family: SettingsState.fontFamily
                 elide: Text.ElideRight
                 maximumLineCount: 1
@@ -1312,7 +1447,7 @@ Rectangle {
                 width: parent.width
                 text: hoverMedia.player?.trackArtist || ""
                 color: SettingsState.textSecondary
-                font.pixelSize: SettingsState.px(12)
+                font.pixelSize: SettingsState.px(9)
                 font.family: SettingsState.fontFamily
                 elide: Text.ElideRight
                 maximumLineCount: 1
@@ -1323,7 +1458,7 @@ Rectangle {
               Item {
                 id: hoverProgTrack
                 width: parent.width
-                height: 24
+                height: 18
 
                 readonly property real liveFraction: hoverMedia.frac
                 property real currentPos: liveFraction
@@ -1363,7 +1498,7 @@ Rectangle {
                       shown: hoverProgTrack.shown,
                       showTrack: true,
                       showHandle: false,
-                      trackGap: 8,
+                      trackGap: 6,
                       showRemaining: false,
                       waveColor: SettingsState.accent,
                       trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -1431,11 +1566,11 @@ Rectangle {
 
               // Controls: small icon-only prev / play-pause / next
               Row {
-                spacing: 10
+                spacing: 8
 
                 Item {
-                  width: 28
-                  height: 26
+                  width: 24
+                  height: 20
                   opacity: hoverMedia.player?.canGoPrevious ? 1 : 0.3
 
                   Text {
@@ -1443,7 +1578,7 @@ Rectangle {
                     text: "󰼨"
                     font.family: SettingsState.nerdIconFont
                     color: hoverPrev.containsMouse ? SettingsState.accent : SettingsState.textMain
-                    font.pixelSize: SettingsState.px(16)
+                    font.pixelSize: SettingsState.px(14)
                   }
 
                   MouseArea {
@@ -1453,21 +1588,22 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     enabled: Boolean(hoverMedia.player?.canGoPrevious)
                     onClicked: {
+                      hoverMedia.flipDir = -1;
                       if (hoverMedia.player) hoverMedia.player.previous();
                     }
                   }
                 }
 
                 Item {
-                  width: 28
-                  height: 26
+                  width: 24
+                  height: 20
 
                   Text {
                     anchors.centerIn: parent
                     text: hoverMedia.playing ? "󰏤" : "󰐊"
                     font.family: SettingsState.nerdIconFont
                     color: hoverPlay.containsMouse ? SettingsState.accent : SettingsState.textMain
-                    font.pixelSize: SettingsState.px(17)
+                    font.pixelSize: SettingsState.px(15)
                   }
 
                   MouseArea {
@@ -1483,8 +1619,8 @@ Rectangle {
                 }
 
                 Item {
-                  width: 28
-                  height: 26
+                  width: 24
+                  height: 20
                   opacity: hoverMedia.player?.canGoNext ? 1 : 0.3
 
                   Text {
@@ -1492,7 +1628,7 @@ Rectangle {
                     text: "󰼧"
                     font.family: SettingsState.nerdIconFont
                     color: hoverNext.containsMouse ? SettingsState.accent : SettingsState.textMain
-                    font.pixelSize: SettingsState.px(16)
+                    font.pixelSize: SettingsState.px(14)
                   }
 
                   MouseArea {
@@ -1502,6 +1638,7 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     enabled: Boolean(hoverMedia.player?.canGoNext)
                     onClicked: {
+                      hoverMedia.flipDir = 1;
                       if (hoverMedia.player) hoverMedia.player.next();
                     }
                   }
@@ -1655,7 +1792,7 @@ Rectangle {
   }
 
   // ========================================================
-  // 4b. TIMER VIEW (left swipe: Clock -> Timer -> Reminders)
+  // 4b. TIMER VIEW (left swipe: Clock -> Calendar -> Timer -> Reminders)
   // ========================================================
   TimerView {
     id: timerView
@@ -1683,7 +1820,7 @@ Rectangle {
   }
 
   // ========================================================
-  // 4c. REMINDER LIST VIEW (2nd left-swipe: Clock -> Timer -> Reminders)
+  // 4c. REMINDER LIST VIEW (left-swipe: Clock -> Calendar -> Timer -> Reminders)
   // ========================================================
   Item {
     id: reminderWrap
@@ -1955,11 +2092,15 @@ Rectangle {
       var dx = ev.x - root._pressX;
       var dy = Math.abs(ev.y - root._pressY);
 
-      // Left swipe: Clock -> Timer -> Reminders -> Clock
+      // Left swipe: Clock -> Calendar -> Timer -> Reminders -> Clock
       // (ControlCenter -> Clock)
       if (dx < -14 && dy < 45) {
         root._swiped = true;
-        if (root.isControlCenterView || CalendarState.open || ScreenshotState.open || RecorderState.open) {
+        if (CalendarState.open) {
+          CalendarState.close();
+          root.isTimerView = true;
+          TimerState.open = true;
+        } else if (root.isControlCenterView || ScreenshotState.open || RecorderState.open) {
           root.isControlCenterView = false;
           CalendarState.close();
           ScreenshotState.close();
@@ -1973,12 +2114,17 @@ Rectangle {
           root.isReminderView = false;
           if (ReminderState.editing) ReminderState.editing = false;
         } else {
-          root.isTimerView = true;
-          TimerState.open = true;
+          root.dismissLock = false;
+          root.isTimerView = false;
+          root.isReminderView = false;
+          ScreenshotState.close();
+          RecorderState.close();
+          CalendarState.open = true;
         }
       }
       // Right swipe: Reminders -> Timer -> Clock -> Control Center
-      // (calendar lives as a pill inside the control center)
+      // (calendar lives as a pill inside the control center;
+      //  right swipe on the calendar also returns to Clock)
       else if (dx > 14 && dy < 45) {
         root._swiped = true;
         if (root.isReminderView) {
@@ -1989,7 +2135,11 @@ Rectangle {
         } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
-        } else if (!root.isControlCenterView && !CalendarState.open && !ScreenshotState.open && !RecorderState.open) {
+        } else if (CalendarState.open) {
+          CalendarState.close();
+          root.isControlCenterView = false;
+          if (ccView) ccView.resetToMain();
+        } else if (!root.isControlCenterView && !ScreenshotState.open && !RecorderState.open) {
           root.isControlCenterView = true;
           if (ccView) ccView.activePage = "main";
         }
@@ -1997,9 +2147,13 @@ Rectangle {
     }
 
     onWheel: wheel => {
-      // Touchpad horizontal swipe left: CC -> Clock, Clock -> Timer -> Reminders -> Clock
+      // Touchpad horizontal swipe left: CC -> Clock, Clock -> Calendar -> Timer -> Reminders -> Clock
       if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
-        if (root.isControlCenterView || CalendarState.open || ScreenshotState.open || RecorderState.open) {
+        if (CalendarState.open) {
+          CalendarState.close();
+          root.isTimerView = true;
+          TimerState.open = true;
+        } else if (root.isControlCenterView || ScreenshotState.open || RecorderState.open) {
           root.isControlCenterView = false;
           CalendarState.close();
           ScreenshotState.close();
@@ -2013,11 +2167,16 @@ Rectangle {
           root.isReminderView = false;
           if (ReminderState.editing) ReminderState.editing = false;
         } else {
-          root.isTimerView = true;
-          TimerState.open = true;
+          root.dismissLock = false;
+          root.isTimerView = false;
+          root.isReminderView = false;
+          ScreenshotState.close();
+          RecorderState.close();
+          CalendarState.open = true;
         }
       }
       // Touchpad horizontal swipe right: Reminders -> Timer -> Clock -> Control Center
+      // (calendar -> Clock)
       else if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
         if (root.isReminderView) {
           root.isReminderView = false;
@@ -2027,7 +2186,11 @@ Rectangle {
         } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
-        } else if (!root.isControlCenterView && !CalendarState.open && !ScreenshotState.open && !RecorderState.open) {
+        } else if (CalendarState.open) {
+          CalendarState.close();
+          root.isControlCenterView = false;
+          if (ccView) ccView.resetToMain();
+        } else if (!root.isControlCenterView && !ScreenshotState.open && !RecorderState.open) {
           root.isControlCenterView = true;
           if (ccView) ccView.activePage = "main";
         }

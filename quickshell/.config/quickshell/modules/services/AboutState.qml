@@ -13,9 +13,8 @@ Singleton {
     { label: "email", value: "codingbymohit@gmail.com" }
   ]
 
-  // Keybind visibility state (`qs ipc call mohiitp about` toggles it).
-  // NetworkCircle stays expanded on the About page while this is true,
-  // even without hovering the control center.
+  // Keybind / action visibility state (`qs ipc call mohiitp about`, Super+Ctrl+A).
+  // ClockPill stays expanded on the About view while this is true.
   property bool open: false
 
   function toggle() {
@@ -36,10 +35,6 @@ Singleton {
     if (s.indexOf("twitter") !== -1 || s.indexOf("x.com") !== -1) return "link";
     if (s.indexOf("http") !== -1 || s.indexOf("www.") !== -1 || s.indexOf(".com") !== -1) return "link";
     return "user";
-  }
-
-  function displayValue(entry) {
-    return (entry && entry.value) || "";
   }
 
   function addLink(label, value) {
@@ -65,27 +60,6 @@ Singleton {
     save();
   }
 
-  function openLink(value) {
-    var v = (value || "").trim();
-    if (v === "") return;
-    var target = v;
-    // email -> mailto:, bare handle/url -> https://
-    if (v.indexOf("@") !== -1 && v.indexOf("://") === -1 && v.indexOf("mailto:") !== 0) {
-      // could be "email: foo@bar.com" leftover, strip leading label
-      var m = v.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
-      if (m) v = m[0];
-      target = "mailto:" + v;
-    } else if (v.indexOf("://") === -1 && v.indexOf("mailto:") !== 0) {
-      // github.com/user, linkedin.com/in/user, www.x -> https://
-      if (v.match(/^(github\.com|linkedin\.com|www\.|[\w-]+\.[\w]+)/)) {
-        target = "https://" + v;
-      }
-    }
-    if (openProc.running) openProc.running = false;
-    openProc.command = ["xdg-open", target];
-    openProc.running = true;
-  }
-
   function copyLink(value) {
     var v = (value || "").trim();
     if (v === "" || copyProc.running) return;
@@ -106,11 +80,6 @@ Singleton {
 
   Process {
     id: saveProc
-    running: false
-  }
-
-  Process {
-    id: openProc
     running: false
   }
 

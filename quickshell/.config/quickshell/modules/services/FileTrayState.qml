@@ -17,7 +17,6 @@ Singleton {
   property bool loading: false
 
   readonly property int count: files.length
-  readonly property string storePath: (Quickshell.env("HOME") || "/home/mohiitp") + "/.cache/quickshell/filetray.json"
 
   function toggle() {
     open = !open;
@@ -123,22 +122,6 @@ Singleton {
     save();
   }
 
-  function moveUp(idx) {
-    if (idx <= 0 || idx >= files.length) return;
-    var arr = files.slice(0);
-    var t = arr[idx - 1]; arr[idx - 1] = arr[idx]; arr[idx] = t;
-    files = arr;
-    save();
-  }
-
-  function moveDown(idx) {
-    if (idx < 0 || idx >= files.length - 1) return;
-    var arr = files.slice(0);
-    var t = arr[idx + 1]; arr[idx + 1] = arr[idx]; arr[idx] = t;
-    files = arr;
-    save();
-  }
-
   function openFile(idx) {
     if (idx < 0 || idx >= files.length) return;
     var p = files[idx].path;
@@ -154,11 +137,6 @@ Singleton {
     var dir = p.substring(0, Math.max(p.lastIndexOf("/"), 1));
     if (dir === "") dir = "/";
     Quickshell.execDetached(["xdg-open", dir]);
-  }
-
-  function copyPath(idx) {
-    if (idx < 0 || idx >= files.length) return;
-    Quickshell.execDetached(["bash", "-c", "printf %s " + "'" + files[idx].path.replace(/'/g, "'\\''") + "' | wl-copy"]);
   }
 
   // ---- persistence ----

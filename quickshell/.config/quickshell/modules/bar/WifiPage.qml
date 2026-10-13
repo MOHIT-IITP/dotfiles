@@ -1,4 +1,3 @@
-import Quickshell
 import QtQuick
 import "../services"
 
@@ -65,25 +64,15 @@ Column {
           anchors.verticalCenter: parent.verticalCenter
           spacing: 6
 
-          // Kanji glyph
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: SettingsState.japaneseGlyphs
-            text: "波"
-            color: wifiTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(15)
-            font.bold: true
-          }
-
           // Title
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "WI-FI"
-            color: wifiTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(13)
-            font.bold: true
+            color: SettingsState.accent
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
-            font.letterSpacing: 0.5
+            font.letterSpacing: 2
+            font.weight: Font.DemiBold
           }
         }
 
@@ -113,37 +102,15 @@ Column {
       }
 
       // Toggle switch - minimal / smaller
-      Rectangle {
+      MiniToggle {
         width: 34
         height: 18
-        radius: 9
-        color: NetworkState.wifiEnabled ? SettingsState.accent : SettingsState.bgCard
-        border.color: SettingsState.borderBase
-        border.width: NetworkState.wifiEnabled ? 0 : 1
         anchors.verticalCenter: parent.verticalCenter
-
-        Behavior on color {
-          ColorAnimation { duration: 200 }
-        }
-
-        Rectangle {
-          width: 12
-          height: 12
-          radius: 6
-          color: NetworkState.wifiEnabled ? "#ffffff" : SettingsState.textMuted
-          anchors.verticalCenter: parent.verticalCenter
-          x: NetworkState.wifiEnabled ? parent.width - width - 3 : 3
-
-          Behavior on x {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-          }
-        }
-
-        MouseArea {
-          anchors.fill: parent
-          cursorShape: Qt.PointingHandCursor
-          onClicked: NetworkState.toggleWifi()
-        }
+        on: NetworkState.wifiEnabled
+        knobOn: SettingsState.isDark ? "#121612" : "#ffffff"
+        knobOff: SettingsState.isDark ? SettingsState.textMuted : "#ffffff"
+        frameWhenOff: true
+        onToggled: NetworkState.toggleWifi()
       }
     }
   }
@@ -280,8 +247,8 @@ Column {
         anchors.rightMargin: 10
         anchors.verticalCenter: parent.verticalCenter
         height: 24
-        width: wBtnText.implicitWidth + 4
-        implicitWidth: wBtnText.implicitWidth + 4
+        width: wBtnText.implicitWidth + 16
+        implicitWidth: wBtnText.implicitWidth + 16
         implicitHeight: 24
         z: 5
 
@@ -301,7 +268,7 @@ Column {
           cursorShape: Qt.PointingHandCursor
           onClicked: {
             if (modelData.connected) {
-              // disconnect
+              NetworkState.disconnectWifi(modelData);
             } else {
               AuthState.prompt(modelData.name);
             }

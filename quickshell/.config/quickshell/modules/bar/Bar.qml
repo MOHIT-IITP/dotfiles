@@ -6,7 +6,7 @@ import QtQuick.Effects
 import "../services"
 
 // Top bar: centered clock pill (right swipe opens control center,
-// left swipe opens timer, then reminders).
+// left swipe opens calendar, then timer, then reminders).
 Scope {
   Variants {
     model: Quickshell.screens
@@ -136,7 +136,7 @@ Scope {
         // While auto-hide is enabled, exclusiveZone stays 0 so windows don't jump/resize on hover.
         exclusiveZone: (!SettingsState.barAutoHide && screenScope.barRevealed) ? Math.round((30 + 6 + SettingsState.barGap) * SettingsState.uiScale) : 0
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || ReminderState.promptOpen || ReminderState.editing || (clockPill && (clockPill.ccFontDropdownOpen || clockPill.ccAboutInputOpen || clockPill.swipeOpen || clockPill.pillOpen))
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || ReminderState.promptOpen || ReminderState.editing || (clockPill && (clockPill.ccFontDropdownOpen || clockPill.swipeOpen || clockPill.pillOpen))
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -363,10 +363,6 @@ Scope {
             anchors.rightMargin: 10
             clockPill: clockPill
           }
-
-
-
-
         }
       }
     }

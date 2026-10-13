@@ -1,4 +1,3 @@
-import Quickshell
 import QtQuick
 import "../services"
 
@@ -65,25 +64,15 @@ Column {
           anchors.verticalCenter: parent.verticalCenter
           spacing: 6
 
-          // Kanji glyph
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: SettingsState.japaneseGlyphs
-            text: "歯"
-            color: btTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(15)
-            font.bold: true
-          }
-
           // Title
           Text {
             anchors.verticalCenter: parent.verticalCenter
             text: "BLUETOOTH"
-            color: btTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(13)
-            font.bold: true
+            color: SettingsState.accent
+            font.pixelSize: SettingsState.px(14)
             font.family: SettingsState.fontFamily
-            font.letterSpacing: 0.5
+            font.letterSpacing: 2
+            font.weight: Font.DemiBold
           }
         }
 
@@ -113,37 +102,15 @@ Column {
       }
 
       // Toggle switch - minimal / smaller
-      Rectangle {
+      MiniToggle {
         width: 34
         height: 18
-        radius: 9
-        color: BluetoothState.btOn ? SettingsState.accent : SettingsState.bgCard
-        border.color: SettingsState.borderBase
-        border.width: BluetoothState.btOn ? 0 : 1
         anchors.verticalCenter: parent.verticalCenter
-
-        Behavior on color {
-          ColorAnimation { duration: 200 }
-        }
-
-        Rectangle {
-          width: 12
-          height: 12
-          radius: 6
-          color: BluetoothState.btOn ? "#ffffff" : SettingsState.textMuted
-          anchors.verticalCenter: parent.verticalCenter
-          x: BluetoothState.btOn ? parent.width - width - 3 : 3
-
-          Behavior on x {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-          }
-        }
-
-        MouseArea {
-          anchors.fill: parent
-          cursorShape: Qt.PointingHandCursor
-          onClicked: BluetoothState.toggle()
-        }
+        on: BluetoothState.btOn
+        knobOn: SettingsState.isDark ? "#121612" : "#ffffff"
+        knobOff: SettingsState.isDark ? SettingsState.textMuted : "#ffffff"
+        frameWhenOff: true
+        onToggled: BluetoothState.toggle()
       }
     }
   }

@@ -1,6 +1,4 @@
-import Quickshell
 import QtQuick
-import QtQuick.Effects
 import "../services"
 
 // Standalone circular pill on the left of the bar for active reminders.

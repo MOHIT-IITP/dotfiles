@@ -1,9 +1,9 @@
-import Quickshell
 import QtQuick
 import "../services"
-import "WavySliderPaint.js" as WavyPaint
 
-// Screen recorder subview. Extracted from NetworkCircle.qml.
+// Screen recorder subview — restyled to match dark reference:
+// thin header, bracket frame, tan highlights, pill start button,
+// bar-style audio meters.
 Column {
   id: recorderPage
   required property var circle
@@ -16,126 +16,79 @@ Column {
     NumberAnimation { duration: 220 }
   }
 
-  // 1. Header: [‹] [録 RECORD] ---------------- [● RECORDING 00:15 / IDLE]
+  readonly property color tan: "#c9a87a"
+  readonly property color dimBar: "#4b455e"
+  readonly property color cardSoft: SettingsState.isDark ? "#2b2b31" : "#e9e9ec"
+  readonly property color cardSofter: SettingsState.isDark ? "#2e2e34" : "#e2e2e6"
+  readonly property color lineSoft: SettingsState.isDark ? "#34343a" : "#d5d5da"
+  readonly property color bracketCol: SettingsState.isDark ? "#55555c" : "#aaaaaa"
+
+  // 1. Header: ‹ RECORD ......... Still  ● IDLE
   Item {
     width: parent.width
-    height: 32
+    height: 30
 
     Row {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 8
+      spacing: 10
 
-      // Back button
-      Rectangle {
-        width: 26
-        height: 26
-        radius: 13
-        color: recBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
+      Item {
+        width: 22
+        height: 24
         anchors.verticalCenter: parent.verticalCenter
-
         Text {
           anchors.centerIn: parent
-          text: "\ueab5"
-          font.family: SettingsState.nerdIconFont
-          color: SettingsState.textMain
+          text: "‹"
+          color: recBackMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
           font.pixelSize: SettingsState.px(22)
-          font.bold: true
+          font.family: SettingsState.fontFamily
+          font.weight: Font.Light
         }
-
         MouseArea {
           id: recBackMouse
           anchors.fill: parent
+          anchors.margins: -4
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
-          onClicked: {
-            circle.activePage = "main";
-          }
+          onClicked: circle.activePage = "main"
         }
       }
 
-      // Title + Kanji clickable as back button
-      Item {
+      Text {
         anchors.verticalCenter: parent.verticalCenter
-        width: recTitleGroup.implicitWidth + 4
-        height: 28
-
-        Row {
-          id: recTitleGroup
-          anchors.verticalCenter: parent.verticalCenter
-          spacing: 6
-
-          // Japanese Kanji Glyph "録" (Record)
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: SettingsState.japaneseGlyphs
-            text: "録"
-            color: recTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(20)
-            font.bold: true
-          }
-
-          // Title
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: "RECORD"
-            color: recTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-            font.pixelSize: SettingsState.px(16)
-            font.bold: true
-            font.family: SettingsState.fontFamily
-            font.letterSpacing: 2
-          }
-        }
-
-        MouseArea {
-          id: recTitleMouse
-          anchors.fill: parent
-          hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
-          onClicked: {
-            circle.activePage = "main";
-          }
-        }
+        text: "RECORD"
+        color: SettingsState.accent
+        font.pixelSize: SettingsState.px(14)
+        font.family: SettingsState.fontFamily
+        font.letterSpacing: 2
+        font.weight: Font.DemiBold
       }
     }
 
     Row {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 6
+      spacing: 14
 
-      // Still button
-      Rectangle {
-        height: 24
-        width: stillSwitchRow.implicitWidth + 14
-        radius: 12
-        color: stillSwitchMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
-        border.color: stillSwitchMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
-        border.width: 1
-
-        Row {
-          id: stillSwitchRow
-          anchors.centerIn: parent
-          spacing: 4
-
-          CCIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 12
-            height: 12
-            kind: "camera"
-            glyph: stillSwitchMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-          }
-
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: "Still"
-            color: stillSwitchMouse.containsMouse ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: SettingsState.px(13)
-            font.bold: true
-            font.family: SettingsState.fontFamily
-          }
+      // Still link
+      Row {
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 5
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 13
+          height: 13
+          kind: "camera"
+          glyph: stillSwitchMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
         }
-
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          text: "Still"
+          color: stillSwitchMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
+          font.pixelSize: SettingsState.px(13)
+          font.family: SettingsState.fontFamily
+        }
         MouseArea {
           id: stillSwitchMouse
           anchors.fill: parent
@@ -148,173 +101,127 @@ Column {
         }
       }
 
-      // Right Status Badge
-      Rectangle {
-        height: 24
-        width: recStatusRow.implicitWidth + 16
-        radius: 12
-        color: RecorderState.isRecording ? (SettingsState.isDark ? "#3a1b1b" : "#ffe5e5") : SettingsState.bgCard
-        border.color: RecorderState.isRecording ? (SettingsState.isDark ? "#662c2c" : "#ffb3b3") : SettingsState.borderBase
-        border.width: 1
-
-        Row {
-          id: recStatusRow
-          anchors.centerIn: parent
-          spacing: 6
-
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            width: 8
-            height: 8
-            radius: 4
-            color: RecorderState.isRecording ? "#e05f65" : (SettingsState.isDark ? "#7ee2a8" : "#2e7d32")
-
-            SequentialAnimation on opacity {
-              running: RecorderState.isRecording
-              loops: Animation.Infinite
-              NumberAnimation { to: 0.3; duration: 600 }
-              NumberAnimation { to: 1.0; duration: 600 }
-            }
-          }
-
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: RecorderState.isRecording ? ("REC " + RecorderState.formattedTime) : "IDLE"
-            color: RecorderState.isRecording ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : (SettingsState.isDark ? "#7ee2a8" : "#2e7d32")
-            font.pixelSize: SettingsState.px(13)
-            font.bold: true
-            font.family: SettingsState.fontFamily
-            font.letterSpacing: 1
-          }
-        }
-      }
-    }
-  }
-
-  // Divider
-  Rectangle {
-    width: parent.width
-    height: 1
-    color: SettingsState.borderBase
-  }
-
-  // 2. Preset Frame Card with Corner Brackets
-  Rectangle {
-    width: parent.width
-    height: 60
-    radius: 12
-    color: SettingsState.bgCard
-    border.color: SettingsState.borderBase
-    border.width: 1
-
-    // Top-Left bracket: ⌜
-    Text {
-      anchors.left: parent.left
-      anchors.top: parent.top
-      anchors.margins: 4
-      text: "⌜"
-      color: SettingsState.accent
-      font.pixelSize: SettingsState.px(16)
-      font.bold: true
-    }
-    // Top-Right bracket: ⌝
-    Text {
-      anchors.right: parent.right
-      anchors.top: parent.top
-      anchors.margins: 4
-      text: "⌝"
-      color: SettingsState.accent
-      font.pixelSize: SettingsState.px(16)
-      font.bold: true
-    }
-    // Bottom-Left bracket: ⌞
-    Text {
-      anchors.left: parent.left
-      anchors.bottom: parent.bottom
-      anchors.margins: 4
-      text: "⌞"
-      color: SettingsState.accent
-      font.pixelSize: SettingsState.px(16)
-      font.bold: true
-    }
-    // Bottom-Right bracket: ⌟
-    Text {
-      anchors.right: parent.right
-      anchors.bottom: parent.bottom
-      anchors.margins: 4
-      text: "⌟"
-      color: SettingsState.accent
-      font.pixelSize: SettingsState.px(16)
-      font.bold: true
-    }
-
-    Row {
-      anchors.fill: parent
-      anchors.leftMargin: 16
-      anchors.rightMargin: 16
-      spacing: 12
-
-      Column {
+      // Status: green dot + IDLE / red + time
+      Row {
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width
-        spacing: 3
-
-        Row {
-          spacing: 6
-          Text {
-            text: "Screen recorder"
-            color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(15)
-            font.bold: true
-            font.family: SettingsState.fontFamily
+        spacing: 6
+        Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 8
+          height: 8
+          radius: 4
+          color: RecorderState.isRecording ? "#e05f65" : "#4ade80"
+          SequentialAnimation on opacity {
+            running: RecorderState.isRecording
+            loops: Animation.Infinite
+            NumberAnimation { to: 0.3; duration: 600 }
+            NumberAnimation { to: 1.0; duration: 600 }
           }
         }
-
         Text {
-          text: RecorderState.mode === "area" ? (RecorderState.areaGeometry !== "" ? ("• 60 fps • High quality • " + RecorderState.areaGeometry) : "• 60 fps • High quality • Select an area") : "• 60 fps • High quality • Fullscreen"
-          color: SettingsState.textSecondary
-          font.pixelSize: SettingsState.px(13)
+          anchors.verticalCenter: parent.verticalCenter
+          text: RecorderState.isRecording ? RecorderState.formattedTime : "IDLE"
+          color: RecorderState.isRecording ? "#ff8a8a" : "#8a8a8a"
+          font.pixelSize: SettingsState.px(12)
           font.family: SettingsState.fontFamily
+          font.letterSpacing: 1.5
         }
       }
     }
   }
 
-  // 2b. Capture Target: Fullscreen | Record area
+  // 2. Bracket frame title (transparent, thin corner marks)
+  Item {
+    width: parent.width
+    height: 74
+
+    // corner brackets — thin L shapes
+    Item { // top-left
+      anchors.left: parent.left
+      anchors.top: parent.top
+      width: 16; height: 16
+      Rectangle { width: 16; height: 1.5; color: bracketCol }
+      Rectangle { width: 1.5; height: 16; color: bracketCol }
+    }
+    Item { // top-right
+      anchors.right: parent.right
+      anchors.top: parent.top
+      width: 16; height: 16
+      Rectangle { anchors.right: parent.right; width: 16; height: 1.5; color: bracketCol }
+      Rectangle { anchors.right: parent.right; width: 1.5; height: 16; color: bracketCol }
+    }
+    Item { // bottom-left
+      anchors.left: parent.left
+      anchors.bottom: parent.bottom
+      width: 16; height: 16
+      Rectangle { anchors.bottom: parent.bottom; width: 16; height: 1.5; color: bracketCol }
+      Rectangle { anchors.bottom: parent.bottom; width: 1.5; height: 16; color: bracketCol }
+    }
+    Item { // bottom-right
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      width: 16; height: 16
+      Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 16; height: 1.5; color: bracketCol }
+      Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 1.5; height: 16; color: bracketCol }
+    }
+
+    Column {
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.leftMargin: 20
+      anchors.rightMargin: 20
+      spacing: 3
+      Text {
+        text: "Screen recorder"
+        color: SettingsState.textMain
+        font.pixelSize: SettingsState.px(18)
+        font.family: SettingsState.fontFamily
+        font.weight: Font.DemiBold
+      }
+      Text {
+        text: RecorderState.mode === "area" ? (RecorderState.areaGeometry !== "" ? ("60 fps · High quality · " + RecorderState.areaGeometry) : "60 fps · High quality · Select an area") : "60 fps · High quality · Fullscreen"
+        color: SettingsState.isDark ? "#9a8a75" : "#7a6a55"
+        font.pixelSize: SettingsState.px(13)
+        font.family: SettingsState.fontFamily
+        elide: Text.ElideRight
+        width: parent.width
+      }
+    }
+  }
+
+  // 3. Fullscreen | Record area
   Row {
     width: parent.width
-    height: 40
-    spacing: 8
+    height: 46
+    spacing: 10
 
-    // Fullscreen mode card
     Rectangle {
-      width: (parent.width - 8) / 2
-      height: 40
+      width: (parent.width - 10) / 2
+      height: 46
       radius: 12
-      color: (RecorderState.mode === "fullscreen") ? SettingsState.bgActivePill : (fullMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (RecorderState.mode === "fullscreen") ? SettingsState.borderActive : (fullMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+      color: RecorderState.mode === "fullscreen" ? cardSofter : "transparent"
+      border.color: RecorderState.mode === "fullscreen" ? lineSoft : (fullMouse.containsMouse ? lineSoft : "#2c2c31")
       border.width: 1
-
       Row {
         anchors.centerIn: parent
         spacing: 8
         CCIcon {
           anchors.verticalCenter: parent.verticalCenter
-          width: 15
-          height: 15
+          width: 16
+          height: 16
           kind: "display"
-          glyph: (RecorderState.mode === "fullscreen") ? SettingsState.accent : SettingsState.textSecondary
+          glyph: RecorderState.mode === "fullscreen" ? tan : "#8a8a8a"
         }
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "Fullscreen"
-          color: (RecorderState.mode === "fullscreen") ? SettingsState.textActive : SettingsState.textMain
+          color: RecorderState.mode === "fullscreen" ? tan : (fullMouse.containsMouse ? SettingsState.textMain : "#9a9a9a")
           font.pixelSize: SettingsState.px(14)
-          font.bold: RecorderState.mode === "fullscreen"
           font.family: SettingsState.fontFamily
+          font.weight: RecorderState.mode === "fullscreen" ? Font.DemiBold : Font.Normal
         }
       }
-
       MouseArea {
         id: fullMouse
         anchors.fill: parent
@@ -325,35 +232,32 @@ Column {
       }
     }
 
-    // Area mode card
     Rectangle {
-      width: (parent.width - 8) / 2
-      height: 40
+      width: (parent.width - 10) / 2
+      height: 46
       radius: 12
-      color: (RecorderState.mode === "area") ? SettingsState.bgActivePill : (areaRecMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-      border.color: (RecorderState.mode === "area") ? SettingsState.borderActive : (areaRecMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
+      color: RecorderState.mode === "area" ? cardSofter : "transparent"
+      border.color: RecorderState.mode === "area" ? lineSoft : (areaRecMouse.containsMouse ? lineSoft : "#2c2c31")
       border.width: 1
-
       Row {
         anchors.centerIn: parent
         spacing: 8
         CCIcon {
           anchors.verticalCenter: parent.verticalCenter
-          width: 15
-          height: 15
+          width: 16
+          height: 16
           kind: "area"
-          glyph: (RecorderState.mode === "area") ? SettingsState.accent : SettingsState.textSecondary
+          glyph: RecorderState.mode === "area" ? tan : "#8a8a8a"
         }
         Text {
           anchors.verticalCenter: parent.verticalCenter
           text: "Record area"
-          color: (RecorderState.mode === "area") ? SettingsState.textActive : SettingsState.textMain
+          color: RecorderState.mode === "area" ? tan : (areaRecMouse.containsMouse ? SettingsState.textMain : "#9a9a9a")
           font.pixelSize: SettingsState.px(14)
-          font.bold: RecorderState.mode === "area"
           font.family: SettingsState.fontFamily
+          font.weight: RecorderState.mode === "area" ? Font.DemiBold : Font.Normal
         }
       }
-
       MouseArea {
         id: areaRecMouse
         anchors.fill: parent
@@ -370,17 +274,16 @@ Column {
     }
   }
 
-  // 2c. Area selection row (only in area mode)
+  // 3b. Area picker strip (area mode only)
   Rectangle {
     visible: RecorderState.mode === "area"
     width: parent.width
     height: RecorderState.mode === "area" ? 36 : 0
-    radius: 12
-    color: SettingsState.bgCard
-    border.color: SettingsState.borderBase
+    radius: 10
+    color: "transparent"
+    border.color: "#2c2c31"
     border.width: 1
     clip: true
-
     Row {
       anchors.fill: parent
       anchors.leftMargin: 12
@@ -388,38 +291,32 @@ Column {
       anchors.topMargin: 6
       anchors.bottomMargin: 6
       spacing: 8
-
       Text {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - selectAreaBtn.width - (clearAreaBtn.visible ? clearAreaBtn.width + 8 : 0) - 24
         text: RecorderState.selectingArea ? "Drag to select area..." : (RecorderState.areaGeometry !== "" ? ("◈ " + RecorderState.areaGeometry) : "No area selected")
-        color: RecorderState.areaGeometry !== "" ? SettingsState.accent : SettingsState.textMuted
-        font.pixelSize: SettingsState.px(13)
+        color: RecorderState.areaGeometry !== "" ? tan : SettingsState.textMuted
+        font.pixelSize: SettingsState.px(12)
         font.family: "monospace"
         elide: Text.ElideRight
       }
-
       Rectangle {
         id: clearAreaBtn
         visible: RecorderState.areaGeometry !== "" && !RecorderState.isRecording
         anchors.verticalCenter: parent.verticalCenter
         height: 24
-        width: clearAreaTxt.implicitWidth + 14
+        width: 30
         radius: 12
-        color: clearAreaMouse.containsMouse ? (SettingsState.isDark ? "#322222" : "#ffe0e0") : (SettingsState.isDark ? "#221a1a" : "#fff0f0")
-        border.color: SettingsState.isDark ? "#382525" : "#ffcccc"
+        color: "transparent"
+        border.color: "#3a2a2a"
         border.width: 1
-
         Text {
-          id: clearAreaTxt
           anchors.centerIn: parent
           text: "\uea76"
-          color: SettingsState.isDark ? "#ff8a8a" : "#d32f2f"
+          color: "#ff8a8a"
           font.family: SettingsState.nerdIconFont
           font.pixelSize: SettingsState.px(12)
-          font.bold: true
         }
-
         MouseArea {
           id: clearAreaMouse
           anchors.fill: parent
@@ -428,27 +325,24 @@ Column {
           onClicked: RecorderState.clearArea()
         }
       }
-
       Rectangle {
         id: selectAreaBtn
         anchors.verticalCenter: parent.verticalCenter
         height: 24
         width: selectAreaTxt.implicitWidth + 16
         radius: 12
-        color: RecorderState.selectingArea ? SettingsState.bgActivePill : (selAreaMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-        border.color: SettingsState.borderActive
+        color: cardSofter
+        border.color: lineSoft
         border.width: 1
-
         Text {
           id: selectAreaTxt
           anchors.centerIn: parent
           text: RecorderState.selectingArea ? "..." : (RecorderState.areaGeometry !== "" ? "RESELECT" : "SELECT")
-          color: SettingsState.accent
-          font.pixelSize: SettingsState.px(12)
+          color: tan
+          font.pixelSize: SettingsState.px(11)
           font.bold: true
           font.family: SettingsState.fontFamily
         }
-
         MouseArea {
           id: selAreaMouse
           anchors.fill: parent
@@ -461,48 +355,32 @@ Column {
     }
   }
 
-  // 3. Main Record Pill Button
+  // 4. Start / Stop pill
   Rectangle {
     width: parent.width
-    height: 48
-    radius: 24
-    color: RecorderState.isRecording ? (SettingsState.isDark ? "#3d1818" : "#ffe0e0") : (recBtnMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-    border.color: RecorderState.isRecording ? "#e05f65" : (recBtnMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-    border.width: 1.5
-
-    Behavior on color { ColorAnimation { duration: 150 } }
-    Behavior on border.color { ColorAnimation { duration: 150 } }
-
+    height: 50
+    radius: 25
+    color: cardSoft
+    border.color: RecorderState.isRecording ? "#e05f65" : "transparent"
+    border.width: RecorderState.isRecording ? 1.5 : 0
     Row {
       anchors.centerIn: parent
       spacing: 10
-
       Rectangle {
         anchors.verticalCenter: parent.verticalCenter
-        width: 24
-        height: 24
-        radius: 12
-        color: "#e05f65"
-
-        Rectangle {
-          anchors.centerIn: parent
-          width: RecorderState.isRecording ? 10 : 8
-          height: RecorderState.isRecording ? 10 : 8
-          radius: RecorderState.isRecording ? 2 : 4
-          color: "#ffffff"
-        }
+        width: 14
+        height: 14
+        radius: 7
+        color: "#c95f5f"
       }
-
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: RecorderState.isRecording ? ("Stop recording (" + RecorderState.formattedTime + ")") : (RecorderState.selectingArea ? "Select area on screen..." : ((RecorderState.mode === "area" && RecorderState.areaGeometry === "") ? "Select area & record" : "Start recording"))
-        color: RecorderState.isRecording ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.textMain
-        font.pixelSize: SettingsState.px(16)
-        font.bold: true
+        color: SettingsState.isDark ? "#d5d5d5" : "#333333"
+        font.pixelSize: SettingsState.px(15)
         font.family: SettingsState.fontFamily
       }
     }
-
     MouseArea {
       id: recBtnMouse
       anchors.fill: parent
@@ -512,89 +390,51 @@ Column {
     }
   }
 
-  // 4. Audio Controls Section (Dual Compact Horizontal Faders + Mic Selector Dropdown)
-  Rectangle {
+  // 5. Audio meters — borderless rows with bar visualizer
+  Column {
     width: parent.width
-    height: 84 + (circle.recMicDropdownOpen ? (Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) + 8) : 0)
-    radius: 14
-    color: SettingsState.bgCard
-    border.color: SettingsState.borderBase
-    border.width: 1
-    clip: true
+    spacing: 2
 
-    Behavior on height {
-      NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-    }
-
-    Column {
-      anchors.fill: parent
-      anchors.margins: 10
-      spacing: 6
-
-      // Microphone track + Device selector dropdown chip
+    // Mic row
+    Item {
+      width: parent.width
+      height: 36
       Row {
-        width: parent.width
-        height: 28
+        anchors.fill: parent
         spacing: 8
-
-        Rectangle {
+        CCIcon {
           anchors.verticalCenter: parent.verticalCenter
-          width: 24
-          height: 24
-          radius: 12
-          color: AudioState.inMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgSurface
-          border.color: SettingsState.borderBase
-          border.width: 1
-
-          CCIcon {
-            anchors.centerIn: parent
-            width: 12
-            height: 12
-            kind: "mic"
-            glyph: AudioState.inMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.accent
-          }
-          MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: AudioState.toggleInMute()
-          }
+          width: 15
+          height: 15
+          kind: "mic"
+          glyph: tan
         }
-
-        // Microphone dropdown selector pill button
-        Rectangle {
-          id: rMicDevChip
+        // device name + chevron (dropdown trigger)
+        Item {
           anchors.verticalCenter: parent.verticalCenter
+          width: 128
           height: 24
-          width: Math.min(150, rMicDevRow.implicitWidth + 16)
-          radius: 12
-          color: circle.recMicDropdownOpen ? SettingsState.bgActivePill : (rMicDevMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface)
-          border.color: circle.recMicDropdownOpen ? SettingsState.borderActive : (rMicDevMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-          border.width: 1
-          clip: true
-
           Row {
-            id: rMicDevRow
-            anchors.centerIn: parent
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
             spacing: 4
-
             Text {
+              anchors.verticalCenter: parent.verticalCenter
               text: AudioState.sourceName
-              color: circle.recMicDropdownOpen ? SettingsState.textActive : SettingsState.textMain
+              color: SettingsState.textMain
               font.pixelSize: SettingsState.px(13)
-              font.bold: true
               font.family: SettingsState.fontFamily
               elide: Text.ElideRight
-              width: Math.min(implicitWidth, 110)
+              width: 108
             }
-
             Text {
+              anchors.verticalCenter: parent.verticalCenter
               text: circle.recMicDropdownOpen ? "\ueab7" : "\ueab4"
-              color: SettingsState.textSecondary
+              color: "#777777"
               font.family: SettingsState.nerdIconFont
               font.pixelSize: SettingsState.px(10)
             }
           }
-
           MouseArea {
             id: rMicDevMouse
             anchors.fill: parent
@@ -606,413 +446,205 @@ Column {
             }
           }
         }
-
-        // Wavy slider bar with seek animation
+        // bars (click/drag to set mic vol)
         Item {
-          id: micSliderTrack
+          id: micBars
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 24 - 8 - rMicDevChip.width - 8 - 38 - 8
-          height: 22
-
-          property real currentPos: AudioState.inVol
-          readonly property real shown: Math.min(1, Math.max(0, currentPos))
-
-          onShownChanged: micWaveCanvas.requestPaint()
-          onCurrentPosChanged: micWaveCanvas.requestPaint()
-          onWidthChanged: micWaveCanvas.requestPaint()
-
-          Connections {
-            target: AudioState
-            function onInVolChanged() {
-              if (!micSeekAnim.running && !micSliderMouse.dragging) {
-                micSliderTrack.currentPos = AudioState.inVol;
-                micWaveCanvas.requestPaint();
-              }
-            }
-            function onInMutedChanged() { micWaveCanvas.requestPaint(); }
-          }
-
-          Connections {
-            target: SettingsState
-            function onAccentChanged() { micWaveCanvas.requestPaint(); }
-            function onIsDarkChanged() { micWaveCanvas.requestPaint(); }
-          }
-
-          NumberAnimation {
-            id: micSeekAnim
-            target: micSliderTrack
-            property: "currentPos"
-            duration: 350
-            easing.type: Easing.InOutCubic
-            onRunningChanged: micWaveCanvas.requestPaint()
-            onFinished: {
-              if (!micSliderMouse.dragging) {
-                micSliderTrack.currentPos = AudioState.inVol;
-                micWaveCanvas.requestPaint();
+          width: parent.width - 15 - 8 - 128 - 8 - 44 - 8
+          height: 24
+          readonly property int count: 20
+          readonly property var heights: [7, 12, 16, 9, 14, 19, 12, 8, 15, 21, 16, 11, 7, 13, 18, 12, 8, 14, 10, 6]
+          Row {
+            anchors.centerIn: parent
+            spacing: 3
+            Repeater {
+              model: micBars.count
+              delegate: Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 3
+                height: micBars.heights[index] !== undefined ? micBars.heights[index] : 10
+                radius: 1.5
+                color: {
+                  if (AudioState.inMuted) return dimBar;
+                  var frac = (index + 1) / micBars.count;
+                  return frac <= AudioState.inVol ? tan : dimBar;
+                }
               }
             }
           }
-
-          Canvas {
-            id: micWaveCanvas
-            anchors.fill: parent
-            antialiasing: true
-            renderStrategy: Canvas.Immediate
-
-            onPaint: {
-              WavyPaint.paint(getContext("2d"), width, height, {
-                shown: AudioState.inMuted ? 0 : micSliderTrack.shown,
-                showTrack: true,
-                showHandle: false,
-                trackGap: 8,
-                showRemaining: false,
-                waveColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
-                trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
-                handleColor: AudioState.inMuted ? SettingsState.textMuted : SettingsState.accent,
-                trackH: 4.5,
-                waveW: 4.5,
-                waveAmp: 2.2,
-                waveLen: width / 2,
-                handleW: 6,
-                handleH: 16
-              });
-            }
-          }
-
           MouseArea {
-            id: micSliderMouse
             anchors.fill: parent
-            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-
-            property real startX: 0
-            property bool dragging: false
-
-            onPressed: function(ev) {
-              micSliderMouse.startX = ev.x;
-              micSliderMouse.dragging = false;
-
-              var startVal = micSliderTrack.currentPos;
-              var r = Math.min(1, Math.max(0, ev.x / width));
-
-              micSeekAnim.stop();
-              micSliderTrack.currentPos = startVal;
-              micSeekAnim.from = startVal;
-              micSeekAnim.to = r;
-              micSeekAnim.restart();
-
-              AudioState.setInVol(r);
-            }
-
-            onPositionChanged: function(ev) {
-              if (!pressed) return;
-              if (!micSliderMouse.dragging && Math.abs(ev.x - micSliderMouse.startX) > 4) {
-                micSliderMouse.dragging = true;
-                micSeekAnim.stop();
-              }
-              if (micSliderMouse.dragging) {
-                var r = Math.min(1, Math.max(0, ev.x / width));
-                micSliderTrack.currentPos = r;
-                micWaveCanvas.requestPaint();
-                AudioState.setInVol(r);
-              }
-            }
-
-            onReleased: function() {
-              micSliderMouse.dragging = false;
-            }
+            onPressed: function (ev) { AudioState.setInVol(Math.min(1, Math.max(0, ev.x / width))); }
+            onPositionChanged: function (ev) { if (pressed) AudioState.setInVol(Math.min(1, Math.max(0, ev.x / width))); }
           }
         }
-
         Text {
           anchors.verticalCenter: parent.verticalCenter
-          width: 38
+          width: 44
+          horizontalAlignment: Text.AlignRight
           text: AudioState.inMuted ? "Mute" : (Math.round(AudioState.inVol * 100) + "%")
-          color: AudioState.inMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.textSecondary
+          color: "#8a8a8a"
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
-          horizontalAlignment: Text.AlignRight
         }
       }
+    }
 
-      // Expanded Microphone Device Dropdown List
-      ListView {
-        visible: circle.recMicDropdownOpen
-        width: parent.width
-        height: circle.recMicDropdownOpen ? Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 44) : 0
-        clip: true
-        spacing: 4
-        model: AudioState.sources
-
-        delegate: Rectangle {
-          width: ListView.view.width
-          height: 40
-          radius: 10
-          color: modelData.isDefault ? SettingsState.bgActivePill : (mPickMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard)
-          border.color: modelData.isDefault ? SettingsState.borderActive : (mPickMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase)
-          border.width: 1
-
-          Row {
-            anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
-            spacing: 8
-
-            CCIcon {
-              anchors.verticalCenter: parent.verticalCenter
-              width: 14
-              height: 14
-              kind: "mic"
-              glyph: modelData.isDefault ? SettingsState.accent : SettingsState.textSecondary
-            }
-
-            Text {
-              anchors.verticalCenter: parent.verticalCenter
-              width: parent.width - 48
-              text: modelData.description || modelData.name || "Microphone"
-              color: modelData.isDefault ? SettingsState.textActive : SettingsState.textMain
-              font.pixelSize: SettingsState.px(13)
-              font.bold: modelData.isDefault
-              font.family: SettingsState.fontFamily
-              elide: Text.ElideRight
-            }
-
-            Text {
-              anchors.verticalCenter: parent.verticalCenter
-              visible: modelData.isDefault
-              text: "\ueab2"
-              font.family: SettingsState.nerdIconFont
-              color: SettingsState.accent
-              font.pixelSize: SettingsState.px(14)
-              font.bold: true
-            }
-          }
-
-          MouseArea {
-            id: mPickMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-              AudioState.setDefaultSource(modelData);
-              circle.recMicDropdownOpen = false;
-            }
-          }
-        }
-      }
-
-      // Desktop audio track
-      Row {
-        width: parent.width
-        height: 28
-        spacing: 8
-
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 24
-          height: 24
-          radius: 12
-          color: AudioState.outMuted ? (SettingsState.isDark ? "#2a1e1e" : "#ffebeb") : SettingsState.bgSurface
-          border.color: SettingsState.borderBase
-          border.width: 1
-
+    // Mic device dropdown
+    ListView {
+      visible: circle.recMicDropdownOpen
+      width: parent.width
+      height: circle.recMicDropdownOpen ? Math.min(160, (AudioState.sources ? AudioState.sources.length : 1) * 40) : 0
+      clip: true
+      spacing: 4
+      model: AudioState.sources
+      delegate: Rectangle {
+        width: ListView.view.width
+        height: 36
+        radius: 10
+        color: modelData.isDefault ? cardSofter : (mPickMouse.containsMouse ? cardSoft : "transparent")
+        border.color: lineSoft
+        border.width: 1
+        Row {
+          anchors.fill: parent
+          anchors.leftMargin: 10
+          anchors.rightMargin: 10
+          spacing: 8
           CCIcon {
-            anchors.centerIn: parent
-            width: 12
-            height: 12
-            kind: "sound"
-            glyph: AudioState.outMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.accent
+            anchors.verticalCenter: parent.verticalCenter
+            width: 13
+            height: 13
+            kind: "mic"
+            glyph: modelData.isDefault ? tan : SettingsState.textSecondary
           }
-          MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: AudioState.toggleOutMute()
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - 48
+            text: modelData.description || modelData.name || "Microphone"
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: modelData.isDefault
+            text: "\ueab2"
+            font.family: SettingsState.nerdIconFont
+            color: tan
+            font.pixelSize: SettingsState.px(13)
           }
         }
+        MouseArea {
+          id: mPickMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            AudioState.setDefaultSource(modelData);
+            circle.recMicDropdownOpen = false;
+          }
+        }
+      }
+    }
 
+    // Desktop row
+    Item {
+      width: parent.width
+      height: 36
+      Row {
+        anchors.fill: parent
+        spacing: 8
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 15
+          height: 15
+          kind: "sound"
+          glyph: tan
+        }
         Text {
           anchors.verticalCenter: parent.verticalCenter
-          width: 72
+          width: 128
           text: "Desktop"
           color: SettingsState.textMain
           font.pixelSize: SettingsState.px(13)
-          font.bold: true
           font.family: SettingsState.fontFamily
           elide: Text.ElideRight
         }
-
-        // Wavy slider bar with seek animation
         Item {
-          id: deskSliderTrack
+          id: deskBars
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 24 - 8 - 72 - 8 - 38 - 8
-          height: 22
-
-          property real currentPos: AudioState.outVol
-          readonly property real shown: Math.min(1, Math.max(0, currentPos))
-
-          onShownChanged: deskWaveCanvas.requestPaint()
-          onCurrentPosChanged: deskWaveCanvas.requestPaint()
-          onWidthChanged: deskWaveCanvas.requestPaint()
-
-          Connections {
-            target: AudioState
-            function onOutVolChanged() {
-              if (!deskSeekAnim.running && !deskSliderMouse.dragging) {
-                deskSliderTrack.currentPos = AudioState.outVol;
-                deskWaveCanvas.requestPaint();
-              }
-            }
-            function onOutMutedChanged() { deskWaveCanvas.requestPaint(); }
-          }
-
-          Connections {
-            target: SettingsState
-            function onAccentChanged() { deskWaveCanvas.requestPaint(); }
-            function onIsDarkChanged() { deskWaveCanvas.requestPaint(); }
-          }
-
-          NumberAnimation {
-            id: deskSeekAnim
-            target: deskSliderTrack
-            property: "currentPos"
-            duration: 350
-            easing.type: Easing.InOutCubic
-            onRunningChanged: deskWaveCanvas.requestPaint()
-            onFinished: {
-              if (!deskSliderMouse.dragging) {
-                deskSliderTrack.currentPos = AudioState.outVol;
-                deskWaveCanvas.requestPaint();
+          width: parent.width - 15 - 8 - 128 - 8 - 44 - 8
+          height: 24
+          readonly property int count: 20
+          readonly property var heights: [6, 10, 14, 11, 9, 13, 17, 12, 8, 12, 16, 13, 9, 12, 15, 18, 14, 10, 12, 9]
+          Row {
+            anchors.centerIn: parent
+            spacing: 3
+            Repeater {
+              model: deskBars.count
+              delegate: Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 3
+                height: deskBars.heights[index] !== undefined ? deskBars.heights[index] : 10
+                radius: 1.5
+                color: {
+                  if (AudioState.outMuted) return dimBar;
+                  var frac = (index + 1) / deskBars.count;
+                  return frac <= AudioState.outVol ? tan : dimBar;
+                }
               }
             }
           }
-
-          Canvas {
-            id: deskWaveCanvas
-            anchors.fill: parent
-            antialiasing: true
-            renderStrategy: Canvas.Immediate
-
-            onPaint: {
-              WavyPaint.paint(getContext("2d"), width, height, {
-                shown: AudioState.outMuted ? 0 : deskSliderTrack.shown,
-                showTrack: true,
-                showHandle: false,
-                trackGap: 8,
-                showRemaining: false,
-                waveColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
-                trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
-                handleColor: AudioState.outMuted ? SettingsState.textMuted : SettingsState.accent,
-                trackH: 4.5,
-                waveW: 4.5,
-                waveAmp: 2.2,
-                waveLen: width / 2,
-                handleW: 6,
-                handleH: 16
-              });
-            }
-          }
-
           MouseArea {
-            id: deskSliderMouse
             anchors.fill: parent
-            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-
-            property real startX: 0
-            property bool dragging: false
-
-            onPressed: function(ev) {
-              deskSliderMouse.startX = ev.x;
-              deskSliderMouse.dragging = false;
-
-              var startVal = deskSliderTrack.currentPos;
-              var r = Math.min(1, Math.max(0, ev.x / width));
-
-              deskSeekAnim.stop();
-              deskSliderTrack.currentPos = startVal;
-              deskSeekAnim.from = startVal;
-              deskSeekAnim.to = r;
-              deskSeekAnim.restart();
-
-              AudioState.setOutVol(r);
-            }
-
-            onPositionChanged: function(ev) {
-              if (!pressed) return;
-              if (!deskSliderMouse.dragging && Math.abs(ev.x - deskSliderMouse.startX) > 4) {
-                deskSliderMouse.dragging = true;
-                deskSeekAnim.stop();
-              }
-              if (deskSliderMouse.dragging) {
-                var r = Math.min(1, Math.max(0, ev.x / width));
-                deskSliderTrack.currentPos = r;
-                deskWaveCanvas.requestPaint();
-                AudioState.setOutVol(r);
-              }
-            }
-
-            onReleased: function() {
-              deskSliderMouse.dragging = false;
-            }
+            onPressed: function (ev) { AudioState.setOutVol(Math.min(1, Math.max(0, ev.x / width))); }
+            onPositionChanged: function (ev) { if (pressed) AudioState.setOutVol(Math.min(1, Math.max(0, ev.x / width))); }
           }
         }
-
         Text {
           anchors.verticalCenter: parent.verticalCenter
-          width: 38
+          width: 44
+          horizontalAlignment: Text.AlignRight
           text: AudioState.outMuted ? "Mute" : (Math.round(AudioState.outVol * 100) + "%")
-          color: AudioState.outMuted ? (SettingsState.isDark ? "#ff8a8a" : "#d32f2f") : SettingsState.textSecondary
+          color: "#8a8a8a"
           font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
-          horizontalAlignment: Text.AlignRight
         }
       }
     }
   }
 
-  // 5. Save Destination Row
+  // 6. Save destination (minimal)
   Rectangle {
     width: parent.width
     height: 34
-    radius: 12
-    color: SettingsState.bgCard
-    border.color: SettingsState.borderBase
+    radius: 10
+    color: "transparent"
+    border.color: "#2c2c31"
     border.width: 1
-
     Row {
       anchors.left: parent.left
       anchors.leftMargin: 12
       anchors.verticalCenter: parent.verticalCenter
       spacing: 8
-
       CCIcon {
         anchors.verticalCenter: parent.verticalCenter
-        width: 14
-        height: 14
+        width: 13
+        height: 13
         kind: "folder"
-        glyph: SettingsState.textSecondary
+        glyph: "#8a8a8a"
       }
-
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "SAVE TO"
-        color: SettingsState.textMuted
-        font.pixelSize: SettingsState.px(12)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 1
-      }
-
       Text {
         anchors.verticalCenter: parent.verticalCenter
         text: "~/Videos/Recordings"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(13)
+        color: SettingsState.textSecondary
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
       }
     }
-
     Rectangle {
       anchors.right: parent.right
       anchors.rightMargin: 6
@@ -1020,20 +652,18 @@ Column {
       height: 22
       width: openBtnText.implicitWidth + 14
       radius: 11
-      color: openDirMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
-      border.color: SettingsState.borderBase
+      color: openDirMouse.containsMouse ? cardSofter : "transparent"
+      border.color: lineSoft
       border.width: 1
-
       Text {
         id: openBtnText
         anchors.centerIn: parent
         text: "OPEN"
-        color: SettingsState.accent
-        font.pixelSize: SettingsState.px(12)
+        color: tan
+        font.pixelSize: SettingsState.px(11)
         font.bold: true
         font.family: SettingsState.fontFamily
       }
-
       MouseArea {
         id: openDirMouse
         anchors.fill: parent
@@ -1044,59 +674,32 @@ Column {
     }
   }
 
-  // 6. Recent Recordings Header
+  // 7. Recent recordings (minimal)
   Item {
     width: parent.width
-    height: 22
-
-    Row {
+    height: 20
+    Text {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 6
-
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "録"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(15)
-        font.bold: true
-      }
-
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        text: "RECENT • " + (RecorderState.recentRecordings ? RecorderState.recentRecordings.length : 0)
-        color: SettingsState.textSecondary
-        font.pixelSize: SettingsState.px(13)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-        font.letterSpacing: 1
-      }
+      text: "RECENT • " + (RecorderState.recentRecordings ? RecorderState.recentRecordings.length : 0)
+      color: SettingsState.textMuted
+      font.pixelSize: SettingsState.px(11)
+      font.family: SettingsState.fontFamily
+      font.letterSpacing: 1.5
     }
-
-    Rectangle {
+    Text {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      height: 20
-      width: clearRecText.implicitWidth + 12
-      radius: 10
       visible: RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0
-      color: clearRecMouse.containsMouse ? (SettingsState.isDark ? "#322222" : "#ffe0e0") : (SettingsState.isDark ? "#221a1a" : "#fff0f0")
-      border.color: clearRecMouse.containsMouse ? (SettingsState.isDark ? "#553030" : "#ffb3b3") : (SettingsState.isDark ? "#382525" : "#ffcccc")
-      border.width: 1
-
-      Text {
-        id: clearRecText
-        anchors.centerIn: parent
-        text: "払 CLEAR"
-        color: SettingsState.isDark ? "#ff8a8a" : "#d32f2f"
-        font.pixelSize: SettingsState.px(12)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-
+      text: "CLEAR"
+      color: "#ff8a8a"
+      font.pixelSize: SettingsState.px(11)
+      font.bold: true
+      font.family: SettingsState.fontFamily
       MouseArea {
         id: clearRecMouse
         anchors.fill: parent
+        anchors.margins: -6
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: RecorderState.clearAll()
@@ -1104,12 +707,11 @@ Column {
     }
   }
 
-  // Recent recordings list
   Text {
     visible: !RecorderState.recentRecordings || RecorderState.recentRecordings.length === 0
     text: "No recent recordings"
     color: SettingsState.textMuted
-    font.pixelSize: SettingsState.px(14)
+    font.pixelSize: SettingsState.px(12)
     font.family: SettingsState.fontFamily
     anchors.horizontalCenter: parent.horizontalCenter
   }
@@ -1117,93 +719,73 @@ Column {
   ListView {
     id: recList
     width: parent.width
-    height: (RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(180, RecorderState.recentRecordings.length * 60) : 0
+    height: (RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0) ? Math.min(150, RecorderState.recentRecordings.length * 52) : 0
     spacing: 6
     clip: true
     visible: RecorderState.recentRecordings && RecorderState.recentRecordings.length > 0
     model: RecorderState.recentRecordings
-
     delegate: Rectangle {
       id: recCard
       width: ListView.view.width
-      height: 54
-      radius: 12
-      color: recCardMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgCard
-      border.color: recCardMouse.containsMouse ? SettingsState.borderActive : SettingsState.borderBase
+      height: 46
+      radius: 10
+      color: recCardMouse.containsMouse ? cardSoft : "transparent"
+      border.color: lineSoft
       border.width: 1
-
       Row {
         anchors.fill: parent
         anchors.margins: 7
         spacing: 10
-
-        // Video thumbnail box with play icon
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
-          width: 46
-          height: 38
+          width: 40
+          height: 32
           radius: 8
-          color: recCardMouse.containsMouse ? SettingsState.bgActivePill : SettingsState.bgSurface
-          border.color: SettingsState.borderBase
-          border.width: 1
-
+          color: cardSofter
           CCIcon {
             anchors.centerIn: parent
-            width: 16
-            height: 16
+            width: 14
+            height: 14
             kind: "play"
-            glyph: recCardMouse.containsMouse ? "#e05f65" : SettingsState.accent
+            glyph: recCardMouse.containsMouse ? "#e05f65" : tan
           }
         }
-
-        // Details column
         Column {
           anchors.verticalCenter: parent.verticalCenter
-          width: parent.width - 60
+          width: parent.width - 54
           spacing: 2
-
           Text {
             width: parent.width
             text: modelData.name || "Recording"
             color: SettingsState.textMain
-            font.pixelSize: SettingsState.px(14)
+            font.pixelSize: SettingsState.px(12)
             font.bold: true
             font.family: SettingsState.fontFamily
             elide: Text.ElideRight
           }
-
           Row {
             spacing: 8
             Text {
               text: modelData.date || ""
               color: SettingsState.textSecondary
-              font.pixelSize: SettingsState.px(13)
+              font.pixelSize: SettingsState.px(11)
               font.family: SettingsState.fontFamily
             }
             Text {
-              text: "•"
-                font.family: SettingsState.nerdIconFont
-              color: SettingsState.textMuted
-              font.pixelSize: SettingsState.px(13)
-            }
-            Text {
               text: modelData.size || ""
-              color: SettingsState.accent
-              font.pixelSize: SettingsState.px(13)
+              color: tan
+              font.pixelSize: SettingsState.px(11)
               font.family: SettingsState.fontFamily
             }
           }
         }
       }
-
       MouseArea {
         id: recCardMouse
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-          RecorderState.play(modelData.path);
-        }
+        onClicked: RecorderState.play(modelData.path)
       }
     }
   }

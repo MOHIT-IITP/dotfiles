@@ -1,4 +1,3 @@
-import Quickshell
 import QtQuick
 import QtQuick.Effects
 import "../services"

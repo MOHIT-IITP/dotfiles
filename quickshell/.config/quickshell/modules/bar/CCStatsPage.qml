@@ -6,7 +6,7 @@ Column {
   id: root
   required property var circle
   required property bool hovered
-  spacing: 10
+  spacing: 8
   opacity: (hovered && circle.activePage === "stats") ? 1 : 0
   visible: opacity > 0
 
@@ -16,115 +16,108 @@ Column {
     }
   }
 
-  // Header with back button
+  // Header — minimal like config: spaced title left, thin chevron right
   Item {
     width: parent.width
     height: 30
 
-    Row {
+    Text {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 10
-
-      Rectangle {
-        width: 28
-        height: 28
-        radius: 14
-        color: statsBackMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
-        anchors.verticalCenter: parent.verticalCenter
-
-        Text {
-          anchors.centerIn: parent
-          text: "\ueab5"
-          font.family: SettingsState.nerdIconFont
-          color: SettingsState.textMain
-          font.pixelSize: SettingsState.px(22)
-          font.bold: true
-        }
-
-        MouseArea {
-          id: statsBackMouse
-          anchors.fill: parent
-          hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
-          onClicked: circle.activePage = "main"
-        }
-      }
-
-      Row {
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 6
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          visible: SettingsState.japaneseGlyphs
-          text: "統"
-          color: statsTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-          font.pixelSize: SettingsState.px(20)
-          font.bold: true
-        }
-
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          text: "STATS"
-          color: statsTitleMouse.containsMouse ? SettingsState.accent : SettingsState.textMain
-          font.pixelSize: SettingsState.px(17)
-          font.bold: true
-          font.family: SettingsState.fontFamily
-        }
-      }
-
+      text: "STATS"
+      color: SettingsState.accent
+      font.pixelSize: SettingsState.px(14)
+      font.family: SettingsState.fontFamily
+      font.letterSpacing: 2
+      font.weight: Font.DemiBold
     }
 
     MouseArea {
       id: statsTitleMouse
-      anchors.fill: parent
+      anchors.left: parent.left
+      anchors.top: parent.top
+      anchors.bottom: parent.bottom
+      width: 180
       hoverEnabled: true
       cursorShape: Qt.PointingHandCursor
       onClicked: circle.activePage = "main"
     }
 
-    Text {
+    Item {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
-      text: SysStats.tempText
-      color: SettingsState.textMuted
-      font.pixelSize: SettingsState.px(12)
-      font.bold: true
-      font.family: SettingsState.fontFamily
-      elide: Text.ElideRight
+      width: 24
+      height: 24
+
+      Text {
+        anchors.centerIn: parent
+        text: "‹"
+        font.family: SettingsState.fontFamily
+        font.weight: Font.Light
+        color: statsBackMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
+        font.pixelSize: SettingsState.px(22)
+      }
+
+      MouseArea {
+        id: statsBackMouse
+        anchors.fill: parent
+        anchors.margins: -4
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: circle.activePage = "main"
+      }
     }
   }
 
-  Rectangle {
+  Item {
     width: parent.width
-    height: 1
-    color: SettingsState.borderBase
+    height: 10
   }
 
   Grid {
     width: parent.width
     columns: 2
-    columnSpacing: 18
-    rowSpacing: 14
+    columnSpacing: 24
+    rowSpacing: 18
 
-    // 1. RAM cell
+    // 1. RAM cell — plain row like config: icon | title+detail | pct
     Column {
-      width: (parent.width - 18) / 2
-      spacing: 3
+      width: (parent.width - 24) / 2
+      spacing: 6
 
       Row {
         width: parent.width
-        Item {
-          width: parent.width - pctRam.implicitWidth
-          height: 20
-          CCIcon {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: 18
-            height: 18
-            kind: "ram"
-            glyph: SettingsState.accent
+        spacing: 12
+
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 22
+          height: 22
+          kind: "ram"
+          glyph: SettingsState.isDark ? "#b5b5b5" : "#555555"
+        }
+
+        Column {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 22 - 12 - pctRam.implicitWidth - 8
+          spacing: 3
+
+          Text {
+            width: parent.width
+            text: "RAM"
+            color: SettingsState.isDark ? "#e2e2e2" : "#222222"
+            font.pixelSize: SettingsState.px(16)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: parent.width
+            text: SysStats.ready ? SysStats.ramText : "--"
+            color: SettingsState.isDark ? "#7c7c7c" : "#777777"
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
           }
         }
 
@@ -132,26 +125,10 @@ Column {
           id: pctRam
           anchors.verticalCenter: parent.verticalCenter
           text: Math.round(SysStats.ramPct) + "%"
-          color: SettingsState.accent
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
+          color: SettingsState.textSecondary
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
-      }
-
-      Text {
-        text: "RAM"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(13)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-
-      Text {
-        text: SysStats.ready ? SysStats.ramText : "--"
-        color: SettingsState.textSecondary
-        font.pixelSize: SettingsState.px(11)
-        font.family: SettingsState.fontFamily
       }
 
       WavyStatSlider {
@@ -173,21 +150,42 @@ Column {
 
     // 2. Swap cell
     Column {
-      width: (parent.width - 18) / 2
-      spacing: 3
+      width: (parent.width - 24) / 2
+      spacing: 6
 
       Row {
         width: parent.width
-        Item {
-          width: parent.width - pctSwap.implicitWidth
-          height: 20
-          CCIcon {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: 18
-            height: 18
-            kind: "swap"
-            glyph: SettingsState.accent
+        spacing: 12
+
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 22
+          height: 22
+          kind: "swap"
+          glyph: SettingsState.isDark ? "#b5b5b5" : "#555555"
+        }
+
+        Column {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 22 - 12 - pctSwap.implicitWidth - 8
+          spacing: 3
+
+          Text {
+            width: parent.width
+            text: "Swap"
+            color: SettingsState.isDark ? "#e2e2e2" : "#222222"
+            font.pixelSize: SettingsState.px(16)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: parent.width
+            text: SysStats.ready ? SysStats.swapText : "--"
+            color: SettingsState.isDark ? "#7c7c7c" : "#777777"
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
           }
         }
 
@@ -195,26 +193,10 @@ Column {
           id: pctSwap
           anchors.verticalCenter: parent.verticalCenter
           text: Math.round(SysStats.swapPct) + "%"
-          color: SettingsState.accent
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
+          color: SettingsState.textSecondary
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
-      }
-
-      Text {
-        text: "Swap"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(13)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-
-      Text {
-        text: SysStats.ready ? SysStats.swapText : "--"
-        color: SettingsState.textSecondary
-        font.pixelSize: SettingsState.px(11)
-        font.family: SettingsState.fontFamily
       }
 
       WavyStatSlider {
@@ -236,21 +218,42 @@ Column {
 
     // 3. CPU cell
     Column {
-      width: (parent.width - 18) / 2
-      spacing: 3
+      width: (parent.width - 24) / 2
+      spacing: 6
 
       Row {
         width: parent.width
-        Item {
-          width: parent.width - pctCpu.implicitWidth
-          height: 20
-          CCIcon {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: 18
-            height: 18
-            kind: "cpu"
-            glyph: SettingsState.accent
+        spacing: 12
+
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 22
+          height: 22
+          kind: "cpu"
+          glyph: SettingsState.isDark ? "#b5b5b5" : "#555555"
+        }
+
+        Column {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 22 - 12 - pctCpu.implicitWidth - 8
+          spacing: 3
+
+          Text {
+            width: parent.width
+            text: "CPU"
+            color: SettingsState.isDark ? "#e2e2e2" : "#222222"
+            font.pixelSize: SettingsState.px(16)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: parent.width
+            text: SysStats.tempText
+            color: SettingsState.isDark ? "#7c7c7c" : "#777777"
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
           }
         }
 
@@ -258,26 +261,10 @@ Column {
           id: pctCpu
           anchors.verticalCenter: parent.verticalCenter
           text: Math.round(SysStats.cpuPct) + "%"
-          color: SettingsState.accent
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
+          color: SettingsState.textSecondary
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
-      }
-
-      Text {
-        text: "CPU"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(13)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-
-      Text {
-        text: SysStats.tempText
-        color: SettingsState.textSecondary
-        font.pixelSize: SettingsState.px(11)
-        font.family: SettingsState.fontFamily
       }
 
       WavyStatSlider {
@@ -299,21 +286,42 @@ Column {
 
     // 4. Disk cell
     Column {
-      width: (parent.width - 18) / 2
-      spacing: 3
+      width: (parent.width - 24) / 2
+      spacing: 6
 
       Row {
         width: parent.width
-        Item {
-          width: parent.width - pctDisk.implicitWidth
-          height: 20
-          CCIcon {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width: 18
-            height: 18
-            kind: "disk"
-            glyph: SettingsState.accent
+        spacing: 12
+
+        CCIcon {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 22
+          height: 22
+          kind: "disk"
+          glyph: SettingsState.isDark ? "#b5b5b5" : "#555555"
+        }
+
+        Column {
+          anchors.verticalCenter: parent.verticalCenter
+          width: parent.width - 22 - 12 - pctDisk.implicitWidth - 8
+          spacing: 3
+
+          Text {
+            width: parent.width
+            text: "Disk"
+            color: SettingsState.isDark ? "#e2e2e2" : "#222222"
+            font.pixelSize: SettingsState.px(16)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+          }
+
+          Text {
+            width: parent.width
+            text: SysStats.ready ? SysStats.diskText : "--"
+            color: SettingsState.isDark ? "#7c7c7c" : "#777777"
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
           }
         }
 
@@ -321,26 +329,10 @@ Column {
           id: pctDisk
           anchors.verticalCenter: parent.verticalCenter
           text: Math.round(SysStats.diskPct) + "%"
-          color: SettingsState.accent
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
+          color: SettingsState.textSecondary
+          font.pixelSize: SettingsState.px(13)
           font.family: SettingsState.fontFamily
         }
-      }
-
-      Text {
-        text: "Disk"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(13)
-        font.bold: true
-        font.family: SettingsState.fontFamily
-      }
-
-      Text {
-        text: SysStats.ready ? SysStats.diskText : "--"
-        color: SettingsState.textSecondary
-        font.pixelSize: SettingsState.px(11)
-        font.family: SettingsState.fontFamily
       }
 
       WavyStatSlider {
