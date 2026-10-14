@@ -85,7 +85,7 @@ Rectangle {
         target: ReminderState
         function onRemindersChanged() { ringCanvas.requestPaint(); }
         function onSoonestProgressChanged() { ringCanvas.requestPaint(); }
-        function onSoonestRemainingChanged() { ringCanvas.requestPaint(); }
+        function onSoonestRemainingSecondsChanged() { ringCanvas.requestPaint(); }
         function onSoonestFinishedChanged() { ringCanvas.requestPaint(); }
         function onHasFinishedChanged() { ringCanvas.requestPaint(); }
       }

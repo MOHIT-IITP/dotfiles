@@ -45,7 +45,7 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: 22
-    color: SettingsState.bgCard
+    color: "transparent"
     border.width: 0
 
     Row {
@@ -79,7 +79,7 @@ Item {
             text: "" + root.selectedDay
             color: SettingsState.isDark ? "#ffffff" : "#1a1a1a"
             font.pixelSize: SettingsState.px(42)
-            font.bold: true
+            font.weight: Font.Light
             font.family: SettingsState.fontFamily
             lineHeight: 0.95
           }
@@ -116,12 +116,12 @@ Item {
 
         Column {
           anchors.fill: parent
-          spacing: 4
+          spacing: 0
 
           // Month header (e.g. "JUNE") + subtle navigation chevrons
           Item {
             width: parent.width
-            height: 16
+            height: 14
 
             Text {
               anchors.left: parent.left
@@ -178,7 +178,7 @@ Item {
           // Weekdays header row: M T W T F S S
           Row {
             width: parent.width
-            height: 14
+            height: 12
 
             Repeater {
               model: [
@@ -207,24 +207,23 @@ Item {
             }
           }
 
-          // Days grid: 7 columns x 6 rows (sized to fit exactly: header 16
-          // + weekdays 14 + both column gaps of 4)
+          // Days grid matching reference photo: tight 5-row stack, round
+          // white circle for selected day, red today, small vertical pitch.
           Grid {
             id: calGrid
             width: parent.width
-            height: parent.height - 16 - 14 - 8
+            height: parent.height - 14 - 12
             columns: 7
             rows: CalendarState.calendarRows
-            rowSpacing: 1
+            rowSpacing: 0
             columnSpacing: 0
 
             Repeater {
               model: CalendarState.visibleCalendarGrid
 
               delegate: Item {
-                property real cellH: (calGrid.height - (CalendarState.calendarRows - 1)) / CalendarState.calendarRows
-                property real pillW: Math.min(24, cellH * 1.45)
-                property real pillH: Math.min(18, cellH)
+                property real cellH: calGrid.height / CalendarState.calendarRows
+                property real circleD: Math.min(22, cellH - 1)
                 width: calGrid.width / 7
                 height: cellH
 
@@ -233,22 +232,22 @@ Item {
                 property bool isSelected: inMonth && (modelData.day === root.selectedDay)
                 property bool isWeekend: (index % 7) >= 5
 
-                // Solid white pill background for selected day
+                // Round white circle for selected day (like reference photo)
                 Rectangle {
                   anchors.centerIn: parent
-                  width: pillW
-                  height: pillH
-                  radius: pillH / 2
+                  width: circleD
+                  height: circleD
+                  radius: circleD / 2
                   color: parent.isSelected ? "#ffffff" : "transparent"
                   visible: parent.inMonth && parent.isSelected
                 }
 
-                // Subtle hover pill for unselected days
+                // Subtle hover circle for unselected days
                 Rectangle {
                   anchors.centerIn: parent
-                  width: pillW
-                  height: pillH
-                  radius: pillH / 2
+                  width: circleD
+                  height: circleD
+                  radius: circleD / 2
                   color: SettingsState.isDark ? "#1e1e24" : "#e6e6ec"
                   visible: parent.inMonth && !parent.isSelected && cellMouse.containsMouse
                 }
@@ -264,8 +263,11 @@ Item {
                     return SettingsState.isDark ? "#ffffff" : "#1a1a1a";
                   }
                   font.pixelSize: SettingsState.px(12)
-                  font.bold: parent.isSelected || parent.isToday
+                  font.bold: parent.isSelected
+                  font.weight: parent.isSelected ? Font.DemiBold : Font.Normal
                   font.family: SettingsState.fontFamily
+                  lineHeight: 1.0
+                  lineHeightMode: Text.FixedHeight
                 }
 
                 MouseArea {

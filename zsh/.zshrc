@@ -209,3 +209,8 @@ export PATH="/Users/mohiitp/.antigravity-ide/antigravity-ide/bin:$PATH"
 
 # Added by Antigravity CLI installer
 export PATH="/home/mohiitp/.local/bin:$PATH"
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/mohiitp/dotfiles/~/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"

@@ -37,7 +37,7 @@ Item {
     if (k === "gear" || k === "settings" || k === "config") return ""; // nf-cod-gear
     if (k === "lock") return ""; // nf-cod-lock
     if (k === "logout" || k === "exit") return ""; // nf-cod-sign_out
-    if (k === "moon" || k === "sleep" || k === "suspend" || k === "dnd") return "󰖔"; // nf-md-weather_night
+    if (k === "moon" || k === "sleep" || k === "suspend" || k === "dnd") return ""; // nf-fa-moon_o (thin crescent, DND)
     if (k === "sunset" || k === "nightlight" || k === "night") return "󰖚"; // nf-md-weather_sunset
     if (k === "sun" || k === "brightness") return "󰖨"; // nf-md-white_balance_sunny
     if (k === "display" || k === "monitor" || k === "screen") return "󰍹"; // nf-md-monitor

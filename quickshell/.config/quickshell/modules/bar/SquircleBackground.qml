@@ -53,7 +53,7 @@ Canvas {
     var targetP = Math.max(1.0, power);
     var p = 2.0 + (targetP - 2.0) * blend;
     var invP = 2.0 / p;
-    var steps = 64;
+    var steps = 32;
 
     ctx.save();
     ctx.translate(inset, inset);

@@ -10,6 +10,73 @@ Item {
   readonly property var list: WallpaperState.filteredWallpapers
   readonly property int count: list ? list.length : 0
 
+  // ---- Filmstrip animation state (ported from quickshell_bar surfaces/Wallpaper.qml) ----
+  // Continuous view position chasing WallpaperState.currentIndex. Rendered from
+  // this single value so any input rate (key autorepeat, wheel bursts) stays
+  // coherent: lag is bounded by the chase time constant, not piled up across
+  // per-tile retargeting animations.
+  property real pos: 0
+  property bool hintShown: false
+
+  readonly property var slotW: [224, 144, 114, 92, 74]
+  readonly property var slotH: [126, 81, 64, 52, 42]
+  readonly property var slotCX: [0, 156, 248, 322, 388]
+  readonly property var slotBright: [1, 0.56, 0.42, 0.30, 0.22]
+  readonly property var slotSat: [1, 0.65, 0.55, 0.45, 0.40]
+
+  function slotLerp(arr, ao) {
+    if (ao >= 4) return arr[4];
+    var i = Math.floor(ao);
+    var f = ao - i;
+    return arr[i] + (arr[i + 1] - arr[i]) * f;
+  }
+
+  function offsetX(off) {
+    var ao = Math.abs(off);
+    var cx = ao <= 4 ? slotLerp(slotCX, ao) : slotCX[4] + (ao - 4) * 66;
+    return off < 0 ? -cx : cx;
+  }
+
+  function snapPos() {
+    pos = WallpaperState.currentIndex;
+  }
+
+  onCountChanged: {
+    if (WallpaperState.currentIndex >= count)
+      WallpaperState.selectIndex(Math.max(0, count - 1));
+    // Clamp without gliding when the list itself changes (filter swap).
+    if (pos >= count || pos < 0) snapPos();
+  }
+
+  Connections {
+    target: WallpaperState
+    function onCurrentIndexChanged() {
+      // Wrap-around (last -> first) snaps; otherwise the FrameAnimation glides.
+      var target = WallpaperState.currentIndex;
+      if (Math.abs(target - root.pos) > Math.max(2, root.count / 2))
+        root.pos = target;
+      root.hintShown = false;
+      hintDwell.restart();
+    }
+  }
+
+  Timer {
+    id: hintDwell
+    interval: 600
+    onTriggered: root.hintShown = true
+  }
+
+  FrameAnimation {
+    running: root.pos !== WallpaperState.currentIndex
+    onTriggered: {
+      var k = 1 - Math.exp(-frameTime / 0.14);
+      var next = root.pos + (WallpaperState.currentIndex - root.pos) * k;
+      root.pos = Math.abs(next - WallpaperState.currentIndex) < 0.005 ? WallpaperState.currentIndex : next;
+    }
+  }
+
+  Component.onCompleted: snapPos()
+
   property bool resizeOpen: false
   readonly property string resizeLabel: {
     var m = SettingsState.wallpaperResizeMode;
@@ -19,8 +86,8 @@ Item {
     return "Fill";
   }
 
-  implicitWidth: 720
-  implicitHeight: 260
+  implicitWidth: 650
+  implicitHeight: 236
 
   function forceFocus() {
     viewArea.focus = true;
@@ -34,6 +101,9 @@ Item {
         forceFocus();
         wallFocusRetryTimer.restart();
         WallpaperState.refresh();
+        snapPos();
+        hintShown = false;
+        hintDwell.restart();
       }
     }
   }
@@ -91,13 +161,13 @@ Item {
     // Kanji watermark '壁' (Wall) on the left
     Text {
       anchors.left: parent.left
-      anchors.leftMargin: 20
+      anchors.leftMargin: 12
       anchors.verticalCenter: parent.verticalCenter
       anchors.verticalCenterOffset: 12
       text: "壁"
       color: SettingsState.isDark ? "#f2f2f2" : "#111111"
       opacity: 0.05
-      font.pixelSize: SettingsState.px(64)
+      font.pixelSize: SettingsState.px(56)
       font.bold: true
       font.family: "serif"
     }
@@ -108,7 +178,7 @@ Item {
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.margins: 18
+      anchors.margins: 12
       anchors.bottomMargin: 0
       height: 28
 
@@ -270,7 +340,7 @@ Item {
       visible: root.resizeOpen
       anchors.top: header.bottom
       anchors.right: parent.right
-      anchors.rightMargin: 18
+      anchors.rightMargin: 12
       anchors.topMargin: 2
       width: 130
       height: resizeCol.implicitHeight + 10
@@ -344,8 +414,8 @@ Item {
       anchors.left: parent.left
       anchors.right: parent.right
       anchors.bottom: bottomBar.top
-      anchors.topMargin: 4
-      anchors.bottomMargin: 4
+      anchors.topMargin: 2
+      anchors.bottomMargin: 2
 
       // Empty state
       Text {
@@ -360,21 +430,23 @@ Item {
       // Left navigation button
       Rectangle {
         anchors.left: parent.left
-        anchors.leftMargin: 12
+        anchors.leftMargin: 8
         anchors.verticalCenter: parent.verticalCenter
-        width: 32
-        height: 32
-        radius: 16
-        color: lMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface
+        width: 30
+        height: 30
+        radius: 15
+        color: lMouse.containsMouse && WallpaperState.currentIndex > 0 ? SettingsState.bgCardHover : SettingsState.bgSurface
         border.color: SettingsState.borderBase
         border.width: 1
         z: 200
         visible: root.count > 1
+        opacity: WallpaperState.currentIndex > 0 ? 1.0 : 0.3
+        enabled: WallpaperState.currentIndex > 0
 
         Text {
           anchors.centerIn: parent
           text: "\ueab5"
-            font.family: SettingsState.nerdIconFont
+          font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: SettingsState.px(18)
         }
@@ -383,7 +455,7 @@ Item {
           id: lMouse
           anchors.fill: parent
           hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
+          cursorShape: WallpaperState.currentIndex > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
           onClicked: WallpaperState.prev()
         }
       }
@@ -391,21 +463,23 @@ Item {
       // Right navigation button
       Rectangle {
         anchors.right: parent.right
-        anchors.rightMargin: 12
+        anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
-        width: 32
-        height: 32
-        radius: 16
-        color: rMouse.containsMouse ? SettingsState.bgCardHover : SettingsState.bgSurface
+        width: 30
+        height: 30
+        radius: 15
+        color: rMouse.containsMouse && WallpaperState.currentIndex < root.count - 1 ? SettingsState.bgCardHover : SettingsState.bgSurface
         border.color: SettingsState.borderBase
         border.width: 1
         z: 200
         visible: root.count > 1
+        opacity: WallpaperState.currentIndex < root.count - 1 ? 1.0 : 0.3
+        enabled: WallpaperState.currentIndex < root.count - 1
 
         Text {
           anchors.centerIn: parent
           text: "\ueab6"
-            font.family: SettingsState.nerdIconFont
+          font.family: SettingsState.nerdIconFont
           color: SettingsState.textMain
           font.pixelSize: SettingsState.px(18)
         }
@@ -414,105 +488,89 @@ Item {
           id: rMouse
           anchors.fill: parent
           hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
+          cursorShape: WallpaperState.currentIndex < root.count - 1 ? Qt.PointingHandCursor : Qt.ArrowCursor
           onClicked: WallpaperState.next()
         }
       }
 
-      // Horizontal Coverflow PathView
-      PathView {
-        id: coverflow
-        anchors.fill: parent
-        visible: root.count > 0
+      // Filmstrip (ported from quickshell_bar): tiles positioned from the single
+      // continuous `pos` value, focused thumb large + fully lit, neighbours
+      // shrink / dim / desaturate as they slide under it.
+      clip: true
+
+      Repeater {
+        id: strip
         model: root.list
-        currentIndex: WallpaperState.currentIndex
-        highlightMoveDuration: 280
-        onCurrentIndexChanged: {
-          if (currentIndex !== WallpaperState.currentIndex) {
-            WallpaperState.selectIndex(currentIndex);
-          }
-        }
-        pathItemCount: Math.min(5, Math.max(1, root.count))
-        preferredHighlightBegin: 0.5
-        preferredHighlightEnd: 0.5
-        highlightRangeMode: PathView.StrictlyEnforceRange
-
-        path: Path {
-          startX: 80
-          startY: carouselArea.height / 2
-          PathAttribute { name: "itemZ"; value: 10 }
-          PathAttribute { name: "itemScale"; value: 0.72 }
-          PathAttribute { name: "itemOpacity"; value: 0.60 }
-
-          PathLine {
-            x: carouselArea.width * 0.28
-            y: carouselArea.height / 2
-          }
-          PathAttribute { name: "itemZ"; value: 50 }
-          PathAttribute { name: "itemScale"; value: 0.86 }
-          PathAttribute { name: "itemOpacity"; value: 0.85 }
-
-          PathLine {
-            x: carouselArea.width / 2
-            y: carouselArea.height / 2
-          }
-          PathAttribute { name: "itemZ"; value: 100 }
-          PathAttribute { name: "itemScale"; value: 1.0 }
-          PathAttribute { name: "itemOpacity"; value: 1.0 }
-
-          PathLine {
-            x: carouselArea.width * 0.72
-            y: carouselArea.height / 2
-          }
-          PathAttribute { name: "itemZ"; value: 50 }
-          PathAttribute { name: "itemScale"; value: 0.86 }
-          PathAttribute { name: "itemOpacity"; value: 0.85 }
-
-          PathLine {
-            x: carouselArea.width - 80
-            y: carouselArea.height / 2
-          }
-          PathAttribute { name: "itemZ"; value: 10 }
-          PathAttribute { name: "itemScale"; value: 0.72 }
-          PathAttribute { name: "itemOpacity"; value: 0.60 }
-        }
+        visible: root.count > 0
 
         delegate: Item {
           id: cardItem
-          width: 224
-          height: 138
-          z: Math.round(PathView.itemZ || (isCur ? 100 : 10))
-          scale: PathView.itemScale || (isCur ? 1.0 : 0.85)
-          opacity: PathView.itemOpacity || (isCur ? 1.0 : 0.7)
+          required property int index
+          required property var modelData
 
-          readonly property bool isCur: PathView.isCurrentItem
+          readonly property real off: index - root.pos
+          readonly property real ao: Math.abs(off)
+          readonly property bool isCur: index === WallpaperState.currentIndex
           readonly property bool isApplying: WallpaperState.isApplying && WallpaperState.lastApplied === modelData.path
-          readonly property real cardRadius: isCur ? 16 : 14
+          readonly property real bright: root.slotLerp(root.slotBright, ao)
+          readonly property real sat: root.slotLerp(root.slotSat, ao)
+          readonly property real cardRadius: Math.round(15 + 3 * Math.max(0, 1 - ao))
+          readonly property real edgeFade: {
+            var soft = 70;
+            var gap = Math.min(x, carouselArea.width - (x + width));
+            return Math.max(0, Math.min(1, gap / soft));
+          }
 
-          // Clipped wallpaper image item
+          width: root.slotLerp(root.slotW, ao)
+          height: root.slotLerp(root.slotH, ao)
+          x: carouselArea.width / 2 + root.offsetX(off) - width / 2
+          y: (carouselArea.height - height) / 2
+          z: 10 - ao
+          visible: ao <= 5
+          opacity: edgeFade * (ao <= 4 ? 1 : Math.max(0, 5 - ao))
+
+          // Mask source item for rounded thumbnail
+          Rectangle {
+            id: maskShape
+            anchors.fill: parent
+            radius: cardItem.cardRadius
+            color: "#ffffff"
+            visible: false
+            layer.enabled: true
+            layer.smooth: true
+          }
+
+          // Focused card shadow underlay
+          Rectangle {
+            anchors.fill: parent
+            radius: cardItem.cardRadius
+            color: SettingsState.bgCard
+            visible: cardItem.isCur
+            z: 0
+            layer.enabled: true
+            layer.smooth: true
+            layer.effect: MultiEffect {
+              shadowEnabled: true
+              shadowColor: SettingsState.shadowColor
+              shadowBlur: 0.6
+              shadowVerticalOffset: 3
+            }
+          }
+
+          // Clipped wallpaper thumbnail container
           Item {
             id: imgWrapper
             anchors.fill: parent
+            z: 1
 
             layer.enabled: true
+            layer.smooth: true
             layer.effect: MultiEffect {
               maskEnabled: true
               maskSource: maskShape
               maskThresholdMin: 0.5
               maskSpreadAtMin: 1.0
-            }
-
-            Rectangle {
-              id: maskShape
-              width: imgWrapper.width
-              height: imgWrapper.height
-              radius: cardItem.cardRadius
-              visible: false
-              layer.enabled: true
-
-              Behavior on radius {
-                NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-              }
+              saturation: cardItem.sat - 1
             }
 
             Image {
@@ -522,39 +580,54 @@ Item {
               fillMode: Image.PreserveAspectCrop
               smooth: true
               asynchronous: true
-              sourceSize.width: 450
-              sourceSize.height: 280
+              cache: false
+              sourceSize.width: 480
+              sourceSize.height: 270
             }
 
-            // Dark vignette overlay on non-selected cards
+            // Depth dim: neighbours sink into shadow as they slide under focus.
             Rectangle {
               anchors.fill: parent
+              radius: cardItem.cardRadius
               color: "#000000"
-              opacity: isCur ? 0 : 0.45
+              opacity: 1 - cardItem.bright
+            }
 
-              Behavior on opacity {
-                NumberAnimation { duration: 220; easing.type: Easing.OutQuad }
+            // Live badge
+            Rectangle {
+              anchors.top: parent.top
+              anchors.left: parent.left
+              anchors.margins: 4
+              visible: modelData && modelData.isLive
+              width: liveText.implicitWidth + 9
+              height: liveText.implicitHeight + 4
+              radius: height / 2
+              color: "#8c000000"
+
+              Text {
+                id: liveText
+                anchors.centerIn: parent
+                text: "▶"
+                color: "#f2f2f2"
+                font.pixelSize: SettingsState.px(8)
               }
             }
           }
 
-          // Outer rounded border
+          // Crisp rounded border frame over the art
           Rectangle {
             anchors.fill: parent
             radius: cardItem.cardRadius
             color: "transparent"
-            border.color: isCur ? (isApplying ? "#f2c14e" : SettingsState.accent) : SettingsState.borderBase
-            border.width: isCur ? 2 : 1
-            opacity: isCur ? 1 : 0.6
+            border.color: {
+              var c = Qt.color(cardItem.isCur ? (cardItem.isApplying ? "#f2c14e" : SettingsState.accent) : SettingsState.borderBase);
+              return Qt.rgba(c.r, c.g, c.b, cardItem.isCur ? 1 : 0.6);
+            }
+            border.width: cardItem.isCur ? 2 : 1
+            z: 2
 
-            Behavior on radius {
-              NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-            }
             Behavior on border.color {
-              ColorAnimation { duration: 180 }
-            }
-            Behavior on opacity {
-              NumberAnimation { duration: 220; easing.type: Easing.OutQuad }
+              ColorAnimation { duration: 150 }
             }
           }
 
@@ -562,10 +635,10 @@ Item {
           Rectangle {
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottomMargin: 8
-            height: 20
-            width: resText.implicitWidth + 14
-            radius: 10
+            anchors.bottomMargin: 4
+            height: 18
+            width: resText.implicitWidth + 10
+            radius: 9
             color: SettingsState.isDark ? "#cc0c0e0c" : "#eeffffff"
             visible: isCur
             border.color: isApplying ? "#f2c14e" : SettingsState.borderBase
@@ -574,9 +647,9 @@ Item {
             Text {
               id: resText
               anchors.centerIn: parent
-              text: isApplying ? "Applying..." : (cardImg.implicitWidth > 0 ? (cardImg.implicitWidth + "×" + cardImg.implicitHeight) : "Click to Set")
+              text: isApplying ? "Applying..." : (modelData && modelData.isLive ? "LIVE · Click to Set" : "Click to Set")
               color: isApplying ? "#f2c14e" : SettingsState.textMain
-              font.pixelSize: SettingsState.px(11)
+              font.pixelSize: SettingsState.px(10)
               font.family: SettingsState.fontFamily
             }
           }
@@ -598,28 +671,45 @@ Item {
         }
       }
 
-      // Wheel handler for horizontal scrolling
+      // Wheel handler with notch accumulation so fast scrolls glide coherently
       MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.NoButton
+        z: 20
+        property real acc: 0
         onWheel: function (wheel) {
-          if (wheel.angleDelta.y < 0 || wheel.angleDelta.x > 0) {
-            WallpaperState.next();
-          } else if (wheel.angleDelta.y > 0 || wheel.angleDelta.x < 0) {
-            WallpaperState.prev();
+          acc += wheel.angleDelta.y / 120;
+          var notches = Math.trunc(acc);
+          if (notches !== 0) {
+            for (var i = 0; i < Math.abs(notches); i++) {
+              if (notches > 0) WallpaperState.prev();
+              else WallpaperState.next();
+            }
+            acc -= notches;
+            if ((WallpaperState.currentIndex === 0 && acc > 0) ||
+                (WallpaperState.currentIndex >= root.count - 1 && acc < 0)) {
+              acc = 0;
+            }
           }
+          wheel.accepted = true;
         }
       }
     }
 
     // ---- Bottom Shortcuts Bar ----
+    // Gesture hint: hidden while focus moves, revealed after a 600ms dwell.
     Row {
       id: bottomBar
       anchors.bottom: parent.bottom
-      anchors.bottomMargin: 10
+      anchors.bottomMargin: 6
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 8
+      spacing: 6
       visible: root.count > 0
+      opacity: root.hintShown ? 1 : 0
+
+      Behavior on opacity {
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+      }
 
       Rectangle {
         height: 16

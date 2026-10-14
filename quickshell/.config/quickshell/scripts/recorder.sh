@@ -37,9 +37,34 @@ case "$CMD" in
 
         AUDIO="${1:-both}"
         MODE="${2:-fullscreen}"
-        GEOM_INPUT="${3:-}"
+        FPS_IN="${3:-60}"
+        QUALITY_IN="${4:-high}"
+        CURSOR_IN="${5:-yes}"
+        GEOM_INPUT="${6:-}"
         GEOM=""
         REGION=""
+
+        # Validate fps / quality / cursor (UI offers 30/60/120/144 + Med/High/Ultra/Loss)
+        case "$FPS_IN" in
+            30|60|120|144) FPS="$FPS_IN" ;;
+            *) FPS=60 ;;
+        esac
+        case "$QUALITY_IN" in
+            medium|high|very_high|ultra) QUALITY="$QUALITY_IN" ;;
+            *) QUALITY="high" ;;
+        esac
+        case "$CURSOR_IN" in
+            yes|no) CURSOR="$CURSOR_IN" ;;
+            *) CURSOR="yes" ;;
+        esac
+        # Legacy positional callers: `start <audio> <mode> [geometry]`
+        # Detect a slurp geometry mistakenly sitting in the FPS slot.
+        if [[ "$FPS_IN" == *","*" "* ]]; then
+            GEOM_INPUT="$FPS_IN"
+            FPS=60
+            QUALITY="high"
+            CURSOR="yes"
+        fi
 
         # Resolve recording area when requested
         if [ "$MODE" = "area" ]; then
@@ -99,9 +124,9 @@ case "$CMD" in
 
             if [ "$MODE" = "area" ]; then
                 # New syntax: region passed directly via -w (bare -region is deprecated)
-                nohup gpu-screen-recorder -w "$REGION" -f 60 -q high "${AUDIO_ARGS[@]}" -o "$OUTPATH" >"$REC_LOG" 2>&1 &
+                nohup gpu-screen-recorder -w "$REGION" -f "$FPS" -q "$QUALITY" -cursor "$CURSOR" "${AUDIO_ARGS[@]}" -o "$OUTPATH" >"$REC_LOG" 2>&1 &
             else
-                nohup gpu-screen-recorder -w screen -f 60 -q high "${AUDIO_ARGS[@]}" -o "$OUTPATH" >"$REC_LOG" 2>&1 &
+                nohup gpu-screen-recorder -w screen -f "$FPS" -q "$QUALITY" -cursor "$CURSOR" "${AUDIO_ARGS[@]}" -o "$OUTPATH" >"$REC_LOG" 2>&1 &
             fi
             echo $! > "$PID_FILE"
 
@@ -113,10 +138,10 @@ case "$CMD" in
             if [ "$MODE" = "area" ]; then
                 # wf-recorder takes slurp geometry directly: "X,Y WxH"
                 # shellcheck disable=SC2086
-                nohup wf-recorder $AUDIO_ARGS -g "$GEOM" -f "$OUTPATH" >/dev/null 2>&1 &
+                nohup wf-recorder $AUDIO_ARGS -r "$FPS" -g "$GEOM" -f "$OUTPATH" >/dev/null 2>&1 &
             else
                 # shellcheck disable=SC2086
-                nohup wf-recorder $AUDIO_ARGS -f "$OUTPATH" >/dev/null 2>&1 &
+                nohup wf-recorder $AUDIO_ARGS -r "$FPS" -f "$OUTPATH" >/dev/null 2>&1 &
             fi
             echo $! > "$PID_FILE"
 
@@ -141,9 +166,9 @@ case "$CMD" in
         fi
 
         if [ "$MODE" = "area" ]; then
-            notify-send "Screen Recorder" "Area recording started ($GEOM)..." -i media-record
+            notify-send "Screen Recorder" "Area recording started ($GEOM, ${FPS}fps ${QUALITY})..." -i media-record
         else
-            notify-send "Screen Recorder" "Fullscreen recording started..." -i media-record
+            notify-send "Screen Recorder" "Fullscreen recording started (${FPS}fps ${QUALITY})..." -i media-record
         fi
         # Validate the recorder actually survived startup (e.g. bad region).
         # Errors were previously silent: UI showed REC, then flipped to IDLE.
@@ -155,7 +180,7 @@ case "$CMD" in
             echo '{"status": "failed"}'
             exit 1
         fi
-        echo '{"status": "started", "file": "'"$OUTPATH"'", "mode": "'"$MODE"'", "geometry": "'"$GEOM"'"}'
+        echo '{"status": "started", "file": "'"$OUTPATH"'", "mode": "'"$MODE"'", "geometry": "'"$GEOM"'", "fps": "'"$FPS"'", "quality": "'"$QUALITY"'", "cursor": "'"$CURSOR"'"}'
         ;;
 
     select-area)

@@ -10,7 +10,7 @@ import "WavySliderPaint.js" as WavyPaint
 // Workspace switch: temporarily reveals workspace dots + active bar.
 // Hovered: big clock + 7-day strip.
 // Right swipe on hover: seamlessly morphs the center bar itself into the Control Center!
-// Left swipe: calendar, then timer, then reminders. Calendar lives as a pill inside the control center.
+// Left swipe: timer, then reminders. Calendar lives as a subpage inside the control center.
 Rectangle {
   id: root
 
@@ -86,15 +86,30 @@ Rectangle {
   readonly property bool timerHovering: timerView.visible && timerView.timerHover
   readonly property bool remHovering: reminderWrap.visible && reminderWrap.remHover
   property bool mediaHover: false
+  property bool swipeTransitioning: false
+  Timer {
+    id: swipeTransitionTimer
+    interval: 450
+    repeat: false
+    onTriggered: root.swipeTransitioning = false
+  }
+  function triggerSwipeTransition() {
+    root.swipeTransitioning = true;
+    swipeTransitionTimer.restart();
+  }
+
   readonly property bool isHovered: (mouse.containsMouse || calHovering || timerHovering || remHovering || root.mediaHover) && !root.dismissLock
-  readonly property bool isExpanded: isHovered || root.isControlCenterView || root.isTimerView || root.isReminderView || CalendarState.open || ScreenshotState.open || RecorderState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
+  readonly property bool isExpanded: root.swipeTransitioning || isHovered || root.isControlCenterView || root.isTimerView || root.isReminderView || CalendarState.open || ScreenshotState.open || RecorderState.open || LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || showNotif || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || root.showReminderPrompt
+  // While the card is tall (>35px), keep card styling (squircle background, no rectangular border).
+  // Only when physically collapsed to the 30px pill does it switch to pill border styling.
+  readonly property bool isCardExpanded: isExpanded || implicitHeight > 35
   // Screenshot area/window capture indicator takes over the collapsed center bar
   readonly property bool showCapture: ScreenshotState.capturing && (ScreenshotState.activeMode === "area" || ScreenshotState.activeMode === "window") && !isExpanded
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 260 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (hoverRow.implicitHeight + 36))))))))))))))) : 30
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 720 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (hoverRow.implicitWidth + 36))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 236 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (hoverRow.implicitHeight + 36))))))))))))))) : 30
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 650 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (hoverRow.implicitWidth + 36))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
 
   onIsExpandedChanged: {
     if (isExpanded && !isHovered) {
@@ -102,15 +117,15 @@ Rectangle {
     }
   }
 
-  radius: (isExpanded && implicitHeight > 30.5) ? SettingsState.cardRadius + 12 : 15
-  color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.bgCard
-  border.color: (isExpanded && implicitHeight > 30.5) ? "transparent" : SettingsState.barBorder
-  border.width: (isExpanded && implicitHeight > 30.5) ? 0 : 1
+  radius: isCardExpanded ? SettingsState.cardRadius + 12 : 15
+  color: isCardExpanded ? "transparent" : SettingsState.bgCard
+  border.color: isCardExpanded ? "transparent" : SettingsState.barBorder
+  border.width: isCardExpanded ? 0 : 1
   clip: true
 
   SquircleBackground {
     id: squircleBg
-    visible: root.isExpanded && root.implicitHeight > 30.5
+    visible: root.isCardExpanded
     radius: root.radius
     power: SettingsState.cardRoundingPower
     fillColor: SettingsState.bgCard
@@ -190,9 +205,12 @@ Rectangle {
     root.isTimerView = false;
     root.isReminderView = false;
     if (ReminderState.editing) ReminderState.editing = false;
+    // Decide the page BEFORE showing the container so hidden subpages
+    // snap (their fade Behavior is disabled while the container is faded
+    // out) instead of crossfading the stale main page visibly on open.
+    if (ccView) ccView.activePage = page;
     root.isControlCenterView = true;
     AudioState.refreshDevices();
-    if (ccView) ccView.activePage = page;
   }
 
   readonly property bool ccFontDropdownOpen: ccView ? ccView.fontDropdownOpen : false
@@ -204,6 +222,11 @@ Rectangle {
   // keyboard focus + focus grab so Esc and click-outside can always dismiss,
   // even when a hover flag latches stuck (see collapseAll).
   readonly property bool pillOpen: isExpanded && implicitHeight > 30.5
+  // Transient notification toast (Dynamic Island) must NEVER take keyboard
+  // focus: otherwise every popup steals typing from the terminal / apps
+  // via Exclusive layer-shell focus + HyprlandFocusGrab. Only the
+  // explicitly-opened inbox (and other modals / swipe views) may grab keys.
+  readonly property bool pillNeedsFocus: pillOpen && !showNotif
   // Momentary kill-switch for the gesture layer: flipping it drops a latched
   // containsMouse so a stuck pill can collapse. Re-armed on the next frame.
   property bool hoverReset: false
@@ -213,7 +236,13 @@ Rectangle {
   // Released on full pointer exit (pokeLeaveTimer) or a fresh press.
   property bool dismissLock: false
 
-  focus: pillOpen
+  focus: pillNeedsFocus
+  // focus:true alone doesn't grant *active* focus when the layer gains
+  // Exclusive keyboard focus (e.g. hover/swipe opens via mouse), so Esc
+  // would be dead. Force it so Esc + click-outside always work.
+  onPillNeedsFocusChanged: {
+    if (pillNeedsFocus) root.forceActiveFocus();
+  }
   Keys.onEscapePressed: function(ev) {
     // Also answer while dismissLock holds the pill shut but tallness is
     // gone (pillOpen false): otherwise the first Esc blanks the pill and
@@ -231,7 +260,10 @@ Rectangle {
     CalendarState.close();
     ScreenshotState.close();
     RecorderState.close();
-    if (ccView) ccView.resetToMain();
+    // Reset the CC page only after the container has faded out: resetting
+    // immediately would crossfade the stale/main page visibly inside the
+    // closing container (a split-second ghost + choppy resize).
+    ccResetTimer.restart();
   }
 
   function toggleReminders(): void {
@@ -244,14 +276,27 @@ Rectangle {
   }
 
   // Dismiss everything stuck open: swipe views plus latched hover flags.
-  // Hover is re-synced after the collapse animation settles (300ms): the
+  // Hover is re-synced after the collapse animation settles (450ms): the
   // pill shrinking under a stationary cursor never delivers an exit event,
   // so without this the hover latches true and the pill blanks permanently.
   Timer {
     id: hoverResync
-    interval: 350
+    interval: 500
     repeat: false
     onTriggered: root.hoverReset = false
+  }
+
+  // Deferred CC page reset: fires after the container fade-out (320ms) so
+  // the reset snaps while invisible (subpage fade Behaviors are disabled
+  // below opacity 0.5) instead of flashing the main page during close.
+  // Guarded: skipped if the CC was reopened meanwhile.
+  Timer {
+    id: ccResetTimer
+    interval: 380
+    repeat: false
+    onTriggered: {
+      if (ccView && !root.showCC) ccView.resetToMain();
+    }
   }
 
   function collapseAll(): void {
@@ -267,19 +312,19 @@ Rectangle {
 
   Behavior on implicitWidth {
     NumberAnimation {
-      duration: 300
+      duration: 380
       easing.type: Easing.OutCubic
     }
   }
   Behavior on implicitHeight {
     NumberAnimation {
-      duration: 300
+      duration: 380
       easing.type: Easing.OutCubic
     }
   }
   Behavior on radius {
     NumberAnimation {
-      duration: 300
+      duration: 380
       easing.type: Easing.OutCubic
     }
   }
@@ -317,7 +362,7 @@ Rectangle {
         if (ccView) ccView.activePage = "main";
       } else {
         root.isControlCenterView = false;
-        if (ccView) ccView.resetToMain();
+        ccResetTimer.restart();
       }
     }
   }
@@ -326,18 +371,19 @@ Rectangle {
     target: CalendarState
     function onOpenChanged() {
       if (CalendarState.open) {
+        root.dismissLock = false;
+        if (ccView) ccView.activePage = "calendar";
         root.isControlCenterView = true;
         root.isTimerView = false;
         root.isReminderView = false;
         ScreenshotState.close();
         RecorderState.close();
-        if (ccView) ccView.activePage = "calendar";
         CalendarState.refreshWeather();
       } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !ScreenshotState.open && !RecorderState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
-        if (ccView) ccView.resetToMain();
+        ccResetTimer.restart();
       }
     }
   }
@@ -347,19 +393,19 @@ Rectangle {
     function onOpenChanged() {
       if (ScreenshotState.open) {
         root.dismissLock = false;
+        if (ccView) ccView.activePage = "screenshot";
         root.isControlCenterView = true;
         root.isTimerView = false;
         root.isReminderView = false;
         TimerState.open = false;
         CalendarState.close();
         RecorderState.close();
-        if (ccView) ccView.activePage = "screenshot";
         ScreenshotState.refreshLast();
       } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !CalendarState.open && !RecorderState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
-        if (ccView) ccView.resetToMain();
+        ccResetTimer.restart();
       }
     }
   }
@@ -369,20 +415,20 @@ Rectangle {
     function onOpenChanged() {
       if (RecorderState.open) {
         root.dismissLock = false;
+        if (ccView) ccView.activePage = "recorder";
         root.isControlCenterView = true;
         root.isTimerView = false;
         root.isReminderView = false;
         TimerState.open = false;
         CalendarState.close();
         ScreenshotState.close();
-        if (ccView) ccView.activePage = "recorder";
         RecorderState.refreshRecent();
         RecorderState.checkStatus();
       } else if (!mouse.containsMouse && !LauncherState.open && !WallpaperState.open && !PowerState.open && !ClipboardState.open && !MixerState.open && !AuthState.open && !CalendarState.open && !ScreenshotState.open && !RecorderState.open) {
         root.isControlCenterView = false;
         root.isTimerView = false;
         root.isReminderView = false;
-        if (ccView) ccView.resetToMain();
+        ccResetTimer.restart();
       }
     }
   }
@@ -580,7 +626,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 160 }
+      NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
     }
 
     // Cava visualizer bars on the left of time
@@ -717,7 +763,7 @@ Rectangle {
       width: 16
       height: 16
       kind: "moon"
-      glyph: "#ffd60a"
+      glyph: SettingsState.accent
       visible: NotifCenter.dnd
     }
 
@@ -850,7 +896,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 160 }
+      NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
     }
 
     Canvas {
@@ -927,7 +973,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 160 }
+      NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
     }
 
     Rectangle {
@@ -971,8 +1017,8 @@ Rectangle {
 
         Behavior on width {
           NumberAnimation {
-            duration: 250
-            easing.type: Easing.OutCubic
+            duration: 350
+            easing.type: Easing.OutExpo
           }
         }
 
@@ -1029,7 +1075,7 @@ Rectangle {
       width: 16
       height: 16
       kind: "moon"
-      glyph: "#ffd60a"
+      glyph: SettingsState.accent
       visible: NotifCenter.dnd
     }
 
@@ -1138,7 +1184,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 160 }
+      NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
     }
 
     CCIcon {
@@ -1180,25 +1226,16 @@ Rectangle {
   // 3. EXPANDED HOVER VIEW: Big Time + 7-Day Strip + Swipe Hint
   // ========================================================
   Item {
-    anchors.fill: parent
+    width: hoverRow.implicitWidth + 36
+    height: hoverRow.implicitHeight + 36
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: parent.top
     opacity: root.showHover ? 1 : 0
     visible: opacity > 0
 
-    // Slide-up entrance matched to the pill resize so view
-    // transitions (e.g. calendar -> now playing) glide, not pop.
-    transform: Translate {
-      y: root.showHover ? 0 : 10
-      Behavior on y {
-        NumberAnimation {
-          duration: 300
-          easing.type: Easing.OutCubic
-        }
-      }
-    }
-
     Behavior on opacity {
       NumberAnimation {
-        duration: 250
+        duration: 260
         easing.type: Easing.OutCubic
       }
     }
@@ -1216,7 +1253,9 @@ Rectangle {
 
     Row {
       id: hoverRow
-      anchors.centerIn: parent
+      anchors.top: parent.top
+      anchors.topMargin: 18
+      anchors.horizontalCenter: parent.horizontalCenter
       spacing: 20
 
       // LEFT: Now playing (only when a track is active)
@@ -1782,12 +1821,15 @@ Rectangle {
   // ========================================================
   CenterCC {
     id: ccView
-    anchors.fill: parent
+    width: ccView.implicitWidth
+    height: ccView.implicitHeight
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: parent.top
     opacity: (root.isExpanded && root.showCC && !root.showTimer && !root.showReminders && !root.showFileTray && !root.showLauncher && !root.showWallpaper && !root.showPower && !root.showClipboard && !root.showMixer && !root.showAuth && !root.showNotif && !root.showInbox && !root.showReminderPrompt && !root.showAbout) ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 220 }
+      NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1801,19 +1843,9 @@ Rectangle {
     opacity: (root.isExpanded && root.showTimer) ? 1 : 0
     visible: opacity > 0
 
-    transform: Translate {
-      y: (root.isExpanded && root.showTimer) ? 0 : 10
-      Behavior on y {
-        NumberAnimation {
-          duration: 300
-          easing.type: Easing.OutCubic
-        }
-      }
-    }
-
     Behavior on opacity {
       NumberAnimation {
-        duration: 250
+        duration: 260
         easing.type: Easing.OutCubic
       }
     }
@@ -1847,7 +1879,8 @@ Rectangle {
 
     Behavior on opacity {
       NumberAnimation {
-        duration: 220
+        duration: 260
+        easing.type: Easing.OutCubic
       }
     }
   }
@@ -1862,7 +1895,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1876,7 +1909,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1890,7 +1923,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1904,7 +1937,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1920,7 +1953,7 @@ Rectangle {
     onOpenMicSettings: root.openCCPage("mic")
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1934,7 +1967,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1948,7 +1981,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1962,7 +1995,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1975,7 +2008,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -1989,7 +2022,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -2003,7 +2036,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 180 }
+      NumberAnimation { duration: 280; easing.type: Easing.OutCubic }
     }
   }
 
@@ -2050,6 +2083,17 @@ Rectangle {
   property real _pressX: 0
   property real _pressY: 0
   property bool _swiped: false
+  property real _wheelAccumX: 0
+  property bool _wheelCooldown: false
+  Timer {
+    id: wheelCooldownTimer
+    interval: 350
+    repeat: false
+    onTriggered: {
+      root._wheelCooldown = false;
+      root._wheelAccumX = 0;
+    }
+  }
 
   MouseArea {
     id: mouse
@@ -2096,6 +2140,7 @@ Rectangle {
       // (ControlCenter -> Clock)
       if (dx < -14 && dy < 45) {
         root._swiped = true;
+        root.triggerSwipeTransition();
         if (CalendarState.open) {
           CalendarState.close();
           root.isTimerView = true;
@@ -2105,7 +2150,7 @@ Rectangle {
           CalendarState.close();
           ScreenshotState.close();
           RecorderState.close();
-          if (ccView) ccView.resetToMain();
+          ccResetTimer.restart();
         } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
@@ -2115,30 +2160,34 @@ Rectangle {
           if (ReminderState.editing) ReminderState.editing = false;
         } else {
           root.dismissLock = false;
-          root.isTimerView = false;
+          root.isTimerView = true;
+          TimerState.open = true;
           root.isReminderView = false;
+          CalendarState.close();
           ScreenshotState.close();
           RecorderState.close();
-          CalendarState.open = true;
         }
       }
       // Right swipe: Reminders -> Timer -> Clock -> Control Center
-      // (calendar lives as a pill inside the control center;
-      //  right swipe on the calendar also returns to Clock)
+      // (calendar lives inside control center;
+      //  right swipe on the calendar returns to Clock)
       else if (dx > 14 && dy < 45) {
         root._swiped = true;
+        root.triggerSwipeTransition();
         if (root.isReminderView) {
           root.isReminderView = false;
           if (ReminderState.editing) ReminderState.editing = false;
           root.isTimerView = true;
           TimerState.open = true;
         } else if (root.isTimerView) {
+          // Right swipe from timer returns to Clock
           root.isTimerView = false;
           TimerState.open = false;
+          root.isReminderView = false;
+          CalendarState.close();
         } else if (CalendarState.open) {
           CalendarState.close();
           root.isControlCenterView = false;
-          if (ccView) ccView.resetToMain();
         } else if (!root.isControlCenterView && !ScreenshotState.open && !RecorderState.open) {
           root.isControlCenterView = true;
           if (ccView) ccView.activePage = "main";
@@ -2147,8 +2196,17 @@ Rectangle {
     }
 
     onWheel: wheel => {
-      // Touchpad horizontal swipe left: CC -> Clock, Clock -> Calendar -> Timer -> Reminders -> Clock
-      if (wheel.angleDelta.x < 0 || wheel.pixelDelta.x < 0) {
+      if (root._wheelCooldown) return;
+
+      var dx = wheel.pixelDelta.x !== 0 ? wheel.pixelDelta.x : (wheel.angleDelta.x / 4.0);
+      root._wheelAccumX += dx;
+
+      // Touchpad horizontal swipe left: CC -> Clock, Clock -> Timer -> Reminders -> Clock
+      if (root._wheelAccumX < -28) {
+        root._wheelCooldown = true;
+        wheelCooldownTimer.restart();
+        root.triggerSwipeTransition();
+
         if (CalendarState.open) {
           CalendarState.close();
           root.isTimerView = true;
@@ -2158,7 +2216,7 @@ Rectangle {
           CalendarState.close();
           ScreenshotState.close();
           RecorderState.close();
-          if (ccView) ccView.resetToMain();
+          ccResetTimer.restart();
         } else if (root.isTimerView) {
           root.isTimerView = false;
           TimerState.open = false;
@@ -2168,38 +2226,47 @@ Rectangle {
           if (ReminderState.editing) ReminderState.editing = false;
         } else {
           root.dismissLock = false;
-          root.isTimerView = false;
+          root.isTimerView = true;
+          TimerState.open = true;
           root.isReminderView = false;
+          CalendarState.close();
           ScreenshotState.close();
           RecorderState.close();
-          CalendarState.open = true;
         }
       }
       // Touchpad horizontal swipe right: Reminders -> Timer -> Clock -> Control Center
       // (calendar -> Clock)
-      else if (wheel.angleDelta.x > 0 || wheel.pixelDelta.x > 0) {
+      else if (root._wheelAccumX > 28) {
+        root._wheelCooldown = true;
+        wheelCooldownTimer.restart();
+        root.triggerSwipeTransition();
+
         if (root.isReminderView) {
           root.isReminderView = false;
           if (ReminderState.editing) ReminderState.editing = false;
           root.isTimerView = true;
           TimerState.open = true;
         } else if (root.isTimerView) {
+          // Right swipe from timer returns to Clock
           root.isTimerView = false;
           TimerState.open = false;
+          root.isReminderView = false;
+          CalendarState.close();
         } else if (CalendarState.open) {
           CalendarState.close();
           root.isControlCenterView = false;
-          if (ccView) ccView.resetToMain();
         } else if (!root.isControlCenterView && !ScreenshotState.open && !RecorderState.open) {
           root.isControlCenterView = true;
           if (ccView) ccView.activePage = "main";
         }
       }
       // Vertical scroll -> Workspace switch
-      else if (wheel.angleDelta.y > 0) {
-        Hyprland.dispatch("workspace e-1");
-      } else if (wheel.angleDelta.y < 0) {
-        Hyprland.dispatch("workspace e+1");
+      else if (Math.abs(wheel.angleDelta.y) > 40 && Math.abs(wheel.angleDelta.y) > Math.abs(wheel.angleDelta.x)) {
+        if (wheel.angleDelta.y > 0) {
+          Hyprland.dispatch("workspace e-1");
+        } else if (wheel.angleDelta.y < 0) {
+          Hyprland.dispatch("workspace e+1");
+        }
       }
     }
   }

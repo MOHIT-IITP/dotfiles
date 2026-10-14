@@ -20,6 +20,34 @@ Singleton {
   property string areaRegion: "" // gpu-screen-recorder form: "WxH+X+Y"
   property bool selectingArea: false
 
+  // Capture settings (dropdown in RecorderPage)
+  property int fps: 120 // 30 | 60 | 120 | 144
+  property string quality: "high" // "medium" | "high" | "very_high" | "ultra" (shown Med/High/Ultra/Loss)
+  property bool captureCursor: true
+  property int countdown: 5 // 0 | 3 | 5 | 10 (seconds)
+  property bool settingsExpanded: false
+  // After tapping Start: show Screen | Window/Region target picker
+  property bool choosingTarget: false
+  // Countdown in progress before the recorder spawns
+  property bool starting: false
+  property int countdownLeft: 0
+
+  readonly property var fpsOptions: [30, 60, 120, 144]
+  readonly property var qualityOptions: ["medium", "high", "very_high", "ultra"]
+  readonly property var countdownOptions: [0, 3, 5, 10]
+
+  function qualityLabel(q) {
+    if (q === "medium") return "Med";
+    if (q === "high") return "High";
+    if (q === "very_high") return "Ultra";
+    if (q === "ultra") return "Loss";
+    return "High";
+  }
+
+  readonly property string qualityDisplay: qualityLabel(quality)
+
+  readonly property string summaryText: fps + " fps · " + qualityDisplay
+
   readonly property string currentAudio: {
     var hasMic = !AudioState.inMuted && AudioState.inVol > 0.01;
     var hasDesk = !AudioState.outMuted && AudioState.outVol > 0.01;
@@ -38,8 +66,10 @@ Singleton {
   function toggle() {
     if (isRecording) {
       stop();
+    } else if (starting) {
+      cancelPending();
     } else {
-      start();
+      beginCountdown();
     }
   }
 
@@ -68,10 +98,57 @@ Singleton {
     open = false;
   }
 
+  function requestStart() {
+    if (isRecording || selectingArea || starting) return;
+    choosingTarget = true;
+  }
+
+  function startScreen() {
+    if (isRecording || selectingArea || starting) return;
+    mode = "fullscreen";
+    beginCountdown();
+  }
+
+  function startAreaFlow() {
+    if (isRecording || selectingArea || starting) return;
+    mode = "area";
+    if (areaGeometry === "") {
+      selectArea(true);
+      return;
+    }
+    beginCountdown();
+  }
+
+  function beginCountdown() {
+    if (isRecording || selectingArea || starting) return;
+    if (countdown <= 0) {
+      doStart();
+      return;
+    }
+    starting = true;
+    countdownLeft = countdown;
+    countdownTimer.restart();
+  }
+
+  function cancelPending() {
+    countdownTimer.stop();
+    starting = false;
+    countdownLeft = 0;
+    choosingTarget = false;
+  }
+
   function start() {
+    // Legacy entry point (keybind): honour countdown, keep current mode.
+    choosingTarget = false;
+    beginCountdown();
+  }
+
+  function doStart() {
     // Starting a recording dismisses the card so the bar collapses
     // (avoids capturing the expanded bar, shows the REC indicator).
     open = false;
+    choosingTarget = false;
+    starting = false;
     // Area mode without a selection: run slurp first, then start.
     if (mode === "area" && areaGeometry === "") {
       selectArea(true);
@@ -88,7 +165,10 @@ Singleton {
       "/home/mohiitp/.config/quickshell/scripts/recorder.sh",
       "start",
       currentAudio,
-      mode
+      mode,
+      String(fps),
+      quality,
+      captureCursor ? "yes" : "no"
     ];
     if (mode === "area" && areaGeometry !== "") {
       cmd.push(areaGeometry);
@@ -119,6 +199,9 @@ Singleton {
   }
 
   function stop() {
+    countdownTimer.stop();
+    starting = false;
+    choosingTarget = false;
     isRecording = false;
     if (stopProc.running) {
       stopProc.running = false;
@@ -186,6 +269,20 @@ Singleton {
       statusProc.running = false;
     }
     statusProc.running = true;
+  }
+
+  Timer {
+    id: countdownTimer
+    interval: 1000
+    repeat: true
+    running: false
+    onTriggered: {
+      root.countdownLeft -= 1;
+      if (root.countdownLeft <= 0) {
+        stop();
+        root.doStart();
+      }
+    }
   }
 
   Timer {
@@ -303,7 +400,7 @@ Singleton {
             root.mode = "area";
             if (root._selectAutoStart) {
               root._selectAutoStart = false;
-              root.start();
+              root.beginCountdown();
               return;
             }
           }

@@ -177,9 +177,11 @@ Item {
   CCCalendarPage {
     id: calPage
     anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.margins: 18
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.topMargin: 18
+    // Fixed width (matches implicitWidth 410 - margins) so the pill
+    // resize animation doesn't reflow the day grid every frame (jitter).
+    width: 374
     circle: root
     hovered: true
   }

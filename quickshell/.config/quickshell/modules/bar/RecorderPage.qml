@@ -13,6 +13,7 @@ Column {
   visible: opacity > 0
 
   Behavior on opacity {
+    enabled: circle.opacity > 0.5
     NumberAnimation { duration: 220 }
   }
 
@@ -72,22 +73,27 @@ Column {
       spacing: 14
 
       // Still link
-      Row {
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 5
-        CCIcon {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 13
-          height: 13
-          kind: "camera"
-          glyph: stillSwitchMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
-        }
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          text: "Still"
-          color: stillSwitchMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
-          font.pixelSize: SettingsState.px(13)
-          font.family: SettingsState.fontFamily
+      Item {
+        width: stillRow.implicitWidth + 8
+        height: 24
+        Row {
+          id: stillRow
+          anchors.centerIn: parent
+          spacing: 5
+          CCIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 13
+            height: 13
+            kind: "camera"
+            glyph: stillSwitchMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
+          }
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Still"
+            color: stillSwitchMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
+            font.pixelSize: SettingsState.px(13)
+            font.family: SettingsState.fontFamily
+          }
         }
         MouseArea {
           id: stillSwitchMouse
@@ -102,38 +108,43 @@ Column {
       }
 
       // Status: green dot + IDLE / red + time
-      Row {
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 6
-        Rectangle {
-          anchors.verticalCenter: parent.verticalCenter
-          width: 8
-          height: 8
-          radius: 4
-          color: RecorderState.isRecording ? "#e05f65" : "#4ade80"
-          SequentialAnimation on opacity {
-            running: RecorderState.isRecording
-            loops: Animation.Infinite
-            NumberAnimation { to: 0.3; duration: 600 }
-            NumberAnimation { to: 1.0; duration: 600 }
+      Item {
+        width: statusRow.implicitWidth
+        height: 24
+        Row {
+          id: statusRow
+          anchors.centerIn: parent
+          spacing: 6
+          Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 8
+            height: 8
+            radius: 4
+            color: RecorderState.isRecording ? "#e05f65" : "#4ade80"
+            SequentialAnimation on opacity {
+              running: RecorderState.isRecording
+              loops: Animation.Infinite
+              NumberAnimation { to: 0.3; duration: 600 }
+              NumberAnimation { to: 1.0; duration: 600 }
+            }
           }
-        }
-        Text {
-          anchors.verticalCenter: parent.verticalCenter
-          text: RecorderState.isRecording ? RecorderState.formattedTime : "IDLE"
-          color: RecorderState.isRecording ? "#ff8a8a" : "#8a8a8a"
-          font.pixelSize: SettingsState.px(12)
-          font.family: SettingsState.fontFamily
-          font.letterSpacing: 1.5
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: RecorderState.isRecording ? RecorderState.formattedTime : "IDLE"
+            color: RecorderState.isRecording ? "#ff8a8a" : "#8a8a8a"
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.fontFamily
+            font.letterSpacing: 1.5
+          }
         }
       }
     }
   }
 
-  // 2. Bracket frame title (transparent, thin corner marks)
+  // 2. Bracket frame title + settings dropdown (fps · quality · cursor · countdown)
   Item {
     width: parent.width
-    height: 74
+    height: headerRow.height + (RecorderState.settingsExpanded ? settingsCol.height + 10 : 0) + 16
 
     // corner brackets — thin L shapes
     Item { // top-left
@@ -168,30 +179,363 @@ Column {
     Column {
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.verticalCenter: parent.verticalCenter
+      anchors.top: parent.top
+      anchors.topMargin: 8
       anchors.leftMargin: 20
       anchors.rightMargin: 20
-      spacing: 3
-      Text {
-        text: "Screen recorder"
-        color: SettingsState.textMain
-        font.pixelSize: SettingsState.px(18)
-        font.family: SettingsState.fontFamily
-        font.weight: Font.DemiBold
-      }
-      Text {
-        text: RecorderState.mode === "area" ? (RecorderState.areaGeometry !== "" ? ("60 fps · High quality · " + RecorderState.areaGeometry) : "60 fps · High quality · Select an area") : "60 fps · High quality · Fullscreen"
-        color: SettingsState.isDark ? "#9a8a75" : "#7a6a55"
-        font.pixelSize: SettingsState.px(13)
-        font.family: SettingsState.fontFamily
-        elide: Text.ElideRight
+      spacing: 10
+
+      // Header row (tap to expand/collapse)
+      Item {
+        id: headerRow
         width: parent.width
+        height: 58
+        Column {
+          anchors.left: parent.left
+          anchors.right: chevText.left
+          anchors.rightMargin: 8
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 3
+          Text {
+            text: "Screen recorder"
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(18)
+            font.family: SettingsState.fontFamily
+            font.weight: Font.DemiBold
+          }
+          Text {
+            text: "● " + RecorderState.summaryText + (RecorderState.mode === "area" && RecorderState.areaGeometry !== "" ? " · " + RecorderState.areaGeometry : "")
+            color: SettingsState.isDark ? "#9a8a75" : "#7a6a55"
+            font.pixelSize: SettingsState.px(13)
+            font.family: SettingsState.fontFamily
+            elide: Text.ElideRight
+            width: parent.width
+          }
+        }
+        Text {
+          id: chevText
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          text: RecorderState.settingsExpanded ? "\ueab7" : "\ueab4"
+          color: dropMouse.containsMouse ? SettingsState.textMain : "#8a8a8a"
+          font.family: SettingsState.nerdIconFont
+          font.pixelSize: SettingsState.px(16)
+        }
+        MouseArea {
+          id: dropMouse
+          anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          enabled: !RecorderState.isRecording && !RecorderState.starting
+          onClicked: RecorderState.settingsExpanded = !RecorderState.settingsExpanded
+        }
+      }
+
+      // Expanded settings (matches reference: frame rate · quality · cursor · countdown)
+      Column {
+        id: settingsCol
+        visible: RecorderState.settingsExpanded
+        width: parent.width
+        spacing: 0
+
+        // Frame rate row
+        Item {
+          width: parent.width
+          height: 34
+          Text {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Frame rate"
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(14)
+            font.family: SettingsState.fontFamily
+          }
+          Row {
+            anchors.right: parent.right
+            y: (parent.height - height) / 2
+            spacing: 2
+            Repeater {
+              model: RecorderState.fpsOptions
+              delegate: Rectangle {
+                height: 26
+                width: fpsTxt.implicitWidth + 16
+                radius: 8
+                color: RecorderState.fps === modelData ? cardSofter : "transparent"
+                Text {
+                  id: fpsTxt
+                  anchors.centerIn: parent
+                  text: String(modelData)
+                  color: RecorderState.fps === modelData ? SettingsState.textMain : "#8a8a8a"
+                  font.pixelSize: SettingsState.px(13)
+                  font.family: SettingsState.fontFamily
+                  font.weight: RecorderState.fps === modelData ? Font.DemiBold : Font.Normal
+                }
+                MouseArea {
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  enabled: !RecorderState.isRecording && !RecorderState.starting
+                  onClicked: RecorderState.fps = modelData
+                }
+              }
+            }
+          }
+        }
+
+        Rectangle { width: parent.width; height: 1; color: lineSoft; opacity: 0.5 }
+
+        // Quality row
+        Item {
+          width: parent.width
+          height: 34
+          Text {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Quality"
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(14)
+            font.family: SettingsState.fontFamily
+          }
+          Row {
+            anchors.right: parent.right
+            y: (parent.height - height) / 2
+            spacing: 2
+            Repeater {
+              model: RecorderState.qualityOptions
+              delegate: Rectangle {
+                height: 26
+                width: qTxt.implicitWidth + 16
+                radius: 8
+                color: RecorderState.quality === modelData ? cardSofter : "transparent"
+                Text {
+                  id: qTxt
+                  anchors.centerIn: parent
+                  text: RecorderState.qualityLabel(modelData)
+                  color: RecorderState.quality === modelData ? SettingsState.textMain : "#8a8a8a"
+                  font.pixelSize: SettingsState.px(13)
+                  font.family: SettingsState.fontFamily
+                  font.weight: RecorderState.quality === modelData ? Font.DemiBold : Font.Normal
+                }
+                MouseArea {
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  enabled: !RecorderState.isRecording && !RecorderState.starting
+                  onClicked: RecorderState.quality = modelData
+                }
+              }
+            }
+          }
+        }
+
+        Rectangle { width: parent.width; height: 1; color: lineSoft; opacity: 0.5 }
+
+        // Capture cursor row
+        Item {
+          width: parent.width
+          height: 36
+          Text {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Capture cursor"
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(14)
+            font.family: SettingsState.fontFamily
+          }
+          Rectangle {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: 44
+            height: 24
+            radius: 12
+            color: RecorderState.captureCursor ? "#b07a2a" : dimBar
+            Rectangle {
+              anchors.verticalCenter: parent.verticalCenter
+              x: RecorderState.captureCursor ? parent.width - width - 3 : 3
+              width: 18
+              height: 18
+              radius: 9
+              color: RecorderState.captureCursor ? "#1c1c1c" : "#8a8a8a"
+              Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            }
+            MouseArea {
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              enabled: !RecorderState.isRecording && !RecorderState.starting
+              onClicked: RecorderState.captureCursor = !RecorderState.captureCursor
+            }
+          }
+        }
+
+        Rectangle { width: parent.width; height: 1; color: lineSoft; opacity: 0.5 }
+
+        // Countdown row
+        Item {
+          width: parent.width
+          height: 34
+          Text {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Countdown"
+            color: SettingsState.textMain
+            font.pixelSize: SettingsState.px(14)
+            font.family: SettingsState.fontFamily
+          }
+          Row {
+            anchors.right: parent.right
+            y: (parent.height - height) / 2
+            spacing: 2
+            Repeater {
+              model: RecorderState.countdownOptions
+              delegate: Rectangle {
+                height: 26
+                width: cdTxt.implicitWidth + 16
+                radius: 8
+                color: RecorderState.countdown === modelData ? cardSofter : "transparent"
+                Text {
+                  id: cdTxt
+                  anchors.centerIn: parent
+                  text: modelData === 0 ? "Off" : (String(modelData) + "s")
+                  color: RecorderState.countdown === modelData ? SettingsState.textMain : "#8a8a8a"
+                  font.pixelSize: SettingsState.px(13)
+                  font.family: SettingsState.fontFamily
+                  font.weight: RecorderState.countdown === modelData ? Font.DemiBold : Font.Normal
+                }
+                MouseArea {
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  enabled: !RecorderState.isRecording && !RecorderState.starting
+                  onClicked: RecorderState.countdown = modelData
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 
-  // 3. Fullscreen | Record area
+  // 3. Start / target picker (tap Start → Screen | Window/Region)
+  // 3a. Idle start pill
+  Rectangle {
+    visible: !RecorderState.isRecording && !RecorderState.starting && !RecorderState.choosingTarget
+    width: parent.width
+    height: 50
+    radius: 25
+    color: cardSoft
+    Row {
+      anchors.left: parent.left
+      anchors.leftMargin: 20
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 10
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 14
+        height: 14
+        radius: 7
+        color: "#c95f5f"
+      }
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "Start recording"
+        color: SettingsState.isDark ? "#d5d5d5" : "#333333"
+        font.pixelSize: SettingsState.px(15)
+        font.family: SettingsState.fontFamily
+      }
+    }
+    Text {
+      anchors.right: parent.right
+      anchors.rightMargin: 20
+      anchors.verticalCenter: parent.verticalCenter
+      text: "tap"
+      color: "#8a8a8a"
+      font.pixelSize: SettingsState.px(13)
+      font.family: SettingsState.fontFamily
+    }
+    MouseArea {
+      id: recBtnMouse
+      anchors.fill: parent
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onClicked: RecorderState.requestStart()
+    }
+  }
+
+  // 3b. Countdown pill (tap to cancel)
+  Rectangle {
+    visible: RecorderState.starting && !RecorderState.isRecording
+    width: parent.width
+    height: 50
+    radius: 25
+    color: cardSoft
+    border.color: "#b07a2a"
+    border.width: 1.5
+    Row {
+      anchors.centerIn: parent
+      spacing: 10
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 14
+        height: 14
+        radius: 7
+        color: "#b07a2a"
+      }
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "Starting in " + RecorderState.countdownLeft + "s… (tap to cancel)"
+        color: SettingsState.isDark ? "#d5d5d5" : "#333333"
+        font.pixelSize: SettingsState.px(15)
+        font.family: SettingsState.fontFamily
+      }
+    }
+    MouseArea {
+      anchors.fill: parent
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onClicked: RecorderState.cancelPending()
+    }
+  }
+
+  // 3c. Stop pill while recording
+  Rectangle {
+    visible: RecorderState.isRecording
+    width: parent.width
+    height: 50
+    radius: 25
+    color: cardSoft
+    border.color: "#e05f65"
+    border.width: 1.5
+    Row {
+      anchors.centerIn: parent
+      spacing: 10
+      Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 14
+        height: 14
+        radius: 7
+        color: "#c95f5f"
+      }
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "Stop recording (" + RecorderState.formattedTime + ")"
+        color: SettingsState.isDark ? "#d5d5d5" : "#333333"
+        font.pixelSize: SettingsState.px(15)
+        font.family: SettingsState.fontFamily
+      }
+    }
+    MouseArea {
+      anchors.fill: parent
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onClicked: RecorderState.toggle()
+    }
+  }
+
+  // 3d. Target picker (Screen | Window/Region) after tapping Start
   Row {
+    visible: RecorderState.choosingTarget && !RecorderState.isRecording && !RecorderState.starting
     width: parent.width
     height: 46
     spacing: 10
@@ -200,8 +544,8 @@ Column {
       width: (parent.width - 10) / 2
       height: 46
       radius: 12
-      color: RecorderState.mode === "fullscreen" ? cardSofter : "transparent"
-      border.color: RecorderState.mode === "fullscreen" ? lineSoft : (fullMouse.containsMouse ? lineSoft : "#2c2c31")
+      color: cardSofter
+      border.color: lineSoft
       border.width: 1
       Row {
         anchors.centerIn: parent
@@ -211,15 +555,15 @@ Column {
           width: 16
           height: 16
           kind: "display"
-          glyph: RecorderState.mode === "fullscreen" ? tan : "#8a8a8a"
+          glyph: tan
         }
         Text {
           anchors.verticalCenter: parent.verticalCenter
-          text: "Fullscreen"
-          color: RecorderState.mode === "fullscreen" ? tan : (fullMouse.containsMouse ? SettingsState.textMain : "#9a9a9a")
+          text: "Screen"
+          color: tan
           font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
-          font.weight: RecorderState.mode === "fullscreen" ? Font.DemiBold : Font.Normal
+          font.weight: Font.DemiBold
         }
       }
       MouseArea {
@@ -227,8 +571,7 @@ Column {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        enabled: !RecorderState.isRecording
-        onClicked: RecorderState.mode = "fullscreen"
+        onClicked: RecorderState.startScreen()
       }
     }
 
@@ -236,8 +579,8 @@ Column {
       width: (parent.width - 10) / 2
       height: 46
       radius: 12
-      color: RecorderState.mode === "area" ? cardSofter : "transparent"
-      border.color: RecorderState.mode === "area" ? lineSoft : (areaRecMouse.containsMouse ? lineSoft : "#2c2c31")
+      color: cardSofter
+      border.color: lineSoft
       border.width: 1
       Row {
         anchors.centerIn: parent
@@ -247,15 +590,15 @@ Column {
           width: 16
           height: 16
           kind: "area"
-          glyph: RecorderState.mode === "area" ? tan : "#8a8a8a"
+          glyph: tan
         }
         Text {
           anchors.verticalCenter: parent.verticalCenter
-          text: "Record area"
-          color: RecorderState.mode === "area" ? tan : (areaRecMouse.containsMouse ? SettingsState.textMain : "#9a9a9a")
+          text: "Window / Region"
+          color: tan
           font.pixelSize: SettingsState.px(14)
           font.family: SettingsState.fontFamily
-          font.weight: RecorderState.mode === "area" ? Font.DemiBold : Font.Normal
+          font.weight: Font.DemiBold
         }
       }
       MouseArea {
@@ -263,22 +606,16 @@ Column {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        enabled: !RecorderState.isRecording
-        onClicked: {
-          RecorderState.mode = "area";
-          if (RecorderState.areaGeometry === "" && !RecorderState.selectingArea) {
-            RecorderState.selectArea(false);
-          }
-        }
+        onClicked: RecorderState.startAreaFlow()
       }
     }
   }
 
-  // 3b. Area picker strip (area mode only)
+  // 3e. Area picker strip (Window/Region mode: click a window or drag a region)
   Rectangle {
-    visible: RecorderState.mode === "area"
+    visible: RecorderState.choosingTarget && RecorderState.mode === "area" && !RecorderState.isRecording && !RecorderState.starting
     width: parent.width
-    height: RecorderState.mode === "area" ? 36 : 0
+    height: 36
     radius: 10
     color: "transparent"
     border.color: "#2c2c31"
@@ -293,8 +630,8 @@ Column {
       spacing: 8
       Text {
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - selectAreaBtn.width - (clearAreaBtn.visible ? clearAreaBtn.width + 8 : 0) - 24
-        text: RecorderState.selectingArea ? "Drag to select area..." : (RecorderState.areaGeometry !== "" ? ("◈ " + RecorderState.areaGeometry) : "No area selected")
+        width: parent.width - selectAreaBtn.width - (clearAreaBtn.visible ? clearAreaBtn.width + 8 : 0) - backTxt.implicitWidth - 32
+        text: RecorderState.selectingArea ? "Click a window or drag a region..." : (RecorderState.areaGeometry !== "" ? ("◈ " + RecorderState.areaGeometry) : "Click a window or drag to select")
         color: RecorderState.areaGeometry !== "" ? tan : SettingsState.textMuted
         font.pixelSize: SettingsState.px(12)
         font.family: "monospace"
@@ -302,7 +639,7 @@ Column {
       }
       Rectangle {
         id: clearAreaBtn
-        visible: RecorderState.areaGeometry !== "" && !RecorderState.isRecording
+        visible: RecorderState.areaGeometry !== ""
         anchors.verticalCenter: parent.verticalCenter
         height: 24
         width: 30
@@ -348,45 +685,28 @@ Column {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
-          enabled: !RecorderState.isRecording && !RecorderState.selectingArea
+          enabled: !RecorderState.selectingArea
           onClicked: RecorderState.selectArea(false)
         }
       }
-    }
-  }
-
-  // 4. Start / Stop pill
-  Rectangle {
-    width: parent.width
-    height: 50
-    radius: 25
-    color: cardSoft
-    border.color: RecorderState.isRecording ? "#e05f65" : "transparent"
-    border.width: RecorderState.isRecording ? 1.5 : 0
-    Row {
-      anchors.centerIn: parent
-      spacing: 10
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 14
-        height: 14
-        radius: 7
-        color: "#c95f5f"
-      }
       Text {
+        id: backTxt
         anchors.verticalCenter: parent.verticalCenter
-        text: RecorderState.isRecording ? ("Stop recording (" + RecorderState.formattedTime + ")") : (RecorderState.selectingArea ? "Select area on screen..." : ((RecorderState.mode === "area" && RecorderState.areaGeometry === "") ? "Select area & record" : "Start recording"))
-        color: SettingsState.isDark ? "#d5d5d5" : "#333333"
-        font.pixelSize: SettingsState.px(15)
+        text: "‹ Back"
+        color: "#8a8a8a"
+        font.pixelSize: SettingsState.px(12)
         font.family: SettingsState.fontFamily
+        MouseArea {
+          anchors.fill: parent
+          anchors.margins: -6
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            RecorderState.choosingTarget = false;
+            RecorderState.mode = "fullscreen";
+          }
+        }
       }
-    }
-    MouseArea {
-      id: recBtnMouse
-      anchors.fill: parent
-      hoverEnabled: true
-      cursorShape: Qt.PointingHandCursor
-      onClicked: RecorderState.toggle()
     }
   }
 

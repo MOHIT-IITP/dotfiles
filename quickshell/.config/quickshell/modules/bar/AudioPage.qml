@@ -23,6 +23,7 @@ Column {
   visible: opacity > 0
 
   Behavior on opacity {
+    enabled: circle.opacity > 0.5
     NumberAnimation { duration: 220 }
   }
 

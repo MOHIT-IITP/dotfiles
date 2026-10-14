@@ -10,6 +10,7 @@ Item {
   opacity: (hovered && circle.activePage === "screenshot") ? 1 : 0
 
   Behavior on opacity {
+    enabled: circle.opacity > 0.5
     NumberAnimation { duration: 180 }
   }
 

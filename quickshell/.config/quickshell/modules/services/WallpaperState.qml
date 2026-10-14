@@ -84,14 +84,14 @@ Singleton {
   }
 
   function next() {
-    if (filteredWallpapers.length > 0) {
-      currentIndex = (currentIndex + 1) % filteredWallpapers.length;
+    if (filteredWallpapers.length > 0 && currentIndex < filteredWallpapers.length - 1) {
+      currentIndex++;
     }
   }
 
   function prev() {
-    if (filteredWallpapers.length > 0) {
-      currentIndex = (currentIndex - 1 + filteredWallpapers.length) % filteredWallpapers.length;
+    if (filteredWallpapers.length > 0 && currentIndex > 0) {
+      currentIndex--;
     }
   }
 
@@ -131,7 +131,7 @@ Singleton {
           if (Array.isArray(parsed)) {
             root.allWallpapers = parsed;
             if (root.currentIndex >= parsed.length) {
-              root.currentIndex = 0;
+              root.currentIndex = Math.max(0, parsed.length - 1);
             }
           }
         } catch (e) {

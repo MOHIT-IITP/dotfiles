@@ -27,6 +27,7 @@ Scope {
       property bool barRevealed: true
 
       function shouldReveal() {
+        if (RecorderState.selectingArea) return true;
         if (!SettingsState.barAutoHide) return true;
         if (screenScope.topHover || screenScope.barHover) return true;
         if (barWindow && barWindow.needsFocus) return true;
@@ -58,6 +59,13 @@ Scope {
           } else {
             screenScope.updateReveal();
           }
+        }
+      }
+
+      Connections {
+        target: RecorderState
+        function onSelectingAreaChanged() {
+          screenScope.updateReveal();
         }
       }
 
@@ -128,15 +136,15 @@ Scope {
         // transparent + masked so empty area is click-through.
         implicitHeight: Math.round(960 * SettingsState.uiScale)
         color: "transparent"
-        // Hidden while picking a screen-record area so slurp's overlay is
-        // topmost and receives all pointer input (otherwise the expanded
-        // panel sits above slurp and selection can never complete).
-        visible: !RecorderState.selectingArea
+        // Keep the bar visible while picking a screen-record area. The window
+        // drops below slurp's overlay (Bottom < Overlay) so slurp stays
+        // topmost and receives all pointer input, instead of hiding the bar.
+        visible: true
         // Reserve a strip so maximized/tiled windows sit below the bar with configurable gap.
         // While auto-hide is enabled, exclusiveZone stays 0 so windows don't jump/resize on hover.
         exclusiveZone: (!SettingsState.barAutoHide && screenScope.barRevealed) ? Math.round((30 + 6 + SettingsState.barGap) * SettingsState.uiScale) : 0
 
-        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || ReminderState.promptOpen || ReminderState.editing || (clockPill && (clockPill.ccFontDropdownOpen || clockPill.swipeOpen || clockPill.pillOpen))
+        readonly property bool needsFocus: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || FileTrayState.open || AboutState.open || NotifCenter.inboxOpen || ReminderState.promptOpen || ReminderState.editing || (clockPill && (clockPill.ccFontDropdownOpen || clockPill.swipeOpen || clockPill.pillNeedsFocus))
 
         // After a modal opens, suppress onCleared for 500ms so a keyboard-triggered
         // open doesn't immediately close (mouse outside bar causes Hyprland to clear the grab)
@@ -161,12 +169,18 @@ Scope {
               else if (NotifCenter.inboxOpen && clockPill) clockPill.forceFocusNotifInbox();
               else if (ReminderState.promptOpen && clockPill) clockPill.forceFocusReminder();
               else if (clockPill && clockPill.ccFontDropdownOpen) clockPill.forceFocusCCFontSearch();
+              // Sticky swipe views / hover card opened via mouse gesture have no
+              // dedicated input to focus: give the pill itself active focus so
+              // Esc reliably closes it (focus:true alone isn't active focus).
+              else if (clockPill) clockPill.forceActiveFocus();
             });
           }
         }
 
         // Wayland layer-shell keyboard focus for Wayland / Hyprland
-        WlrLayershell.layer: WlrLayer.Overlay
+        // Dropped below slurp during area selection so the picker gets input
+        // while the bar stays visible underneath.
+        WlrLayershell.layer: RecorderState.selectingArea ? WlrLayer.Bottom : WlrLayer.Overlay
         WlrLayershell.keyboardFocus: barWindow.needsFocus ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         focusable: barWindow.needsFocus
 
@@ -241,14 +255,14 @@ Scope {
                 NumberAnimation {
                   target: barContent
                   property: "y"
-                  duration: 350
-                  easing.type: Easing.InOutCubic
+                  duration: 550
+                  easing.type: Easing.OutExpo
                 }
                 NumberAnimation {
                   target: barContent
                   property: "opacity"
-                  duration: 280
-                  easing.type: Easing.InOutCubic
+                  duration: 400
+                  easing.type: Easing.OutCubic
                 }
               }
             },
@@ -260,7 +274,7 @@ Scope {
                   target: barContent
                   property: "y"
                   to: -(Math.round(20 * SettingsState.uiScale))
-                  duration: 260
+                  duration: 380
                   easing.type: Easing.InOutCubic
                 }
                 // 2. Stops at that point for a while
@@ -273,14 +287,14 @@ Scope {
                     target: barContent
                     property: "y"
                     to: -(Math.round(80 * SettingsState.uiScale))
-                    duration: 300
+                    duration: 450
                     easing.type: Easing.InOutCubic
                   }
                   NumberAnimation {
                     target: barContent
                     property: "opacity"
                     to: 0.0
-                    duration: 260
+                    duration: 380
                     easing.type: Easing.InOutCubic
                   }
                 }
@@ -290,8 +304,8 @@ Scope {
 
           Behavior on scale {
             NumberAnimation {
-              duration: 250
-              easing.type: Easing.OutCubic
+              duration: 350
+              easing.type: Easing.OutExpo
             }
           }
 
