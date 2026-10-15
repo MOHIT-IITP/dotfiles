@@ -41,11 +41,71 @@ Item {
     pos = WallpaperState.currentIndex;
   }
 
+  // ---- Tile pool (ported from quickshell_bar surfaces/Wallpaper.qml) ----
+  // Fixed pool of live tiles around the focus instead of one delegate per
+  // file. Deleting the focused wallpaper previously shifted every later
+  // delegate's index/modelData, re-decoding each Image async (cache:false)
+  // -> all thumbs flashed black for ~1s. Now a delete only rebinds the freed
+  // edge tile; visible tiles keep their decoded frame while the strip glides.
+  readonly property int tileSlots: 17
+  property int poolStart: 0
+  readonly property int tileCount: Math.min(tileSlots, Math.max(0, count))
+
+  function focusWindow() {
+    if (count <= tileSlots)
+      return 0;
+    var keep = 5;
+    var lo = Math.max(0, Math.min(count - tileSlots, poolStart));
+    if (WallpaperState.currentIndex < lo + keep)
+      return Math.max(0, Math.min(count - tileSlots, WallpaperState.currentIndex - keep));
+    if (WallpaperState.currentIndex > lo + tileSlots - 1 - keep)
+      return Math.max(0, Math.min(count - tileSlots, WallpaperState.currentIndex - (tileSlots - 1 - keep)));
+    return lo;
+  }
+
+  function setWindow(start) {
+    if (strip === undefined)
+      return;
+    var ts = tileSlots;
+    var total = count;
+    var lo = Math.max(0, Math.min(Math.max(0, total - ts), start));
+    var pool = strip;
+    var freed = [];
+    var reused = {};
+    var i, d, gi;
+    for (i = 0; i < pool.count; i++) {
+      d = pool.itemAt(i);
+      if (d == null)
+        continue;
+      gi = d.gridIndex;
+      if (gi >= lo && gi < lo + ts)
+        reused[gi] = true;
+      else
+        freed.push(d);
+    }
+    var fi = 0;
+    for (gi = lo; gi < lo + ts && gi < total; gi++) {
+      if (reused[gi])
+        continue;
+      if (fi >= freed.length)
+        break;
+      freed[fi++].gridIndex = gi;
+    }
+    while (fi < freed.length)
+      freed[fi++].gridIndex = -1;
+    poolStart = lo;
+  }
+
   onCountChanged: {
     if (WallpaperState.currentIndex >= count)
       WallpaperState.selectIndex(Math.max(0, count - 1));
     // Clamp without gliding when the list itself changes (filter swap).
     if (pos >= count || pos < 0) snapPos();
+    Qt.callLater(function () {
+      if (WallpaperState.currentIndex >= root.count)
+        WallpaperState.selectIndex(Math.max(0, root.count - 1));
+      root.setWindow(root.focusWindow());
+    });
   }
 
   Connections {
@@ -55,6 +115,7 @@ Item {
       var target = WallpaperState.currentIndex;
       if (Math.abs(target - root.pos) > Math.max(2, root.count / 2))
         root.pos = target;
+      root.setWindow(root.focusWindow());
       root.hintShown = false;
       hintDwell.restart();
     }
@@ -75,7 +136,10 @@ Item {
     }
   }
 
-  Component.onCompleted: snapPos()
+  Component.onCompleted: {
+    snapPos();
+    setWindow(focusWindow());
+  }
 
   property bool resizeOpen: false
   readonly property string resizeLabel: {
@@ -102,6 +166,7 @@ Item {
         wallFocusRetryTimer.restart();
         WallpaperState.refresh();
         snapPos();
+        setWindow(focusWindow());
         hintShown = false;
         hintDwell.restart();
       }
@@ -147,6 +212,11 @@ Item {
     Keys.onEnterPressed: function (ev) {
       WallpaperState.applyCurrent();
       WallpaperState.close();
+      ev.accepted = true;
+    }
+    Keys.onDeletePressed: function (ev) {
+      var cur = WallpaperState.currentWallpaper;
+      if (cur && cur.path) WallpaperState.trash(cur.path);
       ev.accepted = true;
     }
     Keys.onEscapePressed: function (ev) {
@@ -500,18 +570,27 @@ Item {
 
       Repeater {
         id: strip
-        model: root.list
+        model: root.tileCount
         visible: root.count > 0
 
         delegate: Item {
           id: cardItem
           required property int index
-          required property var modelData
+          // View item owned imperatively by setWindow(): a one-slot slide
+          // rebinds only the freed edge tile, so visible thumbs keep their
+          // decoded frame (no black flash). -1 = unused pool slot.
+          property int gridIndex: -1
+          Component.onCompleted: if (gridIndex < 0) root.setWindow(root.focusWindow())
+          readonly property var modelData: gridIndex >= 0 && gridIndex < root.count ? root.list[gridIndex] : undefined
+          readonly property bool dead: modelData === undefined
 
-          readonly property real off: index - root.pos
+          readonly property real off: gridIndex - root.pos
           readonly property real ao: Math.abs(off)
-          readonly property bool isCur: index === WallpaperState.currentIndex
-          readonly property bool isApplying: WallpaperState.isApplying && WallpaperState.lastApplied === modelData.path
+          readonly property bool isCur: !dead && gridIndex === WallpaperState.currentIndex
+          readonly property bool isApplying: !dead && WallpaperState.isApplying && WallpaperState.lastApplied === modelData.path
+          readonly property real hold: trashHeat.hold
+          readonly property bool committing: trashHeat.hold >= trashHeat.tapThreshold
+          readonly property real commitProgress: Math.max(0, (trashHeat.hold - trashHeat.tapThreshold) / (1 - trashHeat.tapThreshold))
           readonly property real bright: root.slotLerp(root.slotBright, ao)
           readonly property real sat: root.slotLerp(root.slotSat, ao)
           readonly property real cardRadius: Math.round(15 + 3 * Math.max(0, 1 - ao))
@@ -521,12 +600,14 @@ Item {
             return Math.max(0, Math.min(1, gap / soft));
           }
 
+          onIsCurChanged: if (!isCur) trashHeat.cancel()
+
           width: root.slotLerp(root.slotW, ao)
           height: root.slotLerp(root.slotH, ao)
           x: carouselArea.width / 2 + root.offsetX(off) - width / 2
           y: (carouselArea.height - height) / 2
           z: 10 - ao
-          visible: ao <= 5
+          visible: !dead && ao <= 5
           opacity: edgeFade * (ao <= 4 ? 1 : Math.max(0, 5 - ao))
 
           // Mask source item for rounded thumbnail
@@ -576,11 +657,20 @@ Item {
             Image {
               id: cardImg
               anchors.fill: parent
-              source: modelData && modelData.path ? ("file://" + modelData.path) : ""
+              source: {
+                if (cardItem.dead || cardItem.ao > 6)
+                  return "";
+                var m = cardItem.modelData;
+                return (m && m.path) ? ("file://" + m.path) : "";
+              }
               fillMode: Image.PreserveAspectCrop
               smooth: true
               asynchronous: true
-              cache: false
+              // cache:true keeps the decoded pixmap keyed by URL, so a delete
+              // that shifts later tiles (gridIndex N now shows the next file)
+              // hits the cache instantly instead of flashing black for the
+              // ~1s async re-decode. Evicted automatically under pressure.
+              cache: true
               sourceSize.width: 480
               sourceSize.height: 270
             }
@@ -593,12 +683,42 @@ Item {
               opacity: 1 - cardItem.bright
             }
 
+            // Hold-to-delete heat fill: rises from the bottom while held,
+            // drains on early release. Same gesture as the wallpaper changer.
+            Rectangle {
+              id: consume
+              anchors.left: parent.left
+              anchors.right: parent.right
+              anchors.bottom: parent.bottom
+              height: parent.height * cardItem.commitProgress
+              visible: cardItem.committing
+              gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.alpha("#8a2c14", 0.66) }
+                GradientStop { position: 0.74; color: Qt.alpha("#e0563b", 0.30) }
+                GradientStop { position: 1.0; color: Qt.alpha("#ff9a64", 0.0) }
+              }
+
+              Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: 2
+                opacity: Math.min(1, cardItem.commitProgress * 3)
+                gradient: Gradient {
+                  orientation: Gradient.Horizontal
+                  GradientStop { position: 0.0; color: Qt.alpha("#ff9a64", 0.0) }
+                  GradientStop { position: 0.5; color: "#ff9a64" }
+                  GradientStop { position: 1.0; color: Qt.alpha("#ff9a64", 0.0) }
+                }
+              }
+            }
+
             // Live badge
             Rectangle {
               anchors.top: parent.top
               anchors.left: parent.left
               anchors.margins: 4
-              visible: modelData && modelData.isLive
+              visible: !cardItem.dead && cardItem.modelData && cardItem.modelData.isLive
               width: liveText.implicitWidth + 9
               height: liveText.implicitHeight + 4
               radius: height / 2
@@ -620,6 +740,7 @@ Item {
             radius: cardItem.cardRadius
             color: "transparent"
             border.color: {
+              if (cardItem.committing) return "#e0563b";
               var c = Qt.color(cardItem.isCur ? (cardItem.isApplying ? "#f2c14e" : SettingsState.accent) : SettingsState.borderBase);
               return Qt.rgba(c.r, c.g, c.b, cardItem.isCur ? 1 : 0.6);
             }
@@ -641,31 +762,53 @@ Item {
             radius: 9
             color: SettingsState.isDark ? "#cc0c0e0c" : "#eeffffff"
             visible: isCur
-            border.color: isApplying ? "#f2c14e" : SettingsState.borderBase
+            border.color: cardItem.committing ? "#e0563b" : (isApplying ? "#f2c14e" : SettingsState.borderBase)
             border.width: 1
 
             Text {
               id: resText
               anchors.centerIn: parent
-              text: isApplying ? "Applying..." : (modelData && modelData.isLive ? "LIVE · Click to Set" : "Click to Set")
-              color: isApplying ? "#f2c14e" : SettingsState.textMain
+              text: cardItem.committing ? "Hold to delete…" : (isApplying ? "Applying..." : (cardItem.modelData && cardItem.modelData.isLive ? "LIVE · Click to Set" : "Click to Set"))
+              color: cardItem.committing ? "#e0563b" : (isApplying ? "#f2c14e" : SettingsState.textMain)
               font.pixelSize: SettingsState.px(10)
               font.family: SettingsState.fontFamily
             }
           }
 
-          // Thumbnail Click Handler
+          HeatHold {
+            id: trashHeat
+            tapThreshold: 0.25
+            onConfirmed: {
+              if (!cardItem.dead && cardItem.modelData && cardItem.modelData.path) WallpaperState.trash(cardItem.modelData.path);
+            }
+            onTapped: {
+              if (isCur && !cardItem.dead && cardItem.modelData && cardItem.modelData.path) {
+                WallpaperState.applyWallpaper(cardItem.modelData.path);
+                WallpaperState.close();
+              }
+            }
+          }
+
+          // Thumbnail press handler: tap focused card to set, hold it to trash
+          // (same as the wallpaper changer). Tapping a neighbour just focuses it.
           MouseArea {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onPressed: {
+              if (!isCur) return;
+              trashHeat.press();
+            }
+            onReleased: {
+              if (isCur) trashHeat.release();
+            }
+            onExited: trashHeat.cancel()
             onClicked: {
-              if (isCur) {
-                WallpaperState.applyWallpaper(modelData.path);
-                WallpaperState.close();
-              } else {
-                WallpaperState.selectIndex(index);
+              if (!isCur) {
+                WallpaperState.selectIndex(gridIndex);
               }
+              // Focused-card taps apply via trashHeat.onTapped so a hold
+              // never misfires as a set.
             }
           }
         }

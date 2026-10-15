@@ -31,12 +31,11 @@ Singleton {
     }
   }
 
-  Timer {
-    interval: 3000
-    repeat: true
-    running: root.open
-    onTriggered: root.refresh()
-  }
+  // NOTE: no periodic auto-refresh while open. The previous 3s poll replaced
+  // allWallpapers with a brand-new array even when nothing changed, which
+  // rebuilt every filmstrip delegate and flashed all thumbs black (~1s async
+  // re-decode with cache:false). Refresh now happens on open / folder change /
+  // manual button only; trash() already updates the list optimistically.
 
   readonly property var filteredWallpapers: {
     var list = [];
@@ -118,6 +117,22 @@ Singleton {
     applyProcess.running = true;
   }
 
+  function trash(path) {
+    if (!path) return;
+    trashProcess.command = ["gio", "trash", path];
+    trashProcess.running = true;
+    // Optimistic removal so the strip reacts instantly; a failed trash
+    // refreshes from disk to restore the entry (see trashProcess.onExited).
+    var kept = [];
+    for (var i = 0; i < allWallpapers.length; ++i) {
+      if (allWallpapers[i] && allWallpapers[i].path !== path)
+        kept.push(allWallpapers[i]);
+    }
+    allWallpapers = kept;
+    if (currentIndex >= filteredWallpapers.length)
+      currentIndex = Math.max(0, filteredWallpapers.length - 1);
+  }
+
   // Scan wallpapers process
   Process {
     id: scanProcess
@@ -129,7 +144,23 @@ Singleton {
         try {
           var parsed = JSON.parse(data);
           if (Array.isArray(parsed)) {
-            root.allWallpapers = parsed;
+            // Diff guard: assigning a new array identity rebuilds the whole
+            // Repeater (every Image re-decodes async -> black flash). Skip the
+            // assignment when the scan found nothing new.
+            var same = parsed.length === root.allWallpapers.length;
+            if (same) {
+              for (var i = 0; i < parsed.length; ++i) {
+                var a = root.allWallpapers[i];
+                var b = parsed[i];
+                if (!a || !b || a.path !== b.path || !!a.isLive !== !!b.isLive) {
+                  same = false;
+                  break;
+                }
+              }
+            }
+            if (!same) {
+              root.allWallpapers = parsed;
+            }
             if (root.currentIndex >= parsed.length) {
               root.currentIndex = Math.max(0, parsed.length - 1);
             }
@@ -147,6 +178,16 @@ Singleton {
     running: false
     onExited: function(code, status) {
       root.isApplying = false;
+    }
+  }
+
+  // Trash (gio trash) process — refresh on failure to restore the entry
+  Process {
+    id: trashProcess
+    running: false
+    onExited: function(code, status) {
+      if (code !== 0)
+        root.refresh();
     }
   }
 }

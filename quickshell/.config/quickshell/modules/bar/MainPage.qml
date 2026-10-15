@@ -10,6 +10,7 @@ Item {
   id: mainPage
   required property var circle
   required property bool hovered
+  implicitWidth: strip.implicitWidth
   implicitHeight: 52
   opacity: (hovered && circle.activePage === "main") ? 1 : 0
   visible: opacity > 0

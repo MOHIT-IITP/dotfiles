@@ -63,24 +63,24 @@ Item {
   implicitWidth: {
     if (root.activePage === "calendar") return 410;
     if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
-    if (root.activePage === "main") return 740;
+    if (root.activePage === "main") return mainPage.implicitWidth + 32;
     return 410;
   }
 
   implicitHeight: {
     if (root.activePage === "settings") return settingsPage.implicitHeight + 76;
-    if (root.activePage === "sound") return soundPage.implicitHeight + 36;
-    if (root.activePage === "mic") return micPage.implicitHeight + 36;
+    if (root.activePage === "sound") return soundPage.implicitHeight + 32;
+    if (root.activePage === "mic") return micPage.implicitHeight + 32;
     if (root.activePage === "mixer") return 380;
     if (root.activePage === "screenshot") return 250;
-    if (root.activePage === "bluetooth") return btPage.implicitHeight + 36;
-    if (root.activePage === "wifi") return wifiPage.implicitHeight + 36;
-    if (root.activePage === "calendar") return calPage.implicitHeight + 36;
-    if (root.activePage === "stats") return statsPage.implicitHeight + 36;
+    if (root.activePage === "bluetooth") return btPage.implicitHeight + 32;
+    if (root.activePage === "wifi") return wifiPage.implicitHeight + 32;
+    if (root.activePage === "calendar") return calPage.implicitHeight + 32;
+    if (root.activePage === "stats") return statsPage.implicitHeight + 32;
     if (root.activePage === "recorder") {
       return recorderPage.implicitHeight + 32;
     }
-    return mainPage.implicitHeight + 12;
+    return mainPage.implicitHeight + 32;
   }
 
   // Hover tracking so ClockPill stays expanded while interacting with
@@ -96,10 +96,10 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.topMargin: 6
-    anchors.leftMargin: 4
-    anchors.rightMargin: 4
-    anchors.bottomMargin: 6
+    anchors.topMargin: 16
+    anchors.leftMargin: 16
+    anchors.rightMargin: 16
+    anchors.bottomMargin: 16
     circle: root
     hovered: true
   }
@@ -109,7 +109,7 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: 18
+    anchors.margins: 16
     circle: root
     hovered: true
   }
@@ -119,7 +119,7 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: 18
+    anchors.margins: 16
     circle: root
     hovered: true
   }
@@ -136,7 +136,7 @@ Item {
     id: soundPage
     direction: "output"
     anchors.fill: parent
-    anchors.margins: 18
+    anchors.margins: 16
     circle: root
     hovered: true
   }
@@ -145,7 +145,7 @@ Item {
     id: micPage
     direction: "input"
     anchors.fill: parent
-    anchors.margins: 18
+    anchors.margins: 16
     circle: root
     hovered: true
   }
@@ -169,7 +169,7 @@ Item {
   ScreenshotPage {
     id: screenshotPage
     anchors.fill: parent
-    anchors.margins: 18
+    anchors.margins: 16
     circle: root
     hovered: true
   }
@@ -178,10 +178,10 @@ Item {
     id: calPage
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.topMargin: 18
+    anchors.topMargin: 16
     // Fixed width (matches implicitWidth 410 - margins) so the pill
     // resize animation doesn't reflow the day grid every frame (jitter).
-    width: 374
+    width: 378
     circle: root
     hovered: true
   }
@@ -191,7 +191,7 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: 18
+    anchors.margins: 16
     circle: root
     hovered: true
   }

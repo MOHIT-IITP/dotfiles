@@ -398,20 +398,20 @@ Rectangle {
 
   Behavior on implicitWidth {
     NumberAnimation {
-      duration: 380
-      easing.type: Easing.OutCubic
+      duration: 650
+      easing.type: Easing.OutExpo
     }
   }
   Behavior on implicitHeight {
     NumberAnimation {
-      duration: 380
-      easing.type: Easing.OutCubic
+      duration: 650
+      easing.type: Easing.OutExpo
     }
   }
   Behavior on radius {
     NumberAnimation {
-      duration: 380
-      easing.type: Easing.OutCubic
+      duration: 650
+      easing.type: Easing.OutExpo
     }
   }
 
@@ -1938,7 +1938,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+      NumberAnimation { duration: 420; easing.type: Easing.OutCubic }
     }
   }
 

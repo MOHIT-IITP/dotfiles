@@ -120,7 +120,6 @@ alias python="/usr/bin/python3"
 # navigation + tools
 alias vi="nvim"
 alias v="vim"
-alias wl="walset"
 alias ls="eza --icons"
 alias ll="eza --long"
 alias la="eza --long --all"
@@ -138,11 +137,11 @@ alias uns="yay -Rns"
 alias open="xdg-open"
 
 # Git shortcuts
-alias ga="git pull origin main && git add ."
+alias ga="git pull origin HEAD && git add ."
 alias gc="git commit -m"
-alias gp="git push origin main"
+alias gp="git push origin HEAD"
 alias lg="lazygit"
-alias gpl="git pull origin main"
+alias gpl="git pull origin HEAD"
 alias gs="git status"
 
 # Project shortcuts
@@ -153,6 +152,7 @@ alias mc="cd ~/moLib/moCode"
 alias nrd="npm run dev"
 alias nrb="npm run build"
 alias bro="bun run dev"
+alias brd="bun run build"
 
 # java thingi
 alias jc="javac"
