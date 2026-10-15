@@ -6,8 +6,8 @@ import "../services"
 // accent-soft circle on hover, accent pill when active. No dark hover fill.
 Item {
   id: root
-  width: 36
-  height: 36
+  width: 34
+  height: 34
 
   property string kind: "wifi"
   property bool active: false
@@ -56,6 +56,10 @@ Item {
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
+    onContainsMouseChanged: {
+      if (containsMouse)
+        AmeState.follow(root);
+    }
     onClicked: root.clicked()
   }
 }

@@ -115,6 +115,54 @@ Rectangle {
     if (isExpanded && !isHovered) {
       root.dismissLock = false;
     }
+    if (!isExpanded) {
+      AmeState.clear();
+    }
+  }
+
+  // Ame bead anchor: true while the parked anchor is still effectively
+  // visible *inside this pill* (walks the parent chain, so a page switch or
+  // a hover on another monitor hides the bead here until the next local
+  // hover instead of parking it on a stale pos).
+  function ameAnchorVisible() {
+    try {
+      var a = AmeState.anchor;
+      if (!a)
+        return false;
+      var inside = false;
+      var p = a;
+      while (p) {
+        if (!p.visible || p.opacity <= 0.01)
+          return false;
+        if (p === root) {
+          inside = true;
+          break;
+        }
+        p = p.parent;
+      }
+      return inside;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  readonly property bool ameLive: root.isExpanded && AmeState.anchor !== null && ameAnchorVisible()
+  readonly property point ameDotPoint: {
+    void width;
+    void height;
+    void AmeState.anchor;
+    void AmeState.fx;
+    void AmeState.fy;
+    var a = AmeState.anchor;
+    if (!a)
+      return Qt.point(width / 2, height / 2);
+    try {
+      var px = a.width * AmeState.fx;
+      var py = a.height * AmeState.fy + (AmeState.form === "tick" ? 0 : 8);
+      return a.mapToItem(root, px, py);
+    } catch (e) {
+      return Qt.point(width / 2, height / 2);
+    }
   }
 
   radius: isCardExpanded ? SettingsState.cardRadius + 12 : 15
@@ -236,6 +284,26 @@ Rectangle {
   // Released on full pointer exit (pokeLeaveTimer) or a fresh press.
   property bool dismissLock: false
 
+  // True while any explicitly-opened modal holds the pill tall. Used to
+  // collapse the hover latch when the last modal closes: otherwise the
+  // inner TextInput keeps activeFocus, the hover card pops up underneath,
+  // and Esc is dead (focus never returns to root so the second Esc is lost).
+  readonly property bool anyModalOpen: LauncherState.open || WallpaperState.open || PowerState.open || ClipboardState.open || MixerState.open || AuthState.open || AboutState.open || NotifCenter.inboxOpen || FileTrayState.open || FileTrayState.dndHover || ReminderState.promptOpen || ReminderState.editing
+  onAnyModalOpenChanged: {
+    if (!anyModalOpen) {
+      // Defer one frame so a modal-to-modal switch (e.g. mixer -> CC page)
+      // can re-expand before we collapse the hover latch.
+      Qt.callLater(function() {
+        if (!root.anyModalOpen && !root.swipeOpen && !CalendarState.open && !ScreenshotState.open && !RecorderState.open && !CCState.open && !TimerState.open) {
+          root.collapseAll();
+        }
+      });
+    } else {
+      // A fresh modal takes over: drop any stale hover latch.
+      root.dismissLock = false;
+    }
+  }
+
   focus: pillNeedsFocus
   // focus:true alone doesn't grant *active* focus when the layer gains
   // Exclusive keyboard focus (e.g. hover/swipe opens via mouse), so Esc
@@ -243,11 +311,29 @@ Rectangle {
   onPillNeedsFocusChanged: {
     if (pillNeedsFocus) root.forceActiveFocus();
   }
+  function closeAllModals(): void {
+    if (LauncherState.open) LauncherState.close();
+    if (WallpaperState.open) WallpaperState.close();
+    if (PowerState.open) PowerState.close();
+    if (ClipboardState.open) ClipboardState.close();
+    if (MixerState.open) MixerState.close();
+    if (AuthState.open) AuthState.close();
+    if (AboutState.open) AboutState.close();
+    if (NotifCenter.inboxOpen) NotifCenter.closeInbox();
+    if (FileTrayState.open || FileTrayState.dndHover) FileTrayState.close();
+    if (ReminderState.promptOpen) ReminderState.closePrompt();
+    if (ReminderState.editing) ReminderState.editing = false;
+    if (TimerState.open) TimerState.open = false;
+    if (CCState.open) CCState.open = false;
+  }
   Keys.onEscapePressed: function(ev) {
     // Also answer while dismissLock holds the pill shut but tallness is
     // gone (pillOpen false): otherwise the first Esc blanks the pill and
     // every later Esc is rejected as "nothing to do".
-    if (root.pillOpen || root.dismissLock || root.swipeOpen) {
+    // Close explicit modals too: collapseAll() alone only clears swipe
+    // views, so Esc on a FileTray / launcher-with-lost-focus would look dead.
+    if (root.pillOpen || root.dismissLock || root.swipeOpen || root.anyModalOpen) {
+      root.closeAllModals();
       root.collapseAll();
       ev.accepted = true;
     }
@@ -1509,7 +1595,11 @@ Rectangle {
                   }
                 }
                 onShownChanged: hoverProgCanvas.requestPaint()
-                onCurrentPosChanged: hoverProgCanvas.requestPaint()
+                onCurrentPosChanged: {
+                  hoverProgCanvas.requestPaint();
+                  if (hoverSeekMouse && (hoverSeekMouse.containsMouse || hoverSeekMouse.pressed))
+                    AmeState.followTickH(hoverProgTrack, shown);
+                }
                 onWidthChanged: hoverProgCanvas.requestPaint()
 
                 NumberAnimation {
@@ -1568,9 +1658,14 @@ Rectangle {
                 MouseArea {
                   id: hoverSeekMouse
                   anchors.fill: parent
+                  hoverEnabled: true
                   cursorShape: Qt.PointingHandCursor
                   property real startX: 0
                   property bool dragging: false
+                  onContainsMouseChanged: {
+                    if (containsMouse)
+                      AmeState.followTickH(hoverProgTrack, hoverProgTrack.shown);
+                  }
                   onPressed: function (ev) {
                     if (hoverProgTrack.width <= 0) return;
                     hoverSeekMouse.startX = ev.x;
@@ -1583,6 +1678,7 @@ Rectangle {
                     hoverSeekAnim.to = r;
                     hoverSeekAnim.restart();
                     hoverProgTrack.applySeek(r);
+                    AmeState.followTickH(hoverProgTrack, r);
                   }
                   onPositionChanged: function (ev) {
                     if (!pressed || hoverProgTrack.width <= 0) return;
@@ -1595,6 +1691,7 @@ Rectangle {
                       hoverProgTrack.currentPos = r;
                       hoverProgCanvas.requestPaint();
                       hoverProgTrack.applySeek(r);
+                      AmeState.followTickH(hoverProgTrack, r);
                     }
                   }
                   onReleased: function () {
@@ -1626,6 +1723,10 @@ Rectangle {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     enabled: Boolean(hoverMedia.player?.canGoPrevious)
+                    onContainsMouseChanged: {
+                      if (containsMouse)
+                        AmeState.follow(parent);
+                    }
                     onClicked: {
                       hoverMedia.flipDir = -1;
                       if (hoverMedia.player) hoverMedia.player.previous();
@@ -1651,6 +1752,10 @@ Rectangle {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     enabled: Boolean(hoverMedia.player?.canTogglePlaying)
+                    onContainsMouseChanged: {
+                      if (containsMouse)
+                        AmeState.follow(parent);
+                    }
                     onClicked: {
                       if (hoverMedia.player) hoverMedia.player.togglePlaying();
                     }
@@ -1676,6 +1781,10 @@ Rectangle {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     enabled: Boolean(hoverMedia.player?.canGoNext)
+                    onContainsMouseChanged: {
+                      if (containsMouse)
+                        AmeState.follow(parent);
+                    }
                     onClicked: {
                       hoverMedia.flipDir = 1;
                       if (hoverMedia.player) hoverMedia.player.next();
@@ -2069,6 +2178,23 @@ Rectangle {
   onTimerHoveringChanged: pokeLeaveTimer()
   onRemHoveringChanged: pokeLeaveTimer()
   onMediaHoverChanged: pokeLeaveTimer()
+  // A page switch hides the old anchor's view: drop the bead until the next
+  // hover instead of parking it on a stale position.
+  onShowCCChanged: if (!showCC) AmeState.clear()
+  onShowMixerChanged: if (!showMixer) AmeState.clear()
+  onShowLauncherChanged: if (!showLauncher) AmeState.clear()
+  onShowWallpaperChanged: if (!showWallpaper) AmeState.clear()
+  onShowPowerChanged: if (!showPower) AmeState.clear()
+  onShowClipboardChanged: if (!showClipboard) AmeState.clear()
+  onShowAuthChanged: if (!showAuth) AmeState.clear()
+  onShowInboxChanged: if (!showInbox) AmeState.clear()
+
+  Connections {
+    target: ccView
+    function onActivePageChanged() {
+      AmeState.clear();
+    }
+  }
   onIsTimerViewChanged: {
     if (TimerState.open !== root.isTimerView)
       TimerState.open = root.isTimerView;
@@ -2292,5 +2418,20 @@ Rectangle {
         drop.accept();
       }
     }
+  }
+
+  // Ame bead: red-dot follower. Parks below hovered icons ("soul") and rides
+  // slider/fader handles ("tick"), gliding between anchors. Hidden unless
+  // expanded with a live anchor. Paints on top; never takes input.
+  Ame {
+    id: ame
+    anchors.fill: parent
+    z: 200
+    s: 1
+    heat: 0
+    wickDir: -1
+    wake: Qt.point(root.width / 2, 24)
+    form: root.ameLive ? AmeState.form : "off"
+    point: root.ameLive ? root.ameDotPoint : Qt.point(root.width / 2, 24)
   }
 }

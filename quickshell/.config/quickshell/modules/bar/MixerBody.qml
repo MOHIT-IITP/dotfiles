@@ -55,6 +55,10 @@ Column {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
+          onContainsMouseChanged: {
+            if (containsMouse)
+              AmeState.follow(parent);
+          }
           onClicked: root.back()
         }
       }
@@ -87,6 +91,10 @@ Column {
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
           enabled: root.showBack
+          onContainsMouseChanged: {
+            if (containsMouse)
+              AmeState.follow(parent);
+          }
           onClicked: root.back()
         }
       }
@@ -126,6 +134,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.follow(parent);
+            }
             onClicked: {
               AudioState.refreshDevices();
               root.openSound();
@@ -151,6 +163,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.follow(parent);
+            }
             onClicked: {
               AudioState.refreshDevices();
               root.openMic();
@@ -176,6 +192,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.follow(parent);
+            }
             onClicked: NotifCenter.toggleDnd()
           }
         }
@@ -198,6 +218,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.follow(parent);
+            }
             onClicked: NightlightState.toggle()
           }
         }
@@ -220,6 +244,10 @@ Column {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.follow(parent);
+            }
             onClicked: BrightnessState.setBrightness(BrightnessState.brightness > 0.4 ? 0.2 : 0.9)
           }
         }

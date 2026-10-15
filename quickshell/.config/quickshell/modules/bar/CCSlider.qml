@@ -79,6 +79,10 @@ Column {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
+          onContainsMouseChanged: {
+            if (containsMouse)
+              AmeState.follow(parent);
+          }
           onClicked: root.iconClicked()
         }
       }
@@ -154,6 +158,10 @@ Column {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
+          onContainsMouseChanged: {
+            if (containsMouse)
+              AmeState.follow(devChip);
+          }
           onClicked: root.openDevices()
         }
       }
@@ -183,6 +191,7 @@ Column {
 
   // Wavy slider track with handle
   Item {
+    id: trackBox
     width: parent.width
     height: 26
 
@@ -216,7 +225,11 @@ Column {
 
     Connections {
       target: root
-      function onShownChanged() { waveCanvas.requestPaint(); }
+      function onShownChanged() {
+        waveCanvas.requestPaint();
+        if (sliderMouse && (sliderMouse.containsMouse || sliderMouse.dragging))
+          AmeState.followTickH(trackBox, root.shown);
+      }
       function onCurrentPosChanged() { waveCanvas.requestPaint(); }
       function onMutedChanged() { waveCanvas.requestPaint(); }
       function onAvailableChanged() { waveCanvas.requestPaint(); }
@@ -239,6 +252,11 @@ Column {
       property real startX: 0
       property bool dragging: false
 
+      onContainsMouseChanged: {
+        if (containsMouse)
+          AmeState.followTickH(trackBox, root.shown);
+      }
+
       onPressed: function (ev) {
         sliderMouse.startX = ev.x;
         sliderMouse.dragging = false;
@@ -254,6 +272,7 @@ Column {
         seekAnim.restart();
 
         root.seeked(r);
+        AmeState.followTickH(trackBox, r);
       }
 
       onPositionChanged: function (ev) {
@@ -267,6 +286,7 @@ Column {
           root.currentPos = r;
           waveCanvas.requestPaint();
           root.seeked(r);
+          AmeState.followTickH(trackBox, r);
         }
       }
 

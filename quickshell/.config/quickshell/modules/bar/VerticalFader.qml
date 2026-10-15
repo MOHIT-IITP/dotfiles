@@ -26,6 +26,11 @@ Item {
     }
   }
 
+  onShownChanged: {
+    if (faderMouse && (faderMouse.containsMouse || faderMouse.dragging))
+      AmeState.followTickV(trackArea, shown);
+  }
+
   NumberAnimation {
     id: seekAnim
     target: root
@@ -51,10 +56,16 @@ Item {
     anchors.bottom: trackArea.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     width: 44
+    hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
 
     property real startY: 0
     property bool dragging: false
+
+    onContainsMouseChanged: {
+      if (containsMouse)
+        AmeState.followTickV(trackArea, root.shown);
+    }
 
     onPressed: function (ev) {
       faderMouse.startY = ev.y;
@@ -72,6 +83,7 @@ Item {
       seekAnim.restart();
 
       root.seeked(val);
+      AmeState.followTickV(trackArea, val);
     }
 
     onPositionChanged: function (ev) {
@@ -87,6 +99,7 @@ Item {
         root.currentPos = val;
         waveCanvas.requestPaint();
         root.seeked(val);
+        AmeState.followTickV(trackArea, val);
       }
     }
 
@@ -184,6 +197,10 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
+        onContainsMouseChanged: {
+          if (containsMouse)
+            AmeState.follow(parent);
+        }
         onClicked: root.iconClicked()
       }
     }

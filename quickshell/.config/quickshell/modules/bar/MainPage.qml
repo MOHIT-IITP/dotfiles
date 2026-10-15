@@ -62,7 +62,7 @@ Item {
     anchors.centerIn: parent
     width: implicitWidth
     height: parent.height
-    spacing: 8
+    spacing: 4
 
     // ---- Workspaces pill (left) ----
     Rectangle {
@@ -134,7 +134,7 @@ Item {
     Row {
       id: iconRow
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 2
+      spacing: 0
 
       CCHIcon {
         kind: "calendar"
@@ -223,7 +223,7 @@ Item {
       Row {
         id: netRow
         anchors.centerIn: parent
-        spacing: 2
+        spacing: 0
 
         CCHIcon {
           kind: "bt"
