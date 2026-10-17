@@ -774,29 +774,62 @@ Column {
           height: 24
           readonly property int count: 20
           readonly property var heights: [7, 12, 16, 9, 14, 19, 12, 8, 15, 21, 16, 11, 7, 13, 18, 12, 8, 14, 10, 6]
-          Row {
+
+          // Tick track exactly spanning the bar row, so the Ame bead can ride
+          // the fill edge (mirrors the wavy sliders' bead anchor).
+          Item {
+            id: micTickTrack
             anchors.centerIn: parent
-            spacing: 3
-            Repeater {
-              model: micBars.count
-              delegate: Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 3
-                height: micBars.heights[index] !== undefined ? micBars.heights[index] : 10
-                radius: 1.5
-                color: {
-                  if (AudioState.inMuted) return dimBar;
-                  var frac = (index + 1) / micBars.count;
-                  return frac <= AudioState.inVol ? tan : dimBar;
+            width: micBars.count * 3 + (micBars.count - 1) * 3
+            height: parent.height
+
+            Row {
+              anchors.fill: parent
+              spacing: 3
+              Repeater {
+                model: micBars.count
+                delegate: Rectangle {
+                  anchors.verticalCenter: parent.verticalCenter
+                  width: 3
+                  height: micBars.heights[index] !== undefined ? micBars.heights[index] : 10
+                  radius: 1.5
+                  color: {
+                    if (AudioState.inMuted) return dimBar;
+                    var frac = (index + 1) / micBars.count;
+                    return frac <= AudioState.inVol ? tan : dimBar;
+                  }
                 }
               }
             }
           }
+
+          // Fill-edge fraction (0..1) of the lit bars, for the bead tick.
+          function tickFrac(vol) {
+            var v = Math.max(0, Math.min(1, vol));
+            var lit = Math.floor(micBars.count * v + 1e-9);
+            var edge = lit <= 0 ? 0 : lit * 6 - 3;
+            return micTickTrack.width > 0 ? Math.max(0, Math.min(1, edge / micTickTrack.width)) : 0;
+          }
+
           MouseArea {
             anchors.fill: parent
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onPressed: function (ev) { AudioState.setInVol(Math.min(1, Math.max(0, ev.x / width))); }
-            onPositionChanged: function (ev) { if (pressed) AudioState.setInVol(Math.min(1, Math.max(0, ev.x / width))); }
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.followTickH(micTickTrack, micBars.tickFrac(AudioState.inVol));
+            }
+            onPressed: function (ev) {
+              var v = Math.min(1, Math.max(0, ev.x / width));
+              AudioState.setInVol(v);
+              AmeState.followTickH(micTickTrack, micBars.tickFrac(v));
+            }
+            onPositionChanged: function (ev) {
+              if (!pressed) return;
+              var v = Math.min(1, Math.max(0, ev.x / width));
+              AudioState.setInVol(v);
+              AmeState.followTickH(micTickTrack, micBars.tickFrac(v));
+            }
           }
         }
         Text {
@@ -899,29 +932,61 @@ Column {
           height: 24
           readonly property int count: 20
           readonly property var heights: [6, 10, 14, 11, 9, 13, 17, 12, 8, 12, 16, 13, 9, 12, 15, 18, 14, 10, 12, 9]
-          Row {
+
+          // Tick track exactly spanning the bar row (see micBars).
+          Item {
+            id: deskTickTrack
             anchors.centerIn: parent
-            spacing: 3
-            Repeater {
-              model: deskBars.count
-              delegate: Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 3
-                height: deskBars.heights[index] !== undefined ? deskBars.heights[index] : 10
-                radius: 1.5
-                color: {
-                  if (AudioState.outMuted) return dimBar;
-                  var frac = (index + 1) / deskBars.count;
-                  return frac <= AudioState.outVol ? tan : dimBar;
+            width: deskBars.count * 3 + (deskBars.count - 1) * 3
+            height: parent.height
+
+            Row {
+              anchors.fill: parent
+              spacing: 3
+              Repeater {
+                model: deskBars.count
+                delegate: Rectangle {
+                  anchors.verticalCenter: parent.verticalCenter
+                  width: 3
+                  height: deskBars.heights[index] !== undefined ? deskBars.heights[index] : 10
+                  radius: 1.5
+                  color: {
+                    if (AudioState.outMuted) return dimBar;
+                    var frac = (index + 1) / deskBars.count;
+                    return frac <= AudioState.outVol ? tan : dimBar;
+                  }
                 }
               }
             }
           }
+
+          // Fill-edge fraction (0..1) of the lit bars, for the bead tick.
+          function tickFrac(vol) {
+            var v = Math.max(0, Math.min(1, vol));
+            var lit = Math.floor(deskBars.count * v + 1e-9);
+            var edge = lit <= 0 ? 0 : lit * 6 - 3;
+            return deskTickTrack.width > 0 ? Math.max(0, Math.min(1, edge / deskTickTrack.width)) : 0;
+          }
+
           MouseArea {
             anchors.fill: parent
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onPressed: function (ev) { AudioState.setOutVol(Math.min(1, Math.max(0, ev.x / width))); }
-            onPositionChanged: function (ev) { if (pressed) AudioState.setOutVol(Math.min(1, Math.max(0, ev.x / width))); }
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.followTickH(deskTickTrack, deskBars.tickFrac(AudioState.outVol));
+            }
+            onPressed: function (ev) {
+              var v = Math.min(1, Math.max(0, ev.x / width));
+              AudioState.setOutVol(v);
+              AmeState.followTickH(deskTickTrack, deskBars.tickFrac(v));
+            }
+            onPositionChanged: function (ev) {
+              if (!pressed) return;
+              var v = Math.min(1, Math.max(0, ev.x / width));
+              AudioState.setOutVol(v);
+              AmeState.followTickH(deskTickTrack, deskBars.tickFrac(v));
+            }
           }
         }
         Text {

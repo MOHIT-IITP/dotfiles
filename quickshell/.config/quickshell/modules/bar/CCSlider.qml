@@ -208,7 +208,8 @@ Column {
         WavyPaint.paint(getContext("2d"), width, height, {
           shown: root.shown,
           showTrack: true,
-          showHandle: true,
+          showHandle: false,
+          trackGap: 6,
           showRemaining: false,
           waveColor: root.muted ? SettingsState.textMuted : SettingsState.accent,
           trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -227,7 +228,7 @@ Column {
       target: root
       function onShownChanged() {
         waveCanvas.requestPaint();
-        if (sliderMouse && (sliderMouse.containsMouse || sliderMouse.dragging))
+        if (sliderMouse && (sliderMouse.containsMouse || sliderMouse.pressed || sliderMouse.dragging || seekAnim.running))
           AmeState.followTickH(trackBox, root.shown);
       }
       function onCurrentPosChanged() { waveCanvas.requestPaint(); }
@@ -272,7 +273,7 @@ Column {
         seekAnim.restart();
 
         root.seeked(r);
-        AmeState.followTickH(trackBox, r);
+        AmeState.followTickH(trackBox, root.shown);
       }
 
       onPositionChanged: function (ev) {

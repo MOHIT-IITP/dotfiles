@@ -133,6 +133,7 @@ Item {
         if (root.isFiles) root.runFileSearch();
         forceFocus();
         focusRetryTimer.restart();
+        Qt.callLater(search.syncCaret);
       }
     }
     function onModeChanged() {
@@ -143,6 +144,7 @@ Item {
           root.runFileSearch();
         }
         forceFocus();
+        Qt.callLater(search.syncCaret);
       }
     }
   }
@@ -160,6 +162,7 @@ Item {
       forceFocus();
       if (search.activeFocus || count > 6) {
         running = false;
+        Qt.callLater(search.syncCaret);
       }
     }
   }
@@ -411,12 +414,48 @@ Item {
             focus: true
             activeFocusOnTab: true
             selectByMouse: true
+            selectionColor: SettingsState.accent
+            // Native caret in accent color (thin 2px core inside the wider Ame bead,
+            // blinking like the pill bar's SearchField).
             cursorVisible: true
+            cursorDelegate: Item {
+              width: 2
+              height: parent.height
+              property bool blinkOn: true
+              Timer {
+                interval: 530
+                repeat: true
+                running: search.activeFocus
+                onTriggered: parent.blinkOn = !parent.blinkOn
+              }
+              Rectangle {
+                anchors.fill: parent
+                color: SettingsState.accent
+                opacity: parent.blinkOn ? 1 : 0
+              }
+            }
+
+            // Ame "caret" follower, ported from the pill bar launcher:
+            // park the molten bead exactly on the text cursor (cursorRectangle
+            // center) so typing glides the bead along with the caret.
+            function syncCaret() {
+              if (!LauncherState.open || !search.activeFocus)
+                return;
+              try {
+                AmeState.followCaret(search, search.cursorRectangle.x + search.cursorRectangle.width / 2, search.cursorRectangle.y + search.cursorRectangle.height / 2);
+              } catch (e) {}
+            }
+            onCursorRectangleChanged: search.syncCaret()
+            onActiveFocusChanged: {
+              if (activeFocus)
+                search.syncCaret();
+            }
 
             onTextChanged: {
               query = text;
               sel = 0;
               if (root.isFiles) fileDebounce.restart();
+              search.syncCaret();
             }
 
             Keys.onPressed: function (ev) {

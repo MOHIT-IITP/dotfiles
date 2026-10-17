@@ -47,6 +47,15 @@ Item {
     ReminderState.closePrompt();
   }
 
+  function syncActiveCaret() {
+    if (!ReminderState.promptOpen)
+      return;
+    if (root.step === 1)
+      minsInput.syncCaret();
+    else
+      titleInput.syncCaret();
+  }
+
   Connections {
     target: ReminderState
     function onPromptOpenChanged() {
@@ -56,6 +65,7 @@ Item {
         minsInput.text = "";
         titleInput.text = "";
         focusRetryTimer.restart();
+        Qt.callLater(root.syncActiveCaret);
       }
     }
   }
@@ -74,9 +84,12 @@ Item {
       var focused = (root.step === 1) ? minsInput.activeFocus : titleInput.activeFocus;
       if (focused || count > 8) {
         running = false;
+        Qt.callLater(root.syncActiveCaret);
       }
     }
   }
+
+  onStepChanged: Qt.callLater(root.syncActiveCaret)
 
   // ==========================================
   // STEP 1: TIME SELECTION ("remind in minutes" + Circular → button)
@@ -136,6 +149,42 @@ Item {
             inputMethodHints: Qt.ImhDigitsOnly
             validator: IntValidator { bottom: 1; top: 1440 }
             selectByMouse: true
+            selectionColor: SettingsState.accent
+            cursorVisible: true
+            // Custom blinking block cursor, same as launcher search field:
+            // 2px accent bar blinking at 530ms while focused.
+            cursorDelegate: Item {
+              width: 2
+              height: parent.height
+              property bool blinkOn: true
+              Timer {
+                interval: 530
+                repeat: true
+                running: minsInput.activeFocus
+                onTriggered: parent.blinkOn = !parent.blinkOn
+              }
+              Rectangle {
+                anchors.fill: parent
+                color: SettingsState.accent
+                opacity: parent.blinkOn ? 1 : 0
+              }
+            }
+
+            // Ame "caret" follower, same as launcher: park the molten bead
+            // exactly on the text cursor so typing glides the bead along.
+            function syncCaret() {
+              if (!ReminderState.promptOpen || root.step !== 1 || !minsInput.activeFocus)
+                return;
+              try {
+                AmeState.followCaret(minsInput, minsInput.cursorRectangle.x + minsInput.cursorRectangle.width / 2, minsInput.cursorRectangle.y + minsInput.cursorRectangle.height / 2);
+              } catch (e) {}
+            }
+            onCursorRectangleChanged: minsInput.syncCaret()
+            onActiveFocusChanged: {
+              if (activeFocus)
+                minsInput.syncCaret();
+            }
+            onTextChanged: minsInput.syncCaret()
 
             Keys.onReturnPressed: function(ev) {
               root.goToStep2();
@@ -274,6 +323,40 @@ Item {
             font.bold: true
             font.family: SettingsState.fontFamily
             selectByMouse: true
+            selectionColor: SettingsState.accent
+            cursorVisible: true
+            // Custom blinking block cursor, same as launcher search field.
+            cursorDelegate: Item {
+              width: 2
+              height: parent.height
+              property bool blinkOn: true
+              Timer {
+                interval: 530
+                repeat: true
+                running: titleInput.activeFocus
+                onTriggered: parent.blinkOn = !parent.blinkOn
+              }
+              Rectangle {
+                anchors.fill: parent
+                color: SettingsState.accent
+                opacity: parent.blinkOn ? 1 : 0
+              }
+            }
+
+            // Ame "caret" follower, same as launcher.
+            function syncCaret() {
+              if (!ReminderState.promptOpen || root.step !== 2 || !titleInput.activeFocus)
+                return;
+              try {
+                AmeState.followCaret(titleInput, titleInput.cursorRectangle.x + titleInput.cursorRectangle.width / 2, titleInput.cursorRectangle.y + titleInput.cursorRectangle.height / 2);
+              } catch (e) {}
+            }
+            onCursorRectangleChanged: titleInput.syncCaret()
+            onActiveFocusChanged: {
+              if (activeFocus)
+                titleInput.syncCaret();
+            }
+            onTextChanged: titleInput.syncCaret()
 
             Keys.onReturnPressed: function(ev) {
               root.submit();

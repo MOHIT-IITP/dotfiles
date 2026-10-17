@@ -27,7 +27,7 @@ Item {
   }
 
   onShownChanged: {
-    if (faderMouse && (faderMouse.containsMouse || faderMouse.dragging))
+    if (faderMouse && (faderMouse.containsMouse || faderMouse.pressed || faderMouse.dragging || seekAnim.running))
       AmeState.followTickV(trackArea, shown);
   }
 
@@ -83,7 +83,7 @@ Item {
       seekAnim.restart();
 
       root.seeked(val);
-      AmeState.followTickV(trackArea, val);
+      AmeState.followTickV(trackArea, root.shown);
     }
 
     onPositionChanged: function (ev) {

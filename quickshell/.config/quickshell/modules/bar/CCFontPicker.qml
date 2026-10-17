@@ -45,6 +45,7 @@ Column {
 
     Row {
       anchors.left: parent.left
+      anchors.leftMargin: 14
       anchors.verticalCenter: parent.verticalCenter
       spacing: 10
 
@@ -131,6 +132,7 @@ Column {
 
       Row {
         anchors.left: parent.left
+        anchors.leftMargin: 12
         anchors.verticalCenter: parent.verticalCenter
         spacing: 10
 
@@ -236,7 +238,11 @@ Column {
           }
         }
 
-        onShownChanged: fontCanvas.requestPaint()
+        onShownChanged: {
+          fontCanvas.requestPaint();
+          if (fontSizeMouse && (fontSizeMouse.containsMouse || fontSizeMouse.pressed || fontSizeMouse.dragging || fontSeekAnim.running))
+            AmeState.followTickH(fontSizeTrack, shown);
+        }
         onCurrentPosChanged: fontCanvas.requestPaint()
         onWidthChanged: fontCanvas.requestPaint()
 
@@ -264,7 +270,8 @@ Column {
             WavyPaint.paint(getContext("2d"), width, height, {
               shown: fontSizeTrack.shown,
               showTrack: true,
-              showHandle: true,
+              showHandle: false,
+              trackGap: 6,
               showRemaining: false,
               waveColor: SettingsState.accent,
               trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -288,10 +295,16 @@ Column {
         MouseArea {
           id: fontSizeMouse
           anchors.fill: parent
+          hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
 
           property real startX: 0
           property bool dragging: false
+
+          onContainsMouseChanged: {
+            if (containsMouse)
+              AmeState.followTickH(fontSizeTrack, fontSizeTrack.shown);
+          }
 
           onPressed: function(ev) {
             if (fontSizeTrack.width <= 0) return;
@@ -309,6 +322,7 @@ Column {
             fontSeekAnim.restart();
 
             SettingsState.setFontSizeDelta(Math.round(r * 10 - 5));
+            AmeState.followTickH(fontSizeTrack, fontSizeTrack.shown);
           }
 
           onPositionChanged: function(ev) {
@@ -322,6 +336,7 @@ Column {
               fontSizeTrack.currentPos = r;
               fontCanvas.requestPaint();
               SettingsState.setFontSizeDelta(Math.round(r * 10 - 5));
+              AmeState.followTickH(fontSizeTrack, r);
             }
           }
 

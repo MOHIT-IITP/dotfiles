@@ -17,6 +17,19 @@ Item {
     if (fontPicker) fontPicker.forceSearchFocus();
   }
 
+  // Ame row-seam tracking, like the pill bar's SettingsSurface:
+  // hovering a config row parks the vertical seam on its left edge.
+  property Item focusRowItem: null
+  function reportRowHover(item, hovered) {
+    if (hovered && item) {
+      focusRowItem = item;
+      AmeState.followRow(item);
+    }
+  }
+  onVisibleChanged: {
+    if (!visible) focusRowItem = null;
+  }
+
   Behavior on opacity {
     enabled: circle.opacity > 0.5
     NumberAnimation { duration: 220 }
@@ -33,6 +46,7 @@ Item {
 
     Text {
       anchors.left: parent.left
+      anchors.leftMargin: 8
       anchors.verticalCenter: parent.verticalCenter
       text: circle.settingsSub === "general" ? "GENERAL" : (circle.settingsSub === "ui" ? "UI" : (circle.settingsSub === "theme" ? "THEME" : "CONFIG"))
       color: SettingsState.accent
@@ -144,7 +158,7 @@ Item {
 
             Row {
               anchors.fill: parent
-              anchors.leftMargin: 6
+              anchors.leftMargin: 14
               anchors.rightMargin: 8
               spacing: 16
 
@@ -194,6 +208,10 @@ Item {
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
+              onContainsMouseChanged: {
+                if (containsMouse)
+                  settingsPage.reportRowHover(parent, true);
+              }
               onClicked: circle.settingsSub = modelData.key
             }
           }
@@ -209,11 +227,19 @@ Item {
 
         // 1. Time format: (time icon) Time format -> [24H] [12H]
         Item {
+          id: timeFormatRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(timeFormatRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -289,11 +315,19 @@ Item {
 
         // 2. Clock seconds: (stopwatch) Clock seconds -> toggle
         Item {
+          id: clockSecondsRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(clockSecondsRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -328,11 +362,19 @@ Item {
 
         // 3. Japanese glyphs: (wave) Japanese glyphs -> toggle
         Item {
+          id: japaneseGlyphsRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(japaneseGlyphsRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -367,11 +409,19 @@ Item {
 
         // 4. Music visualizer: (music) Music visualizer -> toggle
         Item {
+          id: visualizerRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(visualizerRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -414,11 +464,19 @@ Item {
 
         // 6. Wallpaper folder
         Item {
+          id: wallpaperRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(wallpaperRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -467,11 +525,19 @@ Item {
 
         // 6b. Auto-hide bar: slide away until the cursor hits the top edge
         Item {
+          id: autoHideRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(autoHideRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -506,11 +572,19 @@ Item {
 
         // 7. UI scale: labels 90% | 100% | 110% | 125% | 135% map to 1.35x effective (100% -> 1.35 look)
         Item {
+          id: uiScaleRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(uiScaleRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -576,11 +650,19 @@ Item {
           spacing: 6
 
           Item {
+            id: barGapRow
             width: parent.width
             height: 24
 
+            HoverHandler {
+              onHoveredChanged: {
+                if (hovered) settingsPage.reportRowHover(barGapRow, true);
+              }
+            }
+
             Row {
               anchors.left: parent.left
+              anchors.leftMargin: 14
               anchors.verticalCenter: parent.verticalCenter
               spacing: 10
 
@@ -638,7 +720,11 @@ Item {
               }
             }
 
-            onShownChanged: gapCanvas.requestPaint()
+            onShownChanged: {
+              gapCanvas.requestPaint();
+              if (gapMouse && (gapMouse.containsMouse || gapMouse.pressed || gapMouse.dragging || seekAnim.running))
+                AmeState.followTickH(gapTrack, shown);
+            }
             onCurrentPosChanged: gapCanvas.requestPaint()
             onWidthChanged: gapCanvas.requestPaint()
 
@@ -666,7 +752,8 @@ Item {
                 WavyPaint.paint(getContext("2d"), width, height, {
                   shown: gapTrack.shown,
                   showTrack: true,
-                  showHandle: true,
+                  showHandle: false,
+                  trackGap: 6,
                   showRemaining: false,
                   waveColor: SettingsState.accent,
                   trackColor: SettingsState.isDark ? "#4E445F" : "#D6CFE3",
@@ -690,10 +777,16 @@ Item {
             MouseArea {
               id: gapMouse
               anchors.fill: parent
+              hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
 
               property real startX: 0
               property bool dragging: false
+
+              onContainsMouseChanged: {
+                if (containsMouse)
+                  AmeState.followTickH(gapTrack, gapTrack.shown);
+              }
 
               onPressed: function(ev) {
                 if (gapTrack.width <= 0) return;
@@ -711,6 +804,7 @@ Item {
                 seekAnim.restart();
 
                 SettingsState.setBarGap(Math.round(r * 24));
+                AmeState.followTickH(gapTrack, gapTrack.shown);
               }
 
               onPositionChanged: function(ev) {
@@ -724,6 +818,7 @@ Item {
                   gapTrack.currentPos = r;
                   gapCanvas.requestPaint();
                   SettingsState.setBarGap(Math.round(r * 24));
+                  AmeState.followTickH(gapTrack, r);
                 }
               }
 
@@ -750,11 +845,19 @@ Item {
 
         // 5. THEME SECTION (Matching Reference UI)
         Item {
+          id: themeModeRow
           width: parent.width
           height: 30
 
+          HoverHandler {
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(themeModeRow, true);
+            }
+          }
+
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
@@ -835,6 +938,17 @@ Item {
             GradientStop { position: 1.00; color: "#ff0000" }
           }
 
+          // Invisible tick track matched to the thumb's travel (thumb is
+          // 20px wide and travels width-20, so shift the bead pad track by
+          // half the difference): the Ame bead rides the hue thumb.
+          Item {
+            id: spectrumTickTrack
+            x: 5.5
+            width: Math.max(0, spectrumTrack.width - 11)
+            height: spectrumTrack.height
+            anchors.verticalCenter: parent.verticalCenter
+          }
+
           // Draggable indicator circle
           Rectangle {
             id: spectrumThumb
@@ -857,15 +971,22 @@ Item {
             id: spectrumMouse
             anchors.fill: parent
             anchors.margins: -4
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
+            onContainsMouseChanged: {
+              if (containsMouse)
+                AmeState.followTickH(spectrumTickTrack, SettingsState.accentHue);
+            }
             onPressed: function(ev) {
               var h = Math.min(1.0, Math.max(0.0, ev.x / spectrumTrack.width));
               SettingsState.setAccentHue(h);
+              AmeState.followTickH(spectrumTickTrack, h);
             }
             onPositionChanged: function(ev) {
               if (pressed) {
                 var h = Math.min(1.0, Math.max(0.0, ev.x / spectrumTrack.width));
                 SettingsState.setAccentHue(h);
+                AmeState.followTickH(spectrumTickTrack, h);
               }
             }
           }
@@ -873,9 +994,17 @@ Item {
 
         // 5c. Accent Swatch & Accent Tone Row (Manual mode only)
         Item {
+          id: accentToneRow
           width: parent.width
           height: SettingsState.themeMode === "manual" ? 38 : 0
           visible: SettingsState.themeMode === "manual"
+
+          HoverHandler {
+            enabled: accentToneRow.visible
+            onHoveredChanged: {
+              if (hovered) settingsPage.reportRowHover(accentToneRow, true);
+            }
+          }
 
           Behavior on height {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -883,6 +1012,7 @@ Item {
 
           Row {
             anchors.left: parent.left
+            anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 12
 
@@ -979,7 +1109,7 @@ Item {
 
           Row {
             anchors.fill: parent
-            anchors.leftMargin: 10
+            anchors.leftMargin: 14
             anchors.rightMargin: 10
             spacing: 8
 

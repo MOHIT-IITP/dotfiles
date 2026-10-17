@@ -153,12 +153,26 @@ Rectangle {
     void AmeState.anchor;
     void AmeState.fx;
     void AmeState.fy;
+    void AmeState.px;
+    void AmeState.py;
+    void AmeState.useAbsolute;
     var a = AmeState.anchor;
     if (!a)
       return Qt.point(width / 2, height / 2);
     try {
+      if (AmeState.useAbsolute && AmeState.form === "caret")
+        return a.mapToItem(root, AmeState.px, AmeState.py);
+      if (AmeState.form === "rowseam")
+        return a.mapToItem(root, 4, a.height * 0.5);
+      if (AmeState.form === "tick") {
+        var padX = 4.5;
+        var padY = 4.5;
+        var px = padX + (a.width - 2 * padX) * AmeState.fx;
+        var py = padY + (a.height - 2 * padY) * AmeState.fy;
+        return a.mapToItem(root, px, py);
+      }
       var px = a.width * AmeState.fx;
-      var py = a.height * AmeState.fy + (AmeState.form === "tick" ? 0 : 8);
+      var py = a.height * AmeState.fy + 8;
       return a.mapToItem(root, px, py);
     } catch (e) {
       return Qt.point(width / 2, height / 2);
@@ -1597,7 +1611,7 @@ Rectangle {
                 onShownChanged: hoverProgCanvas.requestPaint()
                 onCurrentPosChanged: {
                   hoverProgCanvas.requestPaint();
-                  if (hoverSeekMouse && (hoverSeekMouse.containsMouse || hoverSeekMouse.pressed))
+                  if (hoverSeekMouse && (hoverSeekMouse.containsMouse || hoverSeekMouse.pressed || hoverSeekAnim.running))
                     AmeState.followTickH(hoverProgTrack, shown);
                 }
                 onWidthChanged: hoverProgCanvas.requestPaint()
@@ -1678,7 +1692,7 @@ Rectangle {
                     hoverSeekAnim.to = r;
                     hoverSeekAnim.restart();
                     hoverProgTrack.applySeek(r);
-                    AmeState.followTickH(hoverProgTrack, r);
+                    AmeState.followTickH(hoverProgTrack, hoverProgTrack.shown);
                   }
                   onPositionChanged: function (ev) {
                     if (!pressed || hoverProgTrack.width <= 0) return;
@@ -2188,6 +2202,7 @@ Rectangle {
   onShowClipboardChanged: if (!showClipboard) AmeState.clear()
   onShowAuthChanged: if (!showAuth) AmeState.clear()
   onShowInboxChanged: if (!showInbox) AmeState.clear()
+  onShowReminderPromptChanged: if (!showReminderPrompt) AmeState.clear()
 
   Connections {
     target: ccView
@@ -2420,9 +2435,10 @@ Rectangle {
     }
   }
 
-  // Ame bead: red-dot follower. Parks below hovered icons ("soul") and rides
-  // slider/fader handles ("tick"), gliding between anchors. Hidden unless
-  // expanded with a live anchor. Paints on top; never takes input.
+  // Ame bead: red-dot follower. Parks below hovered icons ("soul"), rides
+  // slider/fader handles ("tick"), and sits on the launcher text cursor
+  // ("caret", absolute cursorRectangle point). Hidden unless expanded with a
+  // live anchor. Paints on top; never takes input.
   Ame {
     id: ame
     anchors.fill: parent

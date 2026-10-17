@@ -44,6 +44,7 @@ Item {
         searchInput.text = "";
         forceFocus();
         clipFocusTimer.restart();
+        Qt.callLater(searchInput.syncCaret);
       }
     }
   }
@@ -61,6 +62,7 @@ Item {
       forceFocus();
       if (searchInput.activeFocus || count > 8) {
         running = false;
+        Qt.callLater(searchInput.syncCaret);
       }
     }
   }
@@ -134,9 +136,47 @@ Item {
             clip: true
             focus: true
             activeFocusOnTab: true
+            selectByMouse: true
+            selectionColor: SettingsState.accent
+            // Native caret in accent color (thin 2px core inside the wider Ame bead,
+            // blinking like the pill bar's SearchField).
+            cursorVisible: true
+            cursorDelegate: Item {
+              width: 2
+              height: parent.height
+              property bool blinkOn: true
+              Timer {
+                interval: 530
+                repeat: true
+                running: searchInput.activeFocus
+                onTriggered: parent.blinkOn = !parent.blinkOn
+              }
+              Rectangle {
+                anchors.fill: parent
+                color: SettingsState.accent
+                opacity: parent.blinkOn ? 1 : 0
+              }
+            }
+
+            // Ame "caret" follower, same as app/file launcher:
+            // park the molten bead exactly on the text cursor (cursorRectangle
+            // center) so typing glides the bead along with the caret.
+            function syncCaret() {
+              if (!ClipboardState.open || !searchInput.activeFocus)
+                return;
+              try {
+                AmeState.followCaret(searchInput, searchInput.cursorRectangle.x + searchInput.cursorRectangle.width / 2, searchInput.cursorRectangle.y + searchInput.cursorRectangle.height / 2);
+              } catch (e) {}
+            }
+            onCursorRectangleChanged: searchInput.syncCaret()
+            onActiveFocusChanged: {
+              if (activeFocus)
+                searchInput.syncCaret();
+            }
             onTextChanged: {
               query = text;
               sel = 0;
+              searchInput.syncCaret();
             }
 
             Keys.onPressed: function(ev) {

@@ -13,7 +13,7 @@ function paint(ctx, W, H, o) {
   var handleW = o.handleW || 6;
   var handleH = o.handleH || 16;
   var showTrack = o.showTrack !== false;
-  var showHandle = o.showHandle !== false;
+  var showHandle = o.showHandle === true;
   var showRemaining = o.showRemaining === true;
   var phase = o.phase || 0;
   var doubleWave = o.doubleWave === true;
@@ -152,7 +152,7 @@ function paintVertical(ctx, W, H, o) {
   var waveLen = o.waveLen || 26;
   var handleW = o.handleW || 16;
   var handleH = o.handleH || 6;
-  var showHandle = o.showHandle !== false;
+  var showHandle = o.showHandle === true;
 
   ctx.clearRect(0, 0, W, H);
   ctx.lineJoin = "round";

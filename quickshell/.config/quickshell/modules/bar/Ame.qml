@@ -5,19 +5,29 @@ import QtQuick.Effects
 import "../services"
 
 /**
- * Ame, the shapeshifter — ported from the pill bar. One molten-glass bead,
- * the shell's only glowing element. Idle it just breathes. Every motion is a
- * fixed, scripted timeline (no audio/physics coupling).
+ * Ame, the shapeshifter — ported from the pill bar (飴, the molten-glass bead),
+ * the shell's only glowing element. Idle it just breathes (2.5% scale over ~8s).
+ * No music/audio/physics coupling; every motion is a fixed, scripted timeline.
  *
- * Travel: a form change runs the full shapeshift (anticipation stretch, a
- * remnant droplet pinching off at the origin, a quadratic-bezier flight with
- * a tapered streak, a three-droplet landing splash, then an easeOutBack
- * settle). Short hops glide instead of flying. Same-form target moves chase
- * the anchor live, never escalating to a flight.
+ * Travel: a form change runs the full shapeshift over `shapeshift` ms:
+ * anticipation stretch, a remnant droplet pinching off at the origin, a
+ * quadratic-bezier flight with a tapered streak, a three-droplet landing splash,
+ * then an easeOutBack settle into the new form. The flight launches once and
+ * tracks a moving target live (bezier endpoint, control point and heading
+ * recomputed per frame), so anchors that slide mid-flight bend the arc, no
+ * restart. Short-distance form change skips travel and plays the settle in
+ * place. Same-form target moves (hover width, slider/fader hops, seeks) glide
+ * over `glide` ms, chasing the anchor, never escalating to a flight.
  *
- * Forms: "soul" hover dot with wick (parks below icons), "tick" flat marker
- * (sits on slider/fader handles), plus "rest"/"caret"/"seam"/"ring"/"dock"/
- * "rowseam" for future surfaces, "off" hidden. Colors follow
+ * Forms: "rest" breathing bead, "caret" blinking capsule, "seam" bead,
+ * "ring" circle, "dock" plain bead, "soul" hover dot with wick (parks below
+ * icons), "tick" flat marker (sits on slider/fader handles), "rowseam" vertical
+ * seam, "off" hidden. Entering "off" fades out over `fast` ms; leaving it snaps
+ * to the current wake anchor and pops back with the settle, so handoffs don't
+ * ghost-fly from stale positions. Body draws on a QtQuick Canvas: FrameAnimation
+ * drives full-rate repaint only while the timeline, splash, remnant or a glide
+ * is live; otherwise a Timer ticks the slow inner swirl at 12fps (30fps while
+ * the caret blinks) to keep idle cost low for a 24/7 shell. Colors follow
  * SettingsState.accent so the bead matches this bar's theme.
  */
 Item {
@@ -94,6 +104,14 @@ Item {
                         v * v * a.y + 2 * v * u * c.y + u * u * b.y);
     }
 
+    /**
+     * Recompute heading, distance and the perpendicular bezier control point
+     * for the current fromPoint->point pair. Called per frame during the antic
+     * and fly phases so a target that slides mid-flight bends the arc and the
+     * painted streak stays on the same curve as the bead. Arc side is latched
+     * in startFlight (arcFlip); re-deciding it per frame would mirror the whole
+     * curve in one frame when the target crosses the vertical through the origin.
+     */
     function updateFlightGeo() {
         const dx = point.x - fromPoint.x;
         const dy = point.y - fromPoint.y;
@@ -129,6 +147,11 @@ Item {
             remnantAnim.restart();
     }
 
+    /**
+     * In-place transform: skip travel, replay only the settle window (splash +
+     * easeOutBack pop) so a nearby form change still reads as a shapeshift
+     * without a pointless flight.
+     */
     function startMorph(targetForm) {
         flightAnim.stop();
         activeForm = targetForm;
@@ -143,6 +166,11 @@ Item {
         glideAnim.restart();
     }
 
+    /**
+     * Wake from the hidden ("off") state. Re-shows start at the wake anchor: the
+     * bead condenses there, then flies to its target if far or pops in place if
+     * near. Positions from before the hidden period never leak in.
+     */
     function appear() {
         stopGlide();
         remnantAnim.stop();
@@ -179,6 +207,11 @@ Item {
                 startGlide(point);
                 prog = 1;
             }
+        } else if (activeForm === "tick" && form === "tick") {
+            stopGlide();
+            bx = point.x;
+            by = point.y;
+            canvas.requestPaint();
         } else if (dd > 0.5) {
             startGlide(point);
         } else if (!gliding) {
@@ -187,6 +220,17 @@ Item {
         }
     }
 
+    /**
+     * Coalesced decision point. form and point are sibling bindings whose change
+     * handlers fire mid-cascade in unspecified order. Deciding synchronously
+     * would read a stale partner value (a far form change sees dd≈0 against the
+     * not-yet-updated point and quietly degrades the flight to an in-place
+     * morph). Qt.callLater defers the decision until both bindings have settled,
+     * and collapses per-frame handler bursts into one retarget per tick.
+     * lastTarget tracks the previous settled anchor so a mid-flight DISCRETE hop
+     * (focus jump, seek snap) is told apart from a slide and handed to a glide
+     * rather than teleporting the airborne bead.
+     */
     function decide() {
         if (form === "off") {
             if (hidden)
@@ -209,9 +253,23 @@ Item {
         lastTarget = Qt.point(point.x, point.y);
     }
 
-    onPointChanged: Qt.callLater(root.decide)
+    readonly property bool isTick: activeForm === "tick" || form === "tick"
+
+    onPointChanged: {
+        if (activeForm === "tick" && form === "tick" && !timelineLive) {
+            stopGlide();
+            bx = point.x;
+            by = point.y;
+            lastTarget = Qt.point(point.x, point.y);
+            canvas.requestPaint();
+            return;
+        }
+        Qt.callLater(root.decide);
+    }
     onFormChanged: Qt.callLater(root.decide)
     onHeatChanged: canvas.requestPaint()
+    onBxChanged: canvas.requestPaint()
+    onByChanged: canvas.requestPaint()
 
     Component.onCompleted: {
         bx = point.x;
@@ -256,8 +314,8 @@ Item {
         property: "glideT"
         from: 0
         to: 1
-        duration: root.glide
-        easing.type: Easing.OutCubic
+        duration: root.isTick ? 350 : root.glide
+        easing.type: root.isTick ? Easing.InOutCubic : Easing.OutCubic
     }
 
     onProgChanged: {
@@ -443,12 +501,12 @@ Item {
 
             if (f === "caret") {
                 const blink = settling ? 1 : (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(root.swirl * 5.7)));
-                const hgt = 15 * S * e;
-                const wdt = (2.5 + 6 * (1 - fadeIn)) * S;
+                const hgt = 22 * S * e;
+                const wdt = (5.5 + 6 * (1 - fadeIn)) * S;
                 ctx.globalAlpha = blink;
                 ctx.beginPath();
                 ctx.roundedRect(bx - wdt / 2, by - hgt / 2, wdt, Math.max(2 * S, hgt), Math.min(wdt, hgt) / 2, Math.min(wdt, hgt) / 2);
-                ctx.fillStyle = root.flameInk;
+                ctx.fillStyle = root.accent;
                 ctx.fill();
                 ctx.globalAlpha = 1;
                 return;
@@ -549,6 +607,11 @@ Item {
         }
     }
 
+    /**
+     * The blur layer allocates an FBO the size of the whole pill; while the bead
+     * is hidden that's pure GPU tax on an empty canvas, so the layer only exists
+     * while something is drawn or fading.
+     */
     layer.enabled: opacity > 0.001 || busy
     layer.effect: MultiEffect {
         blurEnabled: true
