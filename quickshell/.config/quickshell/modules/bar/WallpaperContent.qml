@@ -228,20 +228,6 @@ Item {
       ev.accepted = true;
     }
 
-    // Kanji watermark '壁' (Wall) on the left
-    Text {
-      anchors.left: parent.left
-      anchors.leftMargin: 12
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.verticalCenterOffset: 12
-      text: "壁"
-      color: SettingsState.isDark ? "#f2f2f2" : "#111111"
-      opacity: 0.05
-      font.pixelSize: SettingsState.px(56)
-      font.bold: true
-      font.family: "serif"
-    }
-
     // ---- Top Header Bar ----
     Item {
       id: header
