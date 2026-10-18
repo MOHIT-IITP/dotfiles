@@ -3,11 +3,14 @@ import Quickshell.Io
 import QtQuick
 import "../services"
 
-// Embedded App + File Search launcher subview styled exactly as reference:
-// - Mode tabs (Apps / Files) at the top; Files mode is a fast fd-based file search
-// - Top search header with 探 glyph, underlined search input, and result counter
+// Embedded App + File Search launcher subview (minimal card):
+// - Apps mode: DesktopEntries search; Files mode: fast fd-based file search.
+//   Mode is chosen by the caller (Super+Space / Super+F) and can be flipped
+//   in-place with Ctrl+1 / Ctrl+2 / Ctrl+Tab — no tabs row inside the card.
+// - One top search line: back + folder path + 探 glyph + underlined input + counter
+//   (back + path only in Files mode, everything else shared)
 // - Clean vertical results list with 2-line title & subtitle layout and selected pill highlight
-// - Bottom subtle hint footer
+// - Bottom subtle hint footer (apps mode only)
 Item {
   id: root
 
@@ -115,7 +118,10 @@ Item {
   }
 
   implicitWidth: 380
-  implicitHeight: 360
+  // Tight fit per mode: search line + results list (+ hint footer in apps mode),
+  // so the card has no dead space below the grid in either launcher.
+  // (ClockPill renders the card at implicitHeight + 36.)
+  implicitHeight: root.isFiles ? 266 : 298
 
   function forceFocus() {
     search.focus = true;
@@ -253,117 +259,11 @@ Item {
   Column {
     id: contentCol
     anchors.fill: parent
-    anchors.leftMargin: 20
-    anchors.rightMargin: 20
-    anchors.topMargin: 16
-    anchors.bottomMargin: 16
+    anchors.margins: 16
     spacing: 10
 
     // ========================================================
-    // 0. MODE TABS (Apps / Files toggle)
-    // ========================================================
-    Row {
-      width: parent.width
-      spacing: 8
-
-      Repeater {
-        model: [{ "id": "apps", "label": "Apps" }, { "id": "files", "label": "Files" }]
-        delegate: Rectangle {
-          required property var modelData
-          readonly property bool active: LauncherState.mode === modelData.id
-          width: 72
-          height: 28
-          radius: 14
-          color: active ? SettingsState.bgActivePill : (tabMouse.containsMouse ? SettingsState.bgCardHover : "transparent")
-          border.color: active ? SettingsState.borderActive : SettingsState.borderBase
-          border.width: 1
-
-          Text {
-            anchors.centerIn: parent
-            text: modelData.label
-            color: active ? SettingsState.textActive : SettingsState.textSecondary
-            font.pixelSize: SettingsState.px(13)
-            font.bold: active
-            font.family: SettingsState.fontFamily
-          }
-
-          MouseArea {
-            id: tabMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-              LauncherState.mode = modelData.id;
-            }
-          }
-        }
-      }
-
-      Item {
-        width: parent.width - 140
-        height: 1
-      }
-
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        visible: root.isFiles && root.fileSearching
-        text: "\uea7c"
-        color: SettingsState.textMuted
-        font.pixelSize: SettingsState.px(12)
-        font.family: SettingsState.nerdIconFont
-      }
-    }
-
-    // ========================================================
-    // 0b. BREADCRUMB (Files mode: current folder + back)
-    // ========================================================
-    Row {
-      width: parent.width
-      spacing: 10
-      visible: root.isFiles
-      height: root.isFiles ? implicitHeight : 0
-
-      Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: 28
-        height: 28
-        radius: 14
-        color: crumbMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
-        border.color: SettingsState.borderBase
-        border.width: 1
-
-        Text {
-          anchors.centerIn: parent
-          text: "\ueab5"
-          color: SettingsState.textSecondary
-          font.pixelSize: SettingsState.px(15)
-          font.bold: true
-          font.family: SettingsState.nerdIconFont
-        }
-
-        MouseArea {
-          id: crumbMouse
-          anchors.fill: parent
-          hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
-          onClicked: root.goUp()
-        }
-      }
-
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - 38
-        text: root.browsePath + (root.query !== "" ? "  ·  ⌕ " + root.query : "")
-        color: SettingsState.textMuted
-        font.pixelSize: SettingsState.px(13)
-        font.family: SettingsState.fontFamily
-        elide: Text.ElideLeft
-        horizontalAlignment: Text.AlignRight
-      }
-    }
-
-    // ========================================================
-    // 1. TOP SEARCH HEADER (Glyph + Input + Underline + Counter)
+    // 1. TOP SEARCH LINE (Back + folder path [Files] · 探 · Input · Counter)
     // ========================================================
     Item {
       width: parent.width
@@ -372,6 +272,48 @@ Item {
       Row {
         anchors.fill: parent
         spacing: 12
+
+        // Back + current folder, merged into the search line (Files mode only)
+        Rectangle {
+          id: backBtn
+          anchors.verticalCenter: parent.verticalCenter
+          visible: root.isFiles
+          width: 28
+          height: 28
+          radius: 14
+          color: crumbMouse.containsMouse ? SettingsState.bgCardHover : "transparent"
+          border.color: SettingsState.borderBase
+          border.width: 1
+
+          Text {
+            anchors.centerIn: parent
+            text: "\ueab5"
+            color: SettingsState.textSecondary
+            font.pixelSize: SettingsState.px(15)
+            font.bold: true
+            font.family: SettingsState.nerdIconFont
+          }
+
+          MouseArea {
+            id: crumbMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.goUp()
+          }
+        }
+
+        Text {
+          id: pathText
+          anchors.verticalCenter: parent.verticalCenter
+          visible: root.isFiles
+          width: Math.min(implicitWidth, 120)
+          text: root.browsePath
+          color: SettingsState.textMuted
+          font.pixelSize: SettingsState.px(12)
+          font.family: SettingsState.fontFamily
+          elide: Text.ElideLeft
+        }
 
         // Search Kanji Glyph 探
         Text {
@@ -386,7 +328,7 @@ Item {
         // Search Input Container with Underline
         Item {
           id: inputContainer
-          width: parent.width - kanjiGlyph.width - counterText.width - 24
+          width: parent.width - kanjiGlyph.width - counterInfo.width - 24 - (root.isFiles ? (backBtn.width + pathText.width + 24) : 0)
           height: parent.height
 
           // Placeholder
@@ -510,15 +452,31 @@ Item {
           }
         }
 
-        // Result counter (apps: "52 / 52", files: "12 files")
-        Text {
-          id: counterText
+        // Result counter (apps: "52 / 52", files: "12 files") + search spinner
+        Row {
+          id: counterInfo
           anchors.verticalCenter: parent.verticalCenter
-          text: root.isFiles ? (root.fileResults.length + " files") : (filtered.length + " / " + allApps.length)
-          color: SettingsState.textMuted
-          font.pixelSize: SettingsState.px(14)
-          font.family: SettingsState.fontFamily
-          horizontalAlignment: Text.AlignRight
+          spacing: 6
+
+          // File-search progress ticker
+          Text {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.isFiles && root.fileSearching
+            text: "\uea7c"
+            color: SettingsState.textMuted
+            font.pixelSize: SettingsState.px(12)
+            font.family: SettingsState.nerdIconFont
+          }
+
+          Text {
+            id: counterText
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.isFiles ? (root.fileResults.length + " files") : (filtered.length + " / " + allApps.length)
+            color: SettingsState.textMuted
+            font.pixelSize: SettingsState.px(14)
+            font.family: SettingsState.fontFamily
+            horizontalAlignment: Text.AlignRight
+          }
         }
       }
     }

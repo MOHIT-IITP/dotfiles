@@ -108,8 +108,8 @@ Rectangle {
   // Running countdown takes over the collapsed bar: progress ring + MM:SS
   readonly property bool showTimerCollapsed: !isExpanded && !showWorkspaces && !showCapture && (TimerState.running || TimerState.paused || TimerState.finished)
 
-  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 36) : (showWallpaper ? 236 : (showPower ? 132 : (showClipboard ? 420 : (showMixer ? 360 : (showAuth ? 210 : (showInbox ? (notifInboxContent.implicitHeight + 36) : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? (aboutContent.implicitHeight + 28) : (showReminderPrompt ? 52 : (showTimer ? 158 : (showReminders ? (reminderListView.implicitHeight + 36) : (showCC ? ccView.implicitHeight : (hoverRow.implicitHeight + 36))))))))))))))) : 30
-  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 650 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (hoverRow.implicitWidth + 36))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
+  implicitHeight: isExpanded ? (showLauncher ? (launcherContent.implicitHeight + 32) : (showWallpaper ? 220 : (showPower ? 127 : (showClipboard ? 420 : (showMixer ? 363 : (showAuth ? 196 : (showInbox ? notifInboxContent.implicitHeight : (showNotif ? 136 : (showFileTray ? 204 : (showAbout ? aboutContent.implicitHeight : (showReminderPrompt ? 52 : (showTimer ? 156 : (showReminders ? (reminderListView.implicitHeight + 32) : (showCC ? ccView.implicitHeight : (hoverRow.implicitHeight + 32))))))))))))))) : 30
+  implicitWidth: isExpanded ? (showLauncher ? 440 : (showWallpaper ? 650 : (showPower ? 360 : (showClipboard ? 460 : (showMixer ? 440 : (showAuth ? 460 : (showInbox ? 460 : (showNotif ? 380 : (showFileTray ? 480 : (showAbout ? 460 : (showReminderPrompt ? 240 : (showTimer ? 360 : (showReminders ? 360 : (showCC ? ccView.implicitWidth : (hoverRow.implicitWidth + 32))))))))))))))) : (showTimerCollapsed ? (timerCollapsedRow.implicitWidth + 24) : (showCapture ? Math.max(captureRow.implicitWidth + 24, 72) : (showWorkspaces ? Math.max(wsRow.implicitWidth + 24, 72) : collapsedRow.implicitWidth + 44)))
 
   onIsExpandedChanged: {
     if (isExpanded && !isHovered) {
@@ -117,65 +117,6 @@ Rectangle {
     }
     if (!isExpanded) {
       AmeState.clear();
-    }
-  }
-
-  // Ame bead anchor: true while the parked anchor is still effectively
-  // visible *inside this pill* (walks the parent chain, so a page switch or
-  // a hover on another monitor hides the bead here until the next local
-  // hover instead of parking it on a stale pos).
-  function ameAnchorVisible() {
-    try {
-      var a = AmeState.anchor;
-      if (!a)
-        return false;
-      var inside = false;
-      var p = a;
-      while (p) {
-        if (!p.visible || p.opacity <= 0.01)
-          return false;
-        if (p === root) {
-          inside = true;
-          break;
-        }
-        p = p.parent;
-      }
-      return inside;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  readonly property bool ameLive: root.isExpanded && AmeState.anchor !== null && ameAnchorVisible()
-  readonly property point ameDotPoint: {
-    void width;
-    void height;
-    void AmeState.anchor;
-    void AmeState.fx;
-    void AmeState.fy;
-    void AmeState.px;
-    void AmeState.py;
-    void AmeState.useAbsolute;
-    var a = AmeState.anchor;
-    if (!a)
-      return Qt.point(width / 2, height / 2);
-    try {
-      if (AmeState.useAbsolute && AmeState.form === "caret")
-        return a.mapToItem(root, AmeState.px, AmeState.py);
-      if (AmeState.form === "rowseam")
-        return a.mapToItem(root, 4, a.height * 0.5);
-      if (AmeState.form === "tick") {
-        var padX = 4.5;
-        var padY = 4.5;
-        var px = padX + (a.width - 2 * padX) * AmeState.fx;
-        var py = padY + (a.height - 2 * padY) * AmeState.fy;
-        return a.mapToItem(root, px, py);
-      }
-      var px = a.width * AmeState.fx;
-      var py = a.height * AmeState.fy + 8;
-      return a.mapToItem(root, px, py);
-    } catch (e) {
-      return Qt.point(width / 2, height / 2);
     }
   }
 
@@ -726,7 +667,7 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+      NumberAnimation { duration: root.isExpanded ? 100 : 200; easing.type: Easing.OutCubic }
     }
 
     // Cava visualizer bars on the left of time
@@ -1354,7 +1295,7 @@ Rectangle {
     Row {
       id: hoverRow
       anchors.top: parent.top
-      anchors.topMargin: 18
+      anchors.topMargin: 16
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 20
 
@@ -1952,7 +1893,10 @@ Rectangle {
     visible: opacity > 0
 
     Behavior on opacity {
-      NumberAnimation { duration: 420; easing.type: Easing.OutCubic }
+      NumberAnimation {
+        duration: root.isExpanded ? 280 : 160
+        easing.type: root.isExpanded ? Easing.InOutCubic : Easing.OutCubic
+      }
     }
   }
 
@@ -1997,7 +1941,7 @@ Rectangle {
     ReminderView {
       id: reminderListView
       anchors.fill: parent
-      anchors.margins: 18
+      anchors.margins: 16
     }
 
     Behavior on opacity {
@@ -2435,19 +2379,4 @@ Rectangle {
     }
   }
 
-  // Ame bead: red-dot follower. Parks below hovered icons ("soul"), rides
-  // slider/fader handles ("tick"), and sits on the launcher text cursor
-  // ("caret", absolute cursorRectangle point). Hidden unless expanded with a
-  // live anchor. Paints on top; never takes input.
-  Ame {
-    id: ame
-    anchors.fill: parent
-    z: 200
-    s: 1
-    heat: 0
-    wickDir: -1
-    wake: Qt.point(root.width / 2, 24)
-    form: root.ameLive ? AmeState.form : "off"
-    point: root.ameLive ? root.ameDotPoint : Qt.point(root.width / 2, 24)
-  }
 }

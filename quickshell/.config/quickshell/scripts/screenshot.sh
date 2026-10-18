@@ -49,7 +49,10 @@ BEFORE_LATEST="$(get_latest_file)"
 case "$MODE" in
   display)
     sleep 0.35
-    hyprshot -m output -m active -o "$DIR" 2>/dev/null || hyprshot -m output -o "$DIR" 2>/dev/null || true
+    hyprshot -m output -m active -o "$DIR" 2>/dev/null || true
+    if [ "$(get_latest_file)" = "$BEFORE_LATEST" ]; then
+      hyprshot -m output -o "$DIR" 2>/dev/null || true
+    fi
     ;;
 
   window)

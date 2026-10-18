@@ -9,8 +9,8 @@ Item {
 
   implicitWidth: 460
   // Small when empty, grows as notifications arrive (capped so it never
-  // takes over the screen). ClockPill uses this +36 for its own height.
-  implicitHeight: inboxCol.implicitHeight + 36
+  // takes over the screen).
+  implicitHeight: inboxCol.implicitHeight + 32
 
   // Approx card height (CCNotifCard) + spacing; list capped at ~4 cards.
   readonly property int maxListHeight: 248
@@ -67,8 +67,8 @@ Item {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.topMargin: 16
-    anchors.leftMargin: 20
-    anchors.rightMargin: 20
+    anchors.leftMargin: 16
+    anchors.rightMargin: 16
     spacing: 12
 
     // ---- Header ----

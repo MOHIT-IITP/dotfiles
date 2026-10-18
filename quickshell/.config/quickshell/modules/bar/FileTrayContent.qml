@@ -116,7 +116,7 @@ Item {
 
     Column {
       anchors.fill: parent
-      anchors.margins: 14
+      anchors.margins: 16
       spacing: 8
 
       // header

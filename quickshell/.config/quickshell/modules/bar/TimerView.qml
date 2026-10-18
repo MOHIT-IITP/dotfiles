@@ -8,7 +8,7 @@ Item {
   id: root
 
   implicitWidth: 360
-  implicitHeight: 158
+  implicitHeight: 156
   clip: true
 
   property bool timerHover: false
@@ -30,10 +30,7 @@ Item {
 
     Column {
       anchors.fill: parent
-      anchors.topMargin: 12
-      anchors.bottomMargin: 14
-      anchors.leftMargin: 18
-      anchors.rightMargin: 18
+      anchors.margins: 16
       spacing: 4
 
       // ================= RULER / SLIDER BAR =================

@@ -50,7 +50,7 @@ Item {
 
     Row {
       anchors.fill: parent
-      anchors.margins: 14
+      anchors.margins: 0
       spacing: 16
 
       // ================= LEFT PANE: SELECTED DAY & AGENDA =================

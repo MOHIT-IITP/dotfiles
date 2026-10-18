@@ -68,11 +68,11 @@ Item {
   }
 
   implicitHeight: {
-    if (root.activePage === "settings") return settingsPage.implicitHeight + 76;
+    if (root.activePage === "settings") return settingsPage.implicitHeight + 70;
     if (root.activePage === "sound") return soundPage.implicitHeight + 32;
     if (root.activePage === "mic") return micPage.implicitHeight + 32;
-    if (root.activePage === "mixer") return 380;
-    if (root.activePage === "screenshot") return 250;
+    if (root.activePage === "mixer") return 363;
+    if (root.activePage === "screenshot") return 246;
     if (root.activePage === "bluetooth") return btPage.implicitHeight + 32;
     if (root.activePage === "wifi") return wifiPage.implicitHeight + 32;
     if (root.activePage === "calendar") return calPage.implicitHeight + 32;

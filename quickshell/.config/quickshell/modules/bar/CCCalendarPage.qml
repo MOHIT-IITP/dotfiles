@@ -19,7 +19,7 @@ Column {
 
   Item {
     width: parent.width
-    height: 170
+    height: 160
 
     WeatherCalendarView {
       id: weatherCalView

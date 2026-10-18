@@ -12,7 +12,7 @@ case "$RESIZE" in
 esac
 
 if [ -n "$IMG" ] && [ -f "$IMG" ]; then
-    awww img "$IMG" --resize "$RESIZE" --transition-type center --transition-duration 3 --transition-fps 120
+    awww img "$IMG" --resize "$RESIZE" --transition-duration 6 --transition-type wave --transition-angle 45 --transition-wave 30,20 --transition-step 120 --transition-fps 60
     wal -i "$IMG"
     matugen image "$IMG" --source-color-index 0 -m dark
 

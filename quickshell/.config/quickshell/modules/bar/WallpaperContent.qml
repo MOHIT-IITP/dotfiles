@@ -248,8 +248,9 @@ Item {
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.margins: 12
-      anchors.bottomMargin: 0
+      anchors.topMargin: 16
+      anchors.leftMargin: 22
+      anchors.rightMargin: 22
       height: 28
 
       // Directory path text
@@ -844,7 +845,7 @@ Item {
     Row {
       id: bottomBar
       anchors.bottom: parent.bottom
-      anchors.bottomMargin: 6
+      anchors.bottomMargin: 14
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 6
       visible: root.count > 0

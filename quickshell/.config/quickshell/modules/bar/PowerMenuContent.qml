@@ -12,7 +12,7 @@ Item {
   property int hoveredIndex: -1
 
   implicitWidth: 360
-  implicitHeight: 132
+  implicitHeight: 127
 
   function forceFocus() {
     keyArea.focus = true;
@@ -129,10 +129,7 @@ Item {
 
     Column {
       anchors.fill: parent
-      anchors.leftMargin: 20
-      anchors.rightMargin: 20
-      anchors.topMargin: 16
-      anchors.bottomMargin: 16
+      anchors.margins: 16
       spacing: 12
 
       // Header row: "電 POWER" on left, dynamic action title on right

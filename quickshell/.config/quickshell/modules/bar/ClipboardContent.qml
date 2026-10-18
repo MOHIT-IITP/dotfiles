@@ -86,7 +86,7 @@ Item {
   Column {
     id: mainCol
     anchors.fill: parent
-    anchors.margins: 14
+    anchors.margins: 16
     spacing: 10
 
     // ---- Top Header Bar ----
@@ -267,7 +267,7 @@ Item {
     ListView {
       id: clipList
       width: parent.width
-      height: parent.height - 52
+      height: parent.height - 53
       clip: true
       spacing: 4
       visible: filtered.length > 0

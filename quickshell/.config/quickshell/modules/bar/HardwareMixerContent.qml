@@ -11,7 +11,7 @@ Item {
   signal openMicSettings
 
   implicitWidth: 440
-  implicitHeight: 360
+  implicitHeight: 363
 
   function forceFocus() {
     keyArea.focus = true;

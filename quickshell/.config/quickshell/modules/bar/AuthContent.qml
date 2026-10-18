@@ -8,7 +8,7 @@ Item {
 
   readonly property bool isPolkit: AuthState.authType === "polkit"
   implicitWidth: 460
-  implicitHeight: 216
+  implicitHeight: 196
 
   function forceFocus() {
     pwInput.focus = true;

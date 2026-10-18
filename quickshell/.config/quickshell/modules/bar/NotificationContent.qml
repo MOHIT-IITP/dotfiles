@@ -33,10 +33,7 @@ Item {
 
   Column {
     anchors.fill: parent
-    anchors.leftMargin: 20
-    anchors.rightMargin: 20
-    anchors.topMargin: 16
-    anchors.bottomMargin: 16
+    anchors.margins: 16
     spacing: 10
 
     // 1. Top Row: [App Badge / Status] [Icon] [Timestamp]

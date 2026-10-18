@@ -8,6 +8,7 @@ Item {
   required property bool hovered
   visible: opacity > 0
   opacity: (hovered && circle.activePage === "screenshot") ? 1 : 0
+  implicitHeight: screenshotCol.implicitHeight
 
   Behavior on opacity {
     enabled: circle.opacity > 0.5

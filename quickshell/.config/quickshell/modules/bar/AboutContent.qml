@@ -8,7 +8,7 @@ Item {
   id: root
 
   implicitWidth: 460
-  implicitHeight: aboutCol.implicitHeight + 28
+  implicitHeight: aboutCol.implicitHeight + 32
 
   property bool adding: false
 
@@ -85,9 +85,9 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.topMargin: 14
-    anchors.leftMargin: 14
-    anchors.rightMargin: 14
+    anchors.topMargin: 16
+    anchors.leftMargin: 16
+    anchors.rightMargin: 16
     spacing: 12
 
     // Header - minimal
