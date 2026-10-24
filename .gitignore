@@ -1,0 +1,2 @@
+# Stray literal-tilde folder created by unquoted/unescaped paths (e.g. `cp x ~/.local/bin/`)
+/~/
