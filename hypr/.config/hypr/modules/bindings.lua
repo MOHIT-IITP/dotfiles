@@ -2,12 +2,14 @@
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 local terminal    = "kitty"
 local fileManager = "nautilus"
+local browser = "google-chrome-stable"
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
-hl.bind(mainMod .. " + RETURN  ", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + SHIFT + CTRL + ALT  + K  ", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + SHIFT + CTRL + ALT +  E", hl.dsp.exec_cmd(fileManager))
+hl.bind(mainMod .. " + SHIFT + CTRL + ALT + R", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. "+ SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. "+ SHIFT + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + SHIFT + CTRL + ALT + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + SHIFT + ALT + CTRL + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), { description = "Toggle Fullscreen" })
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
@@ -28,28 +30,56 @@ hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("qs ipc call mohiitp screensh
 
 -- Super+C / Super+V as Copy / Paste (terminal-aware)
 -- Sends CTRL+C/V normally, CTRL+SHIFT+C/V in terminals where CTRL+C = interrupt
-local function super_copy()
-    local w = hl.get_active_window()
+local terminal_classes = {
+    "kitty",
+    "ghostty",
+    "alacritty",
+    "foot",
+    "wezterm",
+    "terminal",
+    "konsole",
+}
+
+local function is_terminal_window()
+    local w   = hl.get_active_window()
     local cls = (w and w.class or ""):lower()
-    if cls:match("kitty") or cls:match("ghostty") or cls:match("alacritty") or cls:match("foot") or cls:match("wezterm") or cls:match("terminal") or cls:match("konsole") then
-        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C" }))
-    else
-        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL", key = "C" }))
+
+    for _, name in ipairs(terminal_classes) do
+        if cls:find(name, 1, true) then
+            return true
+        end
     end
+
+    return false
 end
 
-local function super_paste()
-    local w = hl.get_active_window()
-    local cls = (w and w.class or ""):lower()
-    if cls:match("kitty") or cls:match("ghostty") or cls:match("alacritty") or cls:match("foot") or cls:match("wezterm") or cls:match("terminal") or cls:match("konsole") then
-        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V" }))
-    else
-        hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL", key = "V" }))
-    end
+-- Hyprland 0.55+ can leave the synthetic modifier state stuck after
+-- send_shortcut, which makes Super+C/V only work every few presses.
+-- Sending an explicit key down/up pair keeps the keyboard state in sync.
+-- https://github.com/hyprwm/Hyprland/discussions/14099
+local function send_key_combo(mods, key)
+    hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "down", window = "activewindow" }))
+
+    hl.timer(function()
+        hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "up", window = "activewindow" }))
+    end, { timeout = 50, type = "oneshot" })
 end
 
-hl.bind(mainMod .. " + C", super_copy, { release = true, description = "Copy (Super+C)" })
-hl.bind(mainMod .. " + V", super_paste, { release = true, description = "Paste (Super+V)" })
+hl.bind(mainMod .. " + C", function()
+    if is_terminal_window() then
+        send_key_combo("CTRL SHIFT", "C")
+    else
+        send_key_combo("CTRL", "C")
+    end
+end, { description = "Copy (Super+C)" })
+
+hl.bind(mainMod .. " + V", function()
+    if is_terminal_window() then
+        send_key_combo("CTRL SHIFT", "V")
+    else
+        send_key_combo("CTRL", "V")
+    end
+end, { description = "Paste (Super+V)" })
 
 
 

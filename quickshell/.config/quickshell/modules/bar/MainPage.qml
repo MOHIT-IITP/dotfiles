@@ -217,9 +217,9 @@ Item {
       width: netRow.implicitWidth + 14
       height: 44
       radius: 22
-      color: SettingsState.bgCardHover
+      color: circle.btOn ? SettingsState.bgCardHover : "transparent"
       border.color: SettingsState.borderBase
-      border.width: 1
+      border.width: circle.btOn ? 1 : 0
 
       Row {
         id: netRow

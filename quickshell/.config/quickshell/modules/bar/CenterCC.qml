@@ -61,7 +61,7 @@ Item {
   }
 
   implicitWidth: {
-    if (root.activePage === "calendar") return 410;
+    if (root.activePage === "calendar") return 372;
     if (root.activePage === "mixer" || root.activePage === "recorder" || root.activePage === "screenshot" || root.activePage === "settings") return 420;
     if (root.activePage === "main") return mainPage.implicitWidth + 32;
     return 410;
@@ -179,9 +179,9 @@ Item {
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.topMargin: 16
-    // Fixed width (matches implicitWidth 410 - margins) so the pill
+    // Fixed width (matches implicitWidth 372 - margins) so the pill
     // resize animation doesn't reflow the day grid every frame (jitter).
-    width: 378
+    width: 340
     circle: root
     hovered: true
   }

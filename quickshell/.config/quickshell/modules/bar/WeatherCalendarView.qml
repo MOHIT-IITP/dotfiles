@@ -40,6 +40,10 @@ Item {
   // Accent color for weekday title, month header, and today's indicator
   readonly property color calAccent: "#ff3b5c"
 
+  // Shared width fraction for the weekday header and the day columns,
+  // so each weekday letter stays centered above its date column.
+  readonly property real calendarWidthFactor: 0.66
+
   // Rounded card container (borderless: the pill behind already draws the frame)
   // Fill matches the pill background so there is a single even surface.
   Rectangle {
@@ -124,7 +128,8 @@ Item {
             height: 14
 
             Text {
-              anchors.left: parent.left
+              // Left edge lines up with the first date column (above the "M")
+              x: (parent.width - parent.width * root.calendarWidthFactor) / 2
               anchors.verticalCenter: parent.verticalCenter
               text: root.currentMonthStr
               color: root.calAccent
@@ -175,33 +180,41 @@ Item {
             }
           }
 
-          // Weekdays header row: M T W T F S S
-          Row {
+          // Weekdays header row: M T W T F S S, each letter centered above
+          // its date column (same width + centering as the days grid).
+          Item {
             width: parent.width
             height: 12
 
-            Repeater {
-              model: [
-                { name: "M", isWeekend: false },
-                { name: "T", isWeekend: false },
-                { name: "W", isWeekend: false },
-                { name: "T", isWeekend: false },
-                { name: "F", isWeekend: false },
-                { name: "S", isWeekend: true },
-                { name: "S", isWeekend: true }
-              ]
+            Row {
+              id: weekdayRow
+              anchors.centerIn: parent
+              width: parent.width * root.calendarWidthFactor
+              height: 12
 
-              delegate: Item {
-                width: parent.width / 7
-                height: parent.height
+              Repeater {
+                model: [
+                  { name: "M", isWeekend: false },
+                  { name: "T", isWeekend: false },
+                  { name: "W", isWeekend: false },
+                  { name: "T", isWeekend: false },
+                  { name: "F", isWeekend: false },
+                  { name: "S", isWeekend: true },
+                  { name: "S", isWeekend: true }
+                ]
 
-                Text {
-                  anchors.centerIn: parent
-                  text: modelData.name
-                  color: modelData.isWeekend ? (SettingsState.isDark ? "#55555c" : "#98989e") : (SettingsState.isDark ? "#ffffff" : "#1a1a1a")
-                  font.pixelSize: SettingsState.px(11)
-                  font.bold: true
-                  font.family: SettingsState.fontFamily
+                delegate: Item {
+                  width: weekdayRow.width / 7
+                  height: weekdayRow.height
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: modelData.name
+                    color: modelData.isWeekend ? (SettingsState.isDark ? "#55555c" : "#98989e") : (SettingsState.isDark ? "#ffffff" : "#1a1a1a")
+                    font.pixelSize: SettingsState.px(11)
+                    font.bold: true
+                    font.family: SettingsState.fontFamily
+                  }
                 }
               }
             }
@@ -209,76 +222,82 @@ Item {
 
           // Days grid matching reference photo: tight 5-row stack, round
           // white circle for selected day, red today, small vertical pitch.
-          Grid {
-            id: calGrid
+          Item {
             width: parent.width
             height: parent.height - 14 - 12
-            columns: 7
-            rows: CalendarState.calendarRows
-            rowSpacing: 0
-            columnSpacing: 0
 
-            Repeater {
-              model: CalendarState.visibleCalendarGrid
+            Grid {
+              id: calGrid
+              anchors.horizontalCenter: parent.horizontalCenter
+              width: parent.width * root.calendarWidthFactor
+              height: parent.height
+              columns: 7
+              rows: CalendarState.calendarRows
+              rowSpacing: 0
+              columnSpacing: 0
 
-              delegate: Item {
-                property real cellH: calGrid.height / CalendarState.calendarRows
-                property real circleD: Math.min(22, cellH - 1)
-                width: calGrid.width / 7
-                height: cellH
+              Repeater {
+                model: CalendarState.visibleCalendarGrid
 
-                property bool inMonth: modelData.isCurrentMonth
-                property bool isToday: modelData.isToday
-                property bool isSelected: inMonth && (modelData.day === root.selectedDay)
-                property bool isWeekend: (index % 7) >= 5
+                delegate: Item {
+                  property real cellH: calGrid.height / CalendarState.calendarRows
+                  property real circleD: Math.min(22, cellH - 1)
+                  width: calGrid.width / 7
+                  height: cellH
 
-                // Round white circle for selected day (like reference photo)
-                Rectangle {
-                  anchors.centerIn: parent
-                  width: circleD
-                  height: circleD
-                  radius: circleD / 2
-                  color: parent.isSelected ? "#ffffff" : "transparent"
-                  visible: parent.inMonth && parent.isSelected
-                }
+                  property bool inMonth: modelData.isCurrentMonth
+                  property bool isToday: modelData.isToday
+                  property bool isSelected: inMonth && (modelData.day === root.selectedDay)
+                  property bool isWeekend: (index % 7) >= 5
 
-                // Subtle hover circle for unselected days
-                Rectangle {
-                  anchors.centerIn: parent
-                  width: circleD
-                  height: circleD
-                  radius: circleD / 2
-                  color: SettingsState.isDark ? "#1e1e24" : "#e6e6ec"
-                  visible: parent.inMonth && !parent.isSelected && cellMouse.containsMouse
-                }
-
-                Text {
-                  anchors.centerIn: parent
-                  visible: parent.inMonth
-                  text: "" + modelData.day
-                  color: {
-                    if (parent.isSelected) return "#000000";
-                    if (parent.isToday) return root.calAccent;
-                    if (parent.isWeekend) return SettingsState.isDark ? "#55555c" : "#98989e";
-                    return SettingsState.isDark ? "#ffffff" : "#1a1a1a";
+                  // Round white circle for selected day (like reference photo)
+                  Rectangle {
+                    anchors.centerIn: parent
+                    width: circleD
+                    height: circleD
+                    radius: circleD / 2
+                    color: parent.isSelected ? "#ffffff" : "transparent"
+                    visible: parent.inMonth && parent.isSelected
                   }
-                  font.pixelSize: SettingsState.px(12)
-                  font.bold: parent.isSelected
-                  font.weight: parent.isSelected ? Font.DemiBold : Font.Normal
-                  font.family: SettingsState.fontFamily
-                  lineHeight: 1.0
-                  lineHeightMode: Text.FixedHeight
-                }
 
-                MouseArea {
-                  id: cellMouse
-                  anchors.fill: parent
-                  enabled: parent.inMonth
-                  hoverEnabled: true
-                  cursorShape: parent.inMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
-                  onClicked: {
-                    if (parent.inMonth) {
-                      root.selectedDay = modelData.day;
+                  // Subtle hover circle for unselected days
+                  Rectangle {
+                    anchors.centerIn: parent
+                    width: circleD
+                    height: circleD
+                    radius: circleD / 2
+                    color: SettingsState.isDark ? "#1e1e24" : "#e6e6ec"
+                    visible: parent.inMonth && !parent.isSelected && cellMouse.containsMouse
+                  }
+
+                  Text {
+                    anchors.centerIn: parent
+                    visible: parent.inMonth
+                    text: "" + modelData.day
+                    color: {
+                      if (parent.isSelected) return "#000000";
+                      if (parent.isToday) return root.calAccent;
+                      if (parent.isWeekend) return SettingsState.isDark ? "#55555c" : "#98989e";
+                      return SettingsState.isDark ? "#ffffff" : "#1a1a1a";
+                    }
+                    font.pixelSize: SettingsState.px(12)
+                    font.bold: parent.isSelected
+                    font.weight: parent.isSelected ? Font.DemiBold : Font.Normal
+                    font.family: SettingsState.fontFamily
+                    lineHeight: 1.0
+                    lineHeightMode: Text.FixedHeight
+                  }
+
+                  MouseArea {
+                    id: cellMouse
+                    anchors.fill: parent
+                    enabled: parent.inMonth
+                    hoverEnabled: true
+                    cursorShape: parent.inMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: {
+                      if (parent.inMonth) {
+                        root.selectedDay = modelData.day;
+                      }
                     }
                   }
                 }
