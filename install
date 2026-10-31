@@ -42,15 +42,15 @@ sudo pacman -S --noconfirm --needed \
   stow
 
 # Install yay if not installed
-if ! command -v yay &> /dev/null; then
-  echo "⚙️ Installing yay (AUR helper)..."
-  sudo pacman -S --needed --noconfirm base-devel git
-  git clone https://aur.archlinux.org/yay.git
-  cd yay
-  makepkg -si --noconfirm
-  cd ..
-  rm -rf yay
-fi
+# if ! command -v yay &> /dev/null; then
+#   echo "⚙️ Installing yay (AUR helper)..."
+#   sudo pacman -S --needed --noconfirm base-devel git
+#   git clone https://aur.archlinux.org/yay.git
+#   cd yay
+#   makepkg -si --noconfirm
+#   cd ..
+#   rm -rf yay
+# fi
 
 echo "🐚 Setting Zsh as default shell..."
 chsh -s /bin/zsh
